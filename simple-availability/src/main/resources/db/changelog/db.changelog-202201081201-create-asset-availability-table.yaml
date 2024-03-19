@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2022-01-08 12:01
+      author: bslota
+      changes:
+        - createTable:
+            schemaName: availability
+            tableName: asset_availability
+            columns:
+              - column:
+                  name: asset_id
+                  type: varchar(128)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: lock
+                  type: varchar(1024)

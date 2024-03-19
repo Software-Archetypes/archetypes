@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2022-01-08 12:02
+      author: bslota
+      dbms: postgresql
+      changes:
+        - sql:
+            comment: grant table permissions for application user
+            sql: GRANT SELECT,INSERT, UPDATE, DELETE ON availability.asset_availability TO availability_user

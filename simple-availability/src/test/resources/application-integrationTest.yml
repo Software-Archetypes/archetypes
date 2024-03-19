@@ -1,0 +1,5 @@
+spring:
+  kafka:
+    consumer:
+      group-id: test-listener-${random.uuid}
+      auto-offset-reset: latest

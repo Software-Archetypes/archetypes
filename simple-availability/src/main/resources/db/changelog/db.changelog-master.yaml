@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - include:
+      file: db.changelog-202201081200-grant-schema-privileges.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: db.changelog-202201081201-create-asset-availability-table.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: db.changelog-202201081202-grant-asset-availability-privileges.yaml
+      relativeToChangelogFile: true

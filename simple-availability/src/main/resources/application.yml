@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: availability
+  jpa:
+    hibernate:
+      ddl-auto: none
+  datasource:
+    hikari:
+      connection-init-sql: SET SESSION ROLE availability_user;
+      schema: availability
+  liquibase:
+    enabled: true
+    liquibase-schema: public
+  kafka:
+    consumer:
+      properties:
+        allow.auto.create.topics: false

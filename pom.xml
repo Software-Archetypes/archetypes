@@ -16,6 +16,7 @@
 
     <modules>
         <module>timed-availability</module>
+        <module>simple-availability</module>
     </modules>
 
 </project>
