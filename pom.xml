@@ -17,6 +17,7 @@
     <modules>
         <module>timed-availability</module>
         <module>simple-availability</module>
+        <module>general-assignment</module>
     </modules>
 
 </project>
