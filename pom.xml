@@ -18,6 +18,7 @@
         <module>timed-availability</module>
         <module>simple-availability</module>
         <module>general-assignment</module>
+        <module>waitlist</module>
     </modules>
 
 </project>
