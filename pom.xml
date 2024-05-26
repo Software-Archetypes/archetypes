@@ -15,8 +15,8 @@
     </properties>
 
     <modules>
-        <module>timed-availability</module>
-        <module>simple-availability</module>
+        <module>availability/timed-availability</module>
+        <module>availability/simple-availability</module>
         <module>general-assignment</module>
         <module>waitlist</module>
     </modules>
