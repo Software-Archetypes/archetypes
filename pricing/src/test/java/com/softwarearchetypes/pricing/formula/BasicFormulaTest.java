@@ -1,13 +1,12 @@
 package com.softwarearchetypes.pricing.formula;
 
-import com.softwarearchetypes.pricing.shared.AbstractUnitTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-class FormulaPricingEntityTest extends AbstractUnitTest {
+class BasicFormulaTest {
 
     @Test
     @DisplayName("Should execute simple formula")
@@ -16,19 +15,17 @@ class FormulaPricingEntityTest extends AbstractUnitTest {
         record FormulaData(int a, int b) {
         }
 
-
         //and: simple adding formula with two variables
-        var formulaPricing = new FormulaPricingEntity(
+        var basicFormula = new BasicFormula(
                 "{\"+\": [{\"var\": \"a\"}, {\"var\": \"b\"}]}",
-                FormulaData.class,
-                clock
+                FormulaData.class.getName()
         );
 
         //and: formula data: (2,2)
         var formulaData = new FormulaData(2, 2);
 
         //when: formula is executed
-        var result = formulaPricing.calculatePrice(formulaData);
+        var result = basicFormula.calculatePrice(formulaData);
 
         //then: the result is 4
         Assertions.assertEquals(0, BigDecimal.valueOf(4).compareTo(result));
@@ -42,10 +39,9 @@ class FormulaPricingEntityTest extends AbstractUnitTest {
         }
 
         //and: simple adding formula with two variables
-        var formulaPricing = new FormulaPricingEntity(
+        var basicFormula = new BasicFormula(
                 "{\"+\": [2,2]}",
-                ValidFormulaData.class,
-                clock
+                ValidFormulaData.class.getName()
         );
 
         //when: an invalid input data type is used
@@ -53,7 +49,7 @@ class FormulaPricingEntityTest extends AbstractUnitTest {
         }
 
         //then: exception is thrown
-        Assertions.assertThrows(IllegalArgumentException.class, () -> formulaPricing.calculatePrice(new InvalidFormulaData()));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> basicFormula.calculatePrice(new InvalidFormulaData()));
 
     }
 
