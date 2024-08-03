@@ -10,7 +10,7 @@ class BasicFormulaTest {
 
     @Test
     @DisplayName("Should execute simple formula")
-    void shouldExecuteSimpleFormula() {
+    void shouldExecuteSimpleFormula() throws PriceCalculationException {
         //given: simple record to represent input data
         record FormulaData(int a, int b) {
         }

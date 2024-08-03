@@ -2,6 +2,7 @@ package com.softwarearchetypes.pricing.formula;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.softwarearchetypes.pricing.common.Result;
 import com.softwarearchetypes.pricing.formula.command.CreateFormulaCommand;
 import com.softwarearchetypes.pricing.formula.error.InvalidFormulaCreationCommand;
@@ -26,11 +27,18 @@ public class FormulaFacade {
     public Result<InvalidFormulaCreationCommand, UUID> createFormula(CreateFormulaCommand command) {
 
         try {
+
+            String inputDataJson = ClassToJsonMapper.mapClassToJson(command.inputDataType());
+            var formulaTestResult = testFormula(command, inputDataJson);
+            if (formulaTestResult.failure()) {
+                return Result.failure(InvalidFormulaCreationCommand.dueToInvalidFormulaOrInputDataType(formulaTestResult.getFailure().getMessage()));
+            }
+
             var formulaPricingEntity = new FormulaPricingEntity(
                     command.name(),
                     command.formula(),
                     command.inputDataType(),
-                    ClassToJsonMapper.mapClassToJson(command.inputDataType()),
+                    inputDataJson,
                     clock
             );
 
@@ -40,6 +48,19 @@ public class FormulaFacade {
         } catch (JsonProcessingException exception) {
             return Result.failure(InvalidFormulaCreationCommand.dueToErrorDuringParsingInputDataType());
         }
+    }
+
+    private Result<PriceCalculationException, Boolean> testFormula(CreateFormulaCommand command, String inputDataJson) throws JsonProcessingException {
+        var testInputData = new ObjectMapper().readValue(inputDataJson, command.inputDataType());
+        var basicFormula = new BasicFormula(command.formula(), command.inputDataType());
+
+        try {
+            basicFormula.calculatePrice(testInputData);
+            return Result.success(true);
+        } catch (PriceCalculationException e) {
+            return Result.failure(e);
+        }
+
     }
 
 

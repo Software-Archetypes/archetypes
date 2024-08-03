@@ -39,9 +39,9 @@ class ClassToJsonMapper {
         } else if (fieldType == char.class || fieldType == Character.class) {
             return JsonNodeFactory.instance.textNode("");
         } else if (fieldType == byte.class || fieldType == short.class || fieldType == int.class || fieldType == long.class || Number.class.isAssignableFrom(fieldType)) {
-            return JsonNodeFactory.instance.numberNode(0);
+            return JsonNodeFactory.instance.numberNode(1);
         } else if (fieldType == float.class || fieldType == double.class) {
-            return JsonNodeFactory.instance.numberNode(0.0);
+            return JsonNodeFactory.instance.numberNode(1.0);
         } else if (fieldType == String.class) {
             return JsonNodeFactory.instance.textNode("");
         }

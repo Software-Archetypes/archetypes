@@ -21,8 +21,8 @@ class ClassToJsonMapperTest {
         var expectedResult = """
                 {
                   "a" : "",
-                  "b" : 0,
-                  "c" : 0
+                  "b" : 1,
+                  "c" : 1
                 }
                 """;
 

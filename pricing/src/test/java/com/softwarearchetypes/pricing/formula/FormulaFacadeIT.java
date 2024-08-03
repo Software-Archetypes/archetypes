@@ -20,7 +20,7 @@ class FormulaFacadeIT extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("Proper formula should be stored and retrieved from DB")
-    void properFormulaShouldBeStoredAndRetrievedFromDB() {
+    void properFormulaShouldBeStoredAndRetrievedFromDB() throws PriceCalculationException {
         //given: simple record that will contain formula input data
         record TestFormulaData(int x, int y) {
         }
@@ -41,14 +41,12 @@ class FormulaFacadeIT extends AbstractIntegrationTest {
         //then: formula was stored successfully
         new ResultAssert(formulaCreationResult).isSuccess();
 
-        //when: formula is queried
+        //when: formula is queried and executed for parameters: 2, 3
         var formulaPricing = queryRepository.getFormulaById(formulaCreationResult.getSuccess());
-
-        //then: formula is executed properly
         var formulaTestData = new TestFormulaData(2, 3);
         var formulaResult = new BigDecimalAssert(formulaPricing.calculatePrice(formulaTestData));
 
-        //and: result is 6
+        //then: price is 6
         formulaResult.hasValue(BigDecimal.valueOf(6));
     }
 

@@ -15,4 +15,9 @@ public class ResultAssert {
         return this;
     }
 
+    public ResultAssert isFailure() {
+        Assertions.assertTrue(result.failure());
+        return this;
+    }
+
 }

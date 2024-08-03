@@ -7,6 +7,6 @@ import java.math.BigDecimal;
  */
 public interface FormulaPricing {
 
-    BigDecimal calculatePrice(Object data);
+    BigDecimal calculatePrice(Object data) throws PriceCalculationException;
 
 }

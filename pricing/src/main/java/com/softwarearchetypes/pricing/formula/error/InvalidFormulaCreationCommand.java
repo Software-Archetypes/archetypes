@@ -9,4 +9,8 @@ public record InvalidFormulaCreationCommand(
         return new InvalidFormulaCreationCommand("Error occurred during parsing to JSON input data type");
     }
 
+    public static InvalidFormulaCreationCommand dueToInvalidFormulaOrInputDataType(String error) {
+        return new InvalidFormulaCreationCommand(error);
+    }
+
 }

@@ -6,19 +6,24 @@ import io.github.jamsesso.jsonlogic.JsonLogicException;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Optional;
 
 class BasicFormula implements FormulaPricing {
 
     private final String formula;
     private final Class<?> inputDataType;
 
-    public BasicFormula(String formula, String inputDataType) {
+    BasicFormula(String formula, String inputDataType) {
+        this(formula, ClassConverter.convertToEntityAttribute(inputDataType));
+    }
+
+    BasicFormula(String formula, Class<?> inputDataType) {
         this.formula = formula;
-        this.inputDataType = ClassConverter.convertToEntityAttribute(inputDataType);
+        this.inputDataType = inputDataType;
     }
 
     @Override
-    public BigDecimal calculatePrice(Object data) {
+    public BigDecimal calculatePrice(Object data) throws PriceCalculationException {
 
         if (data.getClass() != inputDataType) {
             throw new IllegalArgumentException("The data provided has a different structure than expected. Expected data structure: " + inputDataType);
@@ -28,12 +33,13 @@ class BasicFormula implements FormulaPricing {
 
         try {
             var dataJson = objectMapper.convertValue(data, Map.class);
-            var functionResult = new JsonLogic().apply(formula, dataJson);
 
-            return new BigDecimal(functionResult.toString());
+            return Optional.ofNullable(new JsonLogic().apply(formula, dataJson))
+                    .map(functionResult -> new BigDecimal(functionResult.toString()))
+                    .orElseThrow(() -> new PriceCalculationException("It was not possible to calculate the price for the given parameters."));
 
         } catch (JsonLogicException e) {
-            throw new IllegalArgumentException("Cannot execute formula", e);
+            throw new PriceCalculationException("Error during formula execution", e);
         }
     }
 }
