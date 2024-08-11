@@ -1,4 +1,4 @@
-package com.softwarearchetypes.pricing.formula;
+package com.softwarearchetypes.pricing.formula.domain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.jamsesso.jsonlogic.JsonLogic;
@@ -12,10 +12,6 @@ class BasicFormula implements FormulaPricing {
 
     private final String formula;
     private final Class<?> inputDataType;
-
-    BasicFormula(String formula, String inputDataType) {
-        this(formula, ClassConverter.convertToEntityAttribute(inputDataType));
-    }
 
     BasicFormula(String formula, Class<?> inputDataType) {
         this.formula = formula;

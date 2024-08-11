@@ -1,22 +1,18 @@
-package com.softwarearchetypes.pricing.formula;
+package com.softwarearchetypes.pricing.formula.domain;
 
-import com.softwarearchetypes.pricing.AbstractIntegrationTest;
-import com.softwarearchetypes.pricing.common.BigDecimalAssert;
 import com.softwarearchetypes.pricing.common.ResultAssert;
 import com.softwarearchetypes.pricing.formula.command.CreateFormulaCommand;
+import com.softwarearchetypes.pricing.shared.AbstractIntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 
-class FormulaFacadeIT extends AbstractIntegrationTest {
+class FormulaServiceIT extends AbstractIntegrationTest {
 
     @Autowired
-    private FormulaFacade formulaFacade;
-
-    @Autowired
-    private FormulaQueryRepository queryRepository;
+    private FormulaService formulaService;
 
     @Test
     @DisplayName("Proper formula should be stored and retrieved from DB")
@@ -36,18 +32,22 @@ class FormulaFacadeIT extends AbstractIntegrationTest {
         );
 
         //when: formula is created
-        var formulaCreationResult = formulaFacade.createFormula(createFormulaCommand);
+        var formulaCreationResult = formulaService.createFormula(createFormulaCommand);
 
         //then: formula was stored successfully
         new ResultAssert(formulaCreationResult).isSuccess();
 
         //when: formula is queried and executed for parameters: 2, 3
-        var formulaPricing = queryRepository.getFormulaById(formulaCreationResult.getSuccess());
+        var formulaPricing = formulaService.findById(formulaCreationResult.getSuccess())
+                .map(FormulaPricingAssert::new)
+                .orElse(new FormulaPricingAssert(null));
+
         var formulaTestData = new TestFormulaData(2, 3);
-        var formulaResult = new BigDecimalAssert(formulaPricing.calculatePrice(formulaTestData));
 
         //then: price is 6
-        formulaResult.hasValue(BigDecimal.valueOf(6));
+        formulaPricing.formulaExists()
+                .formulaResult(formulaTestData)
+                .hasValue(BigDecimal.valueOf(6));
     }
 
 

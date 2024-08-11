@@ -1,4 +1,4 @@
-package com.softwarearchetypes.pricing.formula;
+package com.softwarearchetypes.pricing.formula.domain;
 
 import com.softwarearchetypes.pricing.common.ResultAssert;
 import com.softwarearchetypes.pricing.formula.command.CreateFormulaCommand;
@@ -7,15 +7,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class FormulaFacadeTest extends AbstractUnitTest {
+class FormulaServiceTest extends AbstractUnitTest {
 
-    private FormulaFacade facade;
+    private FormulaService facade;
 
     @BeforeEach
     void setUp() {
 
         var repository = new FormulaJpaInMemoryRepository();
-        facade = new FormulaFacade(
+        facade = new FormulaService(
                 repository,
                 clock
         );

@@ -1,15 +1,21 @@
-package com.softwarearchetypes.pricing.formula;
+package com.softwarearchetypes.pricing.formula.infrastructure;
 
-class ClassConverter {
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
-    static String convertToDatabaseColumn(Class<?> attribute) {
+@Converter
+class ClassConverter implements AttributeConverter<Class<?>, String> {
+
+    @Override
+    public String convertToDatabaseColumn(Class attribute) {
         if (attribute == null) {
             return null;
         }
         return attribute.getName();
     }
 
-    static Class<?> convertToEntityAttribute(String dbData) {
+    @Override
+    public Class<?> convertToEntityAttribute(String dbData) {
         if (dbData == null || dbData.isEmpty()) {
             return null;
         }

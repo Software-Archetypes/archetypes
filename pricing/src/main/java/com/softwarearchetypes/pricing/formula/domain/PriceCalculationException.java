@@ -1,4 +1,4 @@
-package com.softwarearchetypes.pricing.formula;
+package com.softwarearchetypes.pricing.formula.domain;
 
 public class PriceCalculationException extends Exception {
 

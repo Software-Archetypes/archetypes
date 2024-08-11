@@ -1,4 +1,4 @@
-package com.softwarearchetypes.pricing;
+package com.softwarearchetypes.pricing.shared;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;

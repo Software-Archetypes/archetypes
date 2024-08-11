@@ -1,11 +1,10 @@
-package com.softwarearchetypes.pricing.shared;
+package com.softwarearchetypes.pricing.common;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -21,12 +20,9 @@ public abstract class AbstractBaseEntity {
     @Column(name = "creation_date")
     private OffsetDateTime creationDate;
 
-    public AbstractBaseEntity(Clock clock) {
-        Objects.requireNonNull(clock, "Entity needs clock to set creation date");
-        this.creationDate = OffsetDateTime.now(clock);
-    }
-
-    protected AbstractBaseEntity() {
+    protected AbstractBaseEntity(OffsetDateTime creationDate) {
+        Objects.requireNonNull(creationDate, "Creation date cannot be null");
+        this.creationDate = creationDate;
     }
 
     public UUID getId() {

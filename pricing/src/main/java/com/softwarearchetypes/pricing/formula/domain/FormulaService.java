@@ -1,4 +1,4 @@
-package com.softwarearchetypes.pricing.formula;
+package com.softwarearchetypes.pricing.formula.domain;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -6,19 +6,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.softwarearchetypes.pricing.common.Result;
 import com.softwarearchetypes.pricing.formula.command.CreateFormulaCommand;
 import com.softwarearchetypes.pricing.formula.error.InvalidFormulaCreationCommand;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
+import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
-public class FormulaFacade {
+public class FormulaService {
 
-    private final FormulaJpaRepository repository;
+    private final FormulaRepository repository;
     private final Clock clock;
 
-    FormulaFacade(FormulaJpaRepository repository, Clock clock) {
+    FormulaService(FormulaRepository repository, Clock clock) {
         this.repository = repository;
         this.clock = clock;
     }
@@ -39,15 +41,24 @@ public class FormulaFacade {
                     command.formula(),
                     command.inputDataType(),
                     inputDataJson,
-                    clock
+                    OffsetDateTime.now(clock)
             );
 
-            formulaPricingEntity = repository.save(formulaPricingEntity);
+            var formulaPricingId = repository.save(formulaPricingEntity);
 
-            return Result.success(formulaPricingEntity.getId());
+            return Result.success(formulaPricingId);
         } catch (JsonProcessingException exception) {
             return Result.failure(InvalidFormulaCreationCommand.dueToErrorDuringParsingInputDataType());
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<FormulaPricing> findById(UUID formulaPricingId) {
+        return repository.findById(formulaPricingId)
+                .map(formulaPricing -> new BasicFormula(
+                        formulaPricing.formula(),
+                        formulaPricing.inputDataClass()
+                ));
     }
 
     private Result<PriceCalculationException, Boolean> testFormula(CreateFormulaCommand command, String inputDataJson) throws JsonProcessingException {

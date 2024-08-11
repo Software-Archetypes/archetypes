@@ -1,4 +1,4 @@
-package com.softwarearchetypes.pricing.formula;
+package com.softwarearchetypes.pricing.formula.domain;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -18,7 +18,7 @@ class BasicFormulaTest {
         //and: simple adding formula with two variables
         var basicFormula = new BasicFormula(
                 "{\"+\": [{\"var\": \"a\"}, {\"var\": \"b\"}]}",
-                FormulaData.class.getName()
+                FormulaData.class
         );
 
         //and: formula data: (2,2)
@@ -41,7 +41,7 @@ class BasicFormulaTest {
         //and: simple adding formula with two variables
         var basicFormula = new BasicFormula(
                 "{\"+\": [2,2]}",
-                ValidFormulaData.class.getName()
+                ValidFormulaData.class
         );
 
         //when: an invalid input data type is used
