@@ -1,0 +1,15 @@
+{
+  "originHash" : "16621f2a0e10e05ab7e59fd040fb8f157a5d36fb6130d39c73d4feb59b7ba0f0",
+  "pins" : [
+    {
+      "identity" : "sugar",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/korpotron/sugar.git",
+      "state" : {
+        "revision" : "4ac209b6db02a797f67051c5cd6018cf3e1d4288",
+        "version" : "0.0.10"
+      }
+    }
+  ],
+  "version" : 3
+}
