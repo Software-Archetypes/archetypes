@@ -2,6 +2,7 @@ package com.bartslota.availability.infrastructure.rest;
 
 import java.security.Principal;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.function.Function;
 
 import org.springframework.http.ResponseEntity;
@@ -79,7 +80,7 @@ class AssetAvailabilityController {
 
     private ResponseEntity<?> handle(Unlock command, Principal user) {
         return availabilityService
-                .lockIndefinitely(AssetId.of(command.assetId()), OwnerId.of(user.getName()))
+                .unlock(AssetId.of(command.assetId()), OwnerId.of(user.getName()), LocalDateTime.now())
                 .fold(rejected -> ResponseEntity.unprocessableEntity().build(),
                         accepted -> ResponseEntity.status(ACCEPTED).build());
     }
