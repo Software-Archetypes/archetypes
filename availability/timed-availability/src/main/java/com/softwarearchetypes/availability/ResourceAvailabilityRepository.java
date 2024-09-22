@@ -2,6 +2,7 @@ package com.softwarearchetypes.availability;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import java.sql.PreparedStatement;
 import java.util.List;
@@ -67,6 +68,56 @@ class ResourceAvailabilityRepository {
                                 """, ResourceAvailabilityRowMapper.rowMapper,
                         parentId.getId(), from(segment.from()), from(segment.to()));
     }
+
+
+    void tryToBlockAllWithinSlot(ResourceId resourceId, TimeSlot segment, Owner owner) {
+        String sql = """
+            WITH availability_check AS (
+                SELECT COUNT(*) AS available_count
+                FROM availabilities
+                WHERE from_date < :toDate AND to_date > :fromDate
+                  AND taken_by IS NULL AND disabled = false
+            ),
+            requestor_check AS (
+                SELECT COUNT(*) AS requestor_count
+                FROM availabilities
+                WHERE resource_id = :resourceId
+                WHERE from_date <= :toDate AND to_date => :fromDate
+                  AND taken_by = :requestorId AND disabled = false
+            )
+            SELECT 
+                CASE 
+                    WHEN (SELECT available_count FROM availability_check) != (SELECT requestor_count FROM requestor_check) THEN 1
+                    ELSE 0
+                END AS fail_condition;
+            
+            UPDATE availabilities
+            SET taken_by = :requestorId, disabled = true
+            WHERE from_date < :toDate AND to_date > :fromDate
+              AND taken_by IS NULL AND disabled = false
+            AND EXISTS (
+                SELECT 1 FROM availability_check WHERE available_count > 0
+            );
+        """;
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("resourceId", resourceId.getId())
+                .addValue("requestorId", owner.id())
+                .addValue("fromDate", segment.from())
+                .addValue("toDate", segment.to());
+
+        try {
+            int result = jdbcTemplate.update(sql, parameters);
+
+            // Check if the transaction should be rolled back
+            if (result == 0) {
+                throw new IllegalStateException("Not all availabilities in the specified range are available or owned by the requestor");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error updating availability", e);
+        }
+    }
+
 
     boolean saveCheckingVersion(ResourceAvailability resourceAvailability) {
         UUID id = resourceAvailability.id().id();

@@ -37,8 +37,14 @@ public class AvailabilityFacade {
 
     @Transactional
     public boolean block(ResourceId resourceId, TimeSlot timeSlot, Owner requester) {
-        ResourceGroupedAvailability toBlock = findGrouped(resourceId, timeSlot);
-        return block(requester, toBlock);
+
+        try {
+            availabilityRepository.tryToBlockAllWithinSlot(resourceId, timeSlot, requester);
+
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 
     private boolean block(Owner requester, ResourceGroupedAvailability toBlock) {

@@ -19,6 +19,7 @@
         <module>availability/simple-availability</module>
         <module>general-assignment</module>
         <module>waitlist</module>
+        <module>configurator</module>
     </modules>
 
 </project>
