@@ -4,6 +4,7 @@ import softwarearchetypes.sat.Clause;
 import softwarearchetypes.sat.DPLLSolver;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CarConfigurationFacade {
@@ -16,13 +17,12 @@ public class CarConfigurationFacade {
         this.dpllSolver = dpllSolver;
     }
 
-    public boolean isProper(CarConfigId carConfigId, PickedOption ... pickedOptions) {
+    public boolean isProper(CarConfigId carConfigId, PickedOption... pickedOptions) {
         List<Rule> rules = optionsRepository.loadRules(carConfigId);
         List<Clause> adminConfig = rules.stream().map(Rule::toClause).flatMap(Collection::stream).toList();
-        List<Clause> userChoice = Arrays.asList(pickedOptions).stream().map(pickedOption -> new Clause(pickedOption.option().id())).toList();
-        List<Clause> all = Stream.concat(adminConfig.stream(), userChoice.stream()).toList();
-        all.forEach(System.out::println);
-        return dpllSolver.solve(all, new HashMap<>());
+        adminConfig.forEach(System.out::println);
+        return dpllSolver.isClauseSatisfied(adminConfig,
+                Arrays.asList(pickedOptions).stream().map(pickedOption -> pickedOption.option().id()).collect(Collectors.toSet()));
     }
 }
 
