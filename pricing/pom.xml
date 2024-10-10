@@ -56,11 +56,33 @@
             <artifactId>postgresql</artifactId>
         </dependency>
 
+        <!-- JSON -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20240303</version>
+        </dependency>
+
         <!--JSON LOGIC-->
         <dependency>
             <groupId>io.github.jamsesso</groupId>
             <artifactId>json-logic-java</artifactId>
             <version>1.0.7</version>
+        </dependency>
+
+        <!--MONEY-->
+        <dependency>
+            <groupId>org.javamoney</groupId>
+            <artifactId>moneta</artifactId>
+            <version>1.4.4</version>
+            <type>pom</type>
+        </dependency>
+
+        <!--APACHE MATH-->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
         </dependency>
 
         <!--TEST-->
