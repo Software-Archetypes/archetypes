@@ -1,28 +1,27 @@
 package softwarearchetypes.carconfig;
 
+import softwarearchetypes.sat.BooleanLogic;
 import softwarearchetypes.sat.Clause;
 import softwarearchetypes.sat.DPLLSolver;
 
 import java.util.*;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 public class CarConfigurationFacade {
 
     private final OptionsRepository optionsRepository;
-    private final DPLLSolver dpllSolver;
+    private final BooleanLogic booleanLogic;
 
-    public CarConfigurationFacade(OptionsRepository optionsRepository, DPLLSolver dpllSolver) {
+    public CarConfigurationFacade(OptionsRepository optionsRepository, BooleanLogic booleanLogic) {
         this.optionsRepository = optionsRepository;
-        this.dpllSolver = dpllSolver;
+        this.booleanLogic = booleanLogic;
     }
 
     public boolean isProper(CarConfigId carConfigId, PickedOption ... pickedOptions) {
         List<Rule> rules = optionsRepository.loadRules(carConfigId);
         List<Clause> adminConfig = rules.stream().map(Rule::toClause).flatMap(Collection::stream).toList();
-        List<Clause> userChoice = Arrays.asList(pickedOptions).stream().map(pickedOption -> new Clause(pickedOption.option().id())).toList();
-        List<Clause> all = Stream.concat(adminConfig.stream(), userChoice.stream()).toList();
-        all.forEach(System.out::println);
-        return dpllSolver.solve(all, new HashMap<>());
+        return booleanLogic.isFormulaSatisfied(adminConfig,
+                Arrays.asList(pickedOptions).stream().map(pickedOption -> pickedOption.option().id()).collect(Collectors.toSet()));
     }
 }
 

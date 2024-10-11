@@ -3,7 +3,7 @@ package softwarearchetypes.carconfig;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
-import softwarearchetypes.sat.DPLLSolver;
+import softwarearchetypes.sat.BooleanLogic;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ class CarConfiguringScenarios {
     OptionsRepository optionsRepository = new OptionsRepository();
 
     CarConfigurationDefinitionFacade carConfigDefinitionFacade = new CarConfigurationDefinitionFacade(optionsRepository);
-    CarConfigurationFacade carConfigFacade = new CarConfigurationFacade(optionsRepository, new DPLLSolver());
+    CarConfigurationFacade carConfigFacade = new CarConfigurationFacade(optionsRepository, new BooleanLogic());
 
     @Test
     void cantBeTakenTogether() {
