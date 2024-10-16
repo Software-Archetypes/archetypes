@@ -47,18 +47,16 @@ public class CarConfigurationDefinitionFacade {
         optionsRepository.addRules(carConfigId, excludes);
     }
 
-    public void oneOfMustBeTaken(CarConfigId carConfigId, List<Option> mustBeTakenTogether) {
-        List<Rule> includes = new ArrayList<>();
-        for (Option option : mustBeTakenTogether) {
-            for (Option pairWith : mustBeTakenTogether) {
-                if (!pairWith.equals(option)) {
-                    includes.add(new IncludeRule(option, pairWith));
-                }
-            }
-        }
+    public void mustBeTaken(CarConfigId carConfigId, Option mustBePresent) {
+        oneOfMustBeTaken(carConfigId, List.of(mustBePresent));
+    }
 
-        addOptions(carConfigId, mustBeTakenTogether);
-        optionsRepository.addRules(carConfigId, includes);
+    public void oneOfMustBeTaken(CarConfigId carConfigId, List<Option> oneOfMustBeTaken) {
+        Rule oneOfPresence = new OneOfPresenceRule(oneOfMustBeTaken);
+
+        checkSatisfiability(carConfigId, List.of(oneOfPresence));
+        addOptions(carConfigId, oneOfMustBeTaken);
+        optionsRepository.addRule(carConfigId, oneOfPresence);
     }
 
     public void mustBeTakenTogether(CarConfigId carConfigId, Option a, Option b) {
@@ -80,12 +78,6 @@ public class CarConfigurationDefinitionFacade {
         addOptions(carConfigId, cantBeTaken);
         addOption(carConfigId, ifThisTaken);
         optionsRepository.addRules(carConfigId, excludes);
-    }
-
-    public void mustBeTaken(CarConfigId carConfigId, Option mustBePresent) {
-        Rule presenceRule = new OneOfPresenceRule(List.of(mustBePresent));
-        addOption(carConfigId, mustBePresent);
-        optionsRepository.addRule(carConfigId, presenceRule);
     }
 
     public void mustBeTakenTogether(CarConfigId carConfigId, List<Option> mustBeTakenTogether) {

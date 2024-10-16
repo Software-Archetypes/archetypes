@@ -28,7 +28,7 @@ class OptionsRepository {
     }
 
     List<Rule> loadRules(CarConfigId id) {
-        return rules.get(id);
+        return rules.getOrDefault(id, new ArrayList<>());
     }
 
     void addRule(CarConfigId id, Rule rule) {

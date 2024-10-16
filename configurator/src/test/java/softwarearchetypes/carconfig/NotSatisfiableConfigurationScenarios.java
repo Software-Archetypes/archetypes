@@ -39,4 +39,16 @@ public class NotSatisfiableConfigurationScenarios {
                 () -> carConfigDefinitionFacade.mustBeTakenTogether(DACIA, SUNROOF, LEATHER_SEATS),
                 "Configuration is not satisfiable");
     }
+
+    @Test
+    void cantBeTakenTogetherExcludesMustBeTaken() {
+        //given
+        carConfigDefinitionFacade.mustBeTaken(DACIA, SUNROOF);
+        carConfigDefinitionFacade.cantBeTakenTogether(DACIA, SUNROOF, LEATHER_SEATS);
+
+        //then
+        assertThrows(IllegalArgumentException.class,
+                () -> carConfigDefinitionFacade.mustBeTaken(DACIA, LEATHER_SEATS),
+                "Configuration is not satisfiable");
+    }
 }
