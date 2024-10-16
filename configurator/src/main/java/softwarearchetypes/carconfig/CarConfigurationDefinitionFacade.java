@@ -64,7 +64,10 @@ public class CarConfigurationDefinitionFacade {
     }
 
     public void includedConditionally(CarConfigId carConfigId, Option ifThisTaken, List<Option> oneOfMustBeTaken) {
-        optionsRepository.addRule(carConfigId, new IncludeOneOfRule(ifThisTaken, oneOfMustBeTaken));
+        Rule include = new IncludeOneOfRule(ifThisTaken, oneOfMustBeTaken);
+
+        checkSatisfiability(carConfigId, List.of(include));
+        optionsRepository.addRule(carConfigId, include);
         addOptions(carConfigId, oneOfMustBeTaken);
         addOption(carConfigId, ifThisTaken);
     }
@@ -75,6 +78,7 @@ public class CarConfigurationDefinitionFacade {
             excludes.add(new ExcludeRule(ifThisTaken, toExclude));
         }
 
+        checkSatisfiability(carConfigId, excludes);
         addOptions(carConfigId, cantBeTaken);
         addOption(carConfigId, ifThisTaken);
         optionsRepository.addRules(carConfigId, excludes);
