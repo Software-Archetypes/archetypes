@@ -1,17 +1,19 @@
 package softwarearchetypes.carconfig;
 
 import softwarearchetypes.sat.Clause;
+import softwarearchetypes.sat.DPLLSolver;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class CarConfigurationDefinitionFacade {
 
     private final OptionsRepository optionsRepository;
+    private final DPLLSolver dpllSolver;
 
-    public CarConfigurationDefinitionFacade(OptionsRepository optionsRepository) {
+    public CarConfigurationDefinitionFacade(OptionsRepository optionsRepository, DPLLSolver dpllSolver) {
         this.optionsRepository = optionsRepository;
+        this.dpllSolver = dpllSolver;
     }
 
     public void addOption(CarConfigId carConfigId, Option option) {
@@ -39,8 +41,24 @@ public class CarConfigurationDefinitionFacade {
                 }
             }
         }
+
+        checkSatisfiability(carConfigId, excludes);
         addOptions(carConfigId, cantBeTakenTogether);
         optionsRepository.addRules(carConfigId, excludes);
+    }
+
+    public void oneOfMustBeTaken(CarConfigId carConfigId, List<Option> mustBeTakenTogether) {
+        List<Rule> includes = new ArrayList<>();
+        for (Option option : mustBeTakenTogether) {
+            for (Option pairWith : mustBeTakenTogether) {
+                if (!pairWith.equals(option)) {
+                    includes.add(new IncludeRule(option, pairWith));
+                }
+            }
+        }
+
+        addOptions(carConfigId, mustBeTakenTogether);
+        optionsRepository.addRules(carConfigId, includes);
     }
 
     public void mustBeTakenTogether(CarConfigId carConfigId, Option a, Option b) {
@@ -58,9 +76,16 @@ public class CarConfigurationDefinitionFacade {
         for (Option toExclude : cantBeTaken) {
             excludes.add(new ExcludeRule(ifThisTaken, toExclude));
         }
+
         addOptions(carConfigId, cantBeTaken);
         addOption(carConfigId, ifThisTaken);
         optionsRepository.addRules(carConfigId, excludes);
+    }
+
+    public void mustBeTaken(CarConfigId carConfigId, Option mustBePresent) {
+        Rule presenceRule = new OneOfPresenceRule(List.of(mustBePresent));
+        addOption(carConfigId, mustBePresent);
+        optionsRepository.addRule(carConfigId, presenceRule);
     }
 
     public void mustBeTakenTogether(CarConfigId carConfigId, List<Option> mustBeTakenTogether) {
@@ -72,9 +97,20 @@ public class CarConfigurationDefinitionFacade {
                 }
             }
         }
+
+        checkSatisfiability(carConfigId, includes);
         addOptions(carConfigId, mustBeTakenTogether);
         optionsRepository.addRules(carConfigId, includes);
+    }
 
+    private void checkSatisfiability(CarConfigId carConfigId, List<Rule> newRules) {
+        List<Rule> rules = optionsRepository.loadRules(carConfigId);
+        List<Clause> existingClauses = rules.stream().map(Rule::toClause).flatMap(Collection::stream).toList();
+        List<Clause> newClauses = newRules.stream().map(Rule::toClause).flatMap(Collection::stream).toList();
+        List<Clause> all = Stream.concat(existingClauses.stream(), newClauses.stream()).toList();
+        all.forEach(System.out::println);
+        boolean isSatisfiable = dpllSolver.solve(all, new HashMap<>());
+        if(!isSatisfiable) throw new IllegalArgumentException("Configuration is not satisfiable");
     }
 }
 
@@ -107,5 +143,17 @@ record ExcludeRule(Option ifTaken, Option cantBeTaken) implements Rule {
     @Override
     public List<Clause> toClause() {
         return List.of(new Clause(-ifTaken.id(), -cantBeTaken.id()));
+    }
+}
+
+record OneOfPresenceRule(List<Option> options) implements Rule {
+    @Override
+    public List<Clause> toClause() {
+        return List.of(
+                new Clause(
+                        options.stream()
+                                .map(Option::id)
+                                .toList())
+        );
     }
 }
