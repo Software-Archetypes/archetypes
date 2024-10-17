@@ -7,9 +7,8 @@ import softwarearchetypes.sat.DPLLSolver;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.assertj.core.api.Assertions.assertThat;
 
-public class ClientConfigurationProcessScenarios {
+public class CarConfiguringScenarios {
     static final CarConfigId DACIA = CarConfigId.random();
 
     static final Option SUNROOF = new Option(1);
@@ -35,10 +34,26 @@ public class ClientConfigurationProcessScenarios {
     }
 
     @Test
-    void userPicksOptionA_optionAExcludesOptionB_BIsBlocked() {
+    void userPicksOptionA_optionAExcludesOptionB_BCannotBePicked() {
         //given
         CarConfigProcessId carConfigProcessId = CarConfigProcessId.random();
         carConfigDefinitionFacade.excludedConditionally(DACIA, PARKING_SENSORS, List.of(LEATHER_SEATS));
+        carConfigFacade.start(carConfigProcessId, DACIA);
+
+        //when
+        carConfigFacade.pickOption(carConfigProcessId, new PickedOption(PARKING_SENSORS));
+
+        //expect
+        assertThrows(IllegalArgumentException.class,
+                () -> carConfigFacade.pickOption(carConfigProcessId, new PickedOption(LEATHER_SEATS)),
+                "Configuration is not satisfiable after pick!");
+    }
+
+    @Test
+    void userPicksOptionA_optionACantBeTakenWithOptionB_BCannotBePicked() {
+        //given
+        CarConfigProcessId carConfigProcessId = CarConfigProcessId.random();
+        carConfigDefinitionFacade.cantBeTakenTogether(DACIA, PARKING_SENSORS, LEATHER_SEATS);
         carConfigFacade.start(carConfigProcessId, DACIA);
 
         //when
