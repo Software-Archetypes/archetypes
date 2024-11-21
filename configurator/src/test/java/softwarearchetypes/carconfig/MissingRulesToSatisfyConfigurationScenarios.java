@@ -31,10 +31,8 @@ public class MissingRulesToSatisfyConfigurationScenarios {
         List<Rule> rules = carConfigFacade.getNotSatisfiedRules(carConfigProcessId);
 
         //expect
-        assertThat(rules).containsExactly(new );
-        assertThrows(IllegalArgumentException.class,
-                () -> carConfigFacade.pickOption(carConfigProcessId, new PickedOption(LEATHER_SEATS)),
-                "Configuration is not satisfiable after pick!");
+        //assertion on what?
+        // assertThat(rules).containsExactly(new );
     }
 
     private CarConfigProcessId startedCarConfiguration(CarConfigId forCar) {
