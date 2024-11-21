@@ -4,10 +4,7 @@ import softwarearchetypes.sat.BooleanLogic;
 import softwarearchetypes.sat.Clause;
 import softwarearchetypes.sat.DPLLSolver;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,13 +44,17 @@ public class CarConfigurationFacade {
         configurationProcessRepository.addProcess(carConfigProcessId, newCarConfigurationProcess);
     }
 
-    public List<Option> availableOptions(CarConfigProcessId carConfigProcessId) {
+    public Set<Option> getMissingOptions(CarConfigProcessId carConfigProcessId) {
         CarConfigurationProcess carConfigurationProcess = configurationProcessRepository.load(carConfigProcessId);
-        return carConfigurationProcess.availableOptions();
-    }
+        Set<Integer> picked =
+                carConfigurationProcess.pickedOptions().stream().map(x -> x.option().id()).collect(Collectors.toSet());
+        List<Clause> rules = carConfigurationProcess.rules().stream()
+                .map(rule -> rule.toClause()).flatMap(Collection::stream).toList();
 
-    public List<Rule> getNotSatisfiedRules(CarConfigProcessId carConfigProcessId) {
-        return new ArrayList<>();
+        Set<Option> missingOptions =
+                booleanLogic.getNeededLiterals(rules, picked)
+                        .stream().flatMap(x -> x.stream()).map(x -> new Option(x)).collect(Collectors.toSet());
+        return missingOptions;
     }
 }
 

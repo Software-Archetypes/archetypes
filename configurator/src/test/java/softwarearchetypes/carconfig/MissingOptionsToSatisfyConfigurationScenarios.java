@@ -4,17 +4,14 @@ import org.junit.jupiter.api.Test;
 import softwarearchetypes.sat.BooleanLogic;
 import softwarearchetypes.sat.DPLLSolver;
 
-import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class MissingRulesToSatisfyConfigurationScenarios {
+public class MissingOptionsToSatisfyConfigurationScenarios {
     static final CarConfigId DACIA = CarConfigId.random();
 
     static final Option SUNROOF = new Option(1);
-    static final Option LEATHER_SEATS = new Option(2);
-    static final Option PARKING_SENSORS = new Option(5);
 
     OptionsRepository optionsRepository = new OptionsRepository();
 
@@ -28,16 +25,15 @@ public class MissingRulesToSatisfyConfigurationScenarios {
         CarConfigProcessId carConfigProcessId = startedCarConfiguration(DACIA);
 
         //when
-        List<Rule> rules = carConfigFacade.getNotSatisfiedRules(carConfigProcessId);
+        Set<Option> missingOptions = carConfigFacade.getMissingOptions(carConfigProcessId);
 
         //expect
-        //assertion on what?
-        // assertThat(rules).containsExactly(new );
+        assertThat(missingOptions).containsExactly(SUNROOF);
     }
 
     private CarConfigProcessId startedCarConfiguration(CarConfigId forCar) {
         CarConfigProcessId carConfigProcessId = CarConfigProcessId.random();
-        carConfigFacade.start(carConfigProcessId, DACIA);
+        carConfigFacade.start(carConfigProcessId, forCar);
         return carConfigProcessId;
     }
 }
