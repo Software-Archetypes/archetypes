@@ -13,12 +13,10 @@ public class CarConfiguringScenarios {
 
     static final Option SUNROOF = new Option(1);
     static final Option LEATHER_SEATS = new Option(2);
-    static final Option NAVIGATION_SYSTEM = new Option(3);
     static final Option BLUETOOTH = new Option(4);
     static final Option PARKING_SENSORS = new Option(5);
 
     OptionsRepository optionsRepository = new OptionsRepository();
-    CarConfigurationProcessRepository carConfigurationProcessRepository = new CarConfigurationProcessRepository();
 
     CarConfigurationDefinitionFacade carConfigDefinitionFacade = new CarConfigurationDefinitionFacade(optionsRepository, new DPLLSolver());
     CarConfigurationFacade carConfigFacade = new CarConfigurationFacade(optionsRepository, new CarConfigurationProcessRepository(), new BooleanLogic(), new DPLLSolver());

@@ -4,6 +4,7 @@ import softwarearchetypes.sat.BooleanLogic;
 import softwarearchetypes.sat.Clause;
 import softwarearchetypes.sat.DPLLSolver;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +50,10 @@ public class CarConfigurationFacade {
     public List<Option> availableOptions(CarConfigProcessId carConfigProcessId) {
         CarConfigurationProcess carConfigurationProcess = configurationProcessRepository.load(carConfigProcessId);
         return carConfigurationProcess.availableOptions();
+    }
+
+    public List<Rule> getNotSatisfiedRules(CarConfigProcessId carConfigProcessId) {
+        return new ArrayList<>();
     }
 }
 
