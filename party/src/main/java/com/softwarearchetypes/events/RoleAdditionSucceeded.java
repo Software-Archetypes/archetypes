@@ -1,4 +1,4 @@
 package com.softwarearchetypes.events;
 
-public interface RoleAdditionSucceeded extends PartyRelatedEvent {
+public sealed interface RoleAdditionSucceeded extends PartyRelatedEvent permits RoleAdded, RoleAdditionSkipped {
 }

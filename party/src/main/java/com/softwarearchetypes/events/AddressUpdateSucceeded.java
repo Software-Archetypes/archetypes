@@ -1,5 +1,5 @@
 package com.softwarearchetypes.events;
 
-//TODO: seal
-public interface AddressUpdateSucceeded extends AddressRelatedEvent {
+public sealed interface AddressUpdateSucceeded extends AddressRelatedEvent permits AddressUpdateSkipped, GeoAddressUpdated {
+
 }

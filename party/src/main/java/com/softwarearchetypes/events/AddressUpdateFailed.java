@@ -7,4 +7,5 @@ public record AddressUpdateFailed(String reason) implements AddressDefinitionFai
     public static AddressUpdateFailed dueToNotMatchingAddressType() {
         return new AddressUpdateFailed(NOT_MATCHING_ADDRESS_TYPE_REASON);
     }
+
 }

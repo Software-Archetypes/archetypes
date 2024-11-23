@@ -163,6 +163,10 @@ For example, a sole proprietorship may start as a lead, then become a client, an
 
 As a result, such solutions are semantically incorrect, meaning that the model does not reflect the actual essence of the business problem, thus complicating programming on both the model and client code sides. The model is characterized by high complexity and poor functional scalability. Typically, in such situations, we observe the use of separate models by different teams, which effectively hinders data consistency, and very similar work must be done in many places by many people.
 
+### Distributed architecture
+
+We often encounter situations where models such as `User`, `Customer`, `Partner`, and others are implemented across separate applications. This approach adds complexity, forcing client applications to integrate with multiple data sources. Maintaining consistency between these applications is both challenging and costly, typically having a negative impact on the delivery and operational performance. Introducing new features often requires changes across multiple applications managed by different teams. Additionally, issues with data consistency can result in customer-reported bugs needing to be analyzed and resolved by several development teams simultaneously.
+
 ## Solution
 
 The essence of the problem lies in the role-centric model. Both the attempt to enrich the `User` type with data and functions specific to a given role, as well as the creation of types corresponding to roles, such as `Lead`, `Customer` or `Partner`, cause many problems. What if the center of the model is not a role, but an entity such as a person or an organization?
@@ -183,15 +187,15 @@ The *Party* archetype is a reusable business model used to represent different t
 
 ## Features of the Party Archetype
 
-1. **Universal Representation of Entities** - the Party archetype acts as a general, overarching representation of any type of entity in the system, regardless of whether it’s an individual, a company, or another type of organization. In this way, a single Party model can handle data related to both individuals (e.g., first name, last name, residential address) and companies (business name, tax identification number, headquarters addresses).
+1. **Universal Representation of Parties** - the Party archetype acts as a general, overarching representation of any type of party in the system, regardless of whether it’s an individual, a company, or another type of organization. In this way, a single Party model can handle data related to both individuals (e.g., first name, last name, residential address) and companies (business name, tax identification number, headquarters addresses).
 
-2. *Multiple Roles* - Each Party instance can take on various roles, such as Client, Supplier, Partner, or User. These roles can be assigned dynamically, allowing a single Party instance to fulfill different functions depending on the business context. Party thus eliminates the need for separate classes for different entity types and allows more flexible role management.
+2. **Multiple Roles** - each Party instance can take on various roles, such as Client, Supplier, Partner, or User. These roles can be assigned dynamically, allowing a single Party instance to fulfill different functions depending on the business context. Party archetype thus eliminates the need for separate classes for different entity types and allows more flexible role management.
 
-3. **Unified Data Model and Database** - Using Party facilitates storing information in a single, central data structure, helping to maintain consistency and avoid redundancy issues. This way, various applications and systems can refer to the same Party instance, simplifying synchronization and data maintenance.
+3. **Unified Data Model and Database** - using Party facilitates storing information in a single, central data structure, helping to maintain consistency and avoid redundancy issues. This way, various applications and systems can refer to the same Party instance, simplifying synchronization and data maintenance.
 
 4. **Avoiding Data Duplication** - Party reduces the need for duplicating data, such as addresses, phone numbers, or other shared attributes. Instead of recreating these fields in various classes, Party stores common data that is accessible regardless of the roles played by a particular instance.
 
-5. **Scalability and Flexibility** - The Party model is easy to expand, as new roles and relationships can be added without needing to modify the core structure. Party is well-suited to scale with growing organizational needs, as it allows adding new functionalities and behaviors with minimal disruption to the existing model.
+5. **Scalability and Flexibility** - the Party model is easy to expand, as new roles and relationships can be added without needing to modify the core structure. Party is well-suited to scale with growing organizational needs, as it allows adding new functionalities and behaviors with minimal disruption to the existing model.
 
 ## How it works?
 
@@ -229,7 +233,126 @@ Defining roles for a given party can be further refined with policies or rules t
 
 ### Addresses
 
-TBD
+In order to contact a party we usually need to store its **addresses**. Each party can have zero or more addresses. Each address can have one or more specific **address uses** such as contact address, billing address, invoice address, etc. We can distinguish a couple of types of addresses as well, including **geographic address**, **web page address**, **email address**, **telecommunnication address (phone number)**.
+
+We represent an address as an abstract concept – an interface. Each type of address will differ in structure and application. Every address may have its own lifecycle: after creation, it can be modified multiple times or eventually deleted. Potentially, the model can also be extended with functions for activation, verification, or blocking of the address. For these reasons, each address is uniquely identifiable through an `AddressId`.
+
+```java
+public sealed interface Address extends AddressLifecycle permits GeoAddress {
+
+    AddressId id();
+
+    PartyId partyId();
+
+    Set<AddressUseType> useTypes();
+
+    AddressDetails addressDetails();
+}
+```
+
+```java
+interface AddressLifecycle {
+
+    AddressUpdateSucceeded toAddressUpdateSucceededEvent();
+
+    AddressDefinitionSucceeded toAddressDefinitionSucceededEvent();
+
+    AddressRemovalSucceeded toAddressRemovalSucceededEvent();
+}
+```
+
+The **Geographic address** is one of the most commonly used ones. It represents a geographic location at which particular party might be contacted.
+
+```java
+public final class GeoAddress implements Address {
+
+    private final AddressId id;
+    private final PartyId partyId;
+    private final GeoAddressDetails geoAddressDetails;
+    private final Set<AddressUseType> useTypes;
+    
+    //...
+    public record GeoAddressDetails(String name, String street, String building, 
+                                    String flat, String city, ZipCode zip, Locale locale) implements AddressDetails {
+
+        static GeoAddressDetails from(String name, String street, String building, String flat, String city, ZipCode zip, Locale locale) {
+            return new GeoAddressDetails(name, street, building, flat, city, zip, locale);
+        }
+    }
+}
+
+
+```
+
+Our experience shows that there are usually rules governing addresses, such as "each party can have exactly one active contact address." Rules and policies may also pertain to the type of entity, e.g., "only companies, not individuals, can have a billing address," or "a party may modify an address no more than once per quarter." These considerations led us to model addresses as a uniquely identifiable collection, which we modify atomically. This means that _the critical section_ is built around all addresses, not each address individually. The group of addresses is also uniquely identifiable—this time, we can use the `PartyId` identifier for this purpose. Policies can be defined for any action as needed.
+
+```java
+public class Addresses {
+
+    private static final AddressDefiningPolicy DEFAULT_ADDRESS_DEFINING_POLICY = new AlwaysAllowAddressDefiningPolicy();
+    
+    private final PartyId partyId;
+    private final Map<AddressId, Address> addresses;
+    private final List<AddressRelatedEvent> events = new LinkedList<>();
+    private final Version version;
+    private final AddressDefiningPolicy addressDefiningPolicy;
+
+    private Addresses(PartyId partyId, Set<Address> addresses, Version version, AddressDefiningPolicy addressDefiningPolicy) {
+        this.partyId = partyId;
+        this.addresses = mapFrom(addresses);
+        this.version = version;
+        this.addressDefiningPolicy = addressDefiningPolicy;
+    }
+
+    public static Addresses emptyAddressesFor(PartyId partyId) {
+        return emptyAddressesFor(partyId, DEFAULT_ADDRESS_DEFINING_POLICY);
+    }
+
+    public static Addresses emptyAddressesFor(PartyId partyId, AddressDefiningPolicy addressDefiningPolicy) {
+        return new Addresses(partyId, Set.of(), Version.initial(), addressDefiningPolicy);
+    }
+
+    public Result<AddressDefinitionFailed, Addresses> addOrUpdate(Address address) {
+        if (addresses.containsKey(address.id())) {
+            return updateWithDataFrom(addresses.get(address.id()), address);
+        } else if (addressDefiningPolicy.isAddressDefinitionAllowedFor(this, address)) {
+            addresses.put(address.id(), address);
+            events.add(address.toAddressDefinitionSucceededEvent());
+            return Result.success(this);
+        } else {
+            return Result.failure(AddressAdditionFailed.dueToPolicyNotMetFor(address.id().asString(), address.partyId().asString()));
+        }
+    }
+
+    public Result<AddressRemovalFailed, Addresses> removeAddressWith(AddressId addressId) {
+        Optional<Address> address = Optional.ofNullable(addresses.get(addressId));
+        address.ifPresentOrElse(it -> {
+                    addresses.remove(addressId);
+                    events.add(it.toAddressRemovalSucceededEvent());
+                },
+                () -> events.add(AddressRemovalSkipped.dueToAddressNotFoundFor(addressId.asString(), partyId.asString())));
+        return Result.success(this);
+    }
+
+    private Result<AddressDefinitionFailed, Addresses> updateWithDataFrom(Address addressToBeUpdated, Address newAddress) {
+        if (addressToBeUpdated.getClass().isAssignableFrom(newAddress.getClass())) {
+            if (!addressToBeUpdated.equals(newAddress)) {
+                this.addresses.put(newAddress.id(), newAddress);
+                this.events.add(newAddress.toAddressUpdateSucceededEvent());
+            } else {
+                this.events.add(addressUpdateSkippedDueToNoChangesIdentifiedFor(addressToBeUpdated));
+            }
+            return Result.success(this);
+        } else {
+            return Result.failure(AddressUpdateFailed.dueToNotMatchingAddressType());
+        }
+    }
+
+    //...
+}
+```
+
+Despite the connection between `Addresses` and `Party`, we have observed that their management (i.e., creation, updates, deletion) usually exhibits a different dynamic compared to operations such as authentication or role definition. _Immediate consistency_ rules typically concern either authentication-related aspects or address-related matters. Rarely do we encounter rules that tie these areas together and require atomicity. Therefore, we decided to model `Party` and `Addresses` as separate aggregates. This opens up a potential opportunity to create a dedicated module for managing the address book, and consequently, perhaps even a microservice.
 
 ### Authentication
 

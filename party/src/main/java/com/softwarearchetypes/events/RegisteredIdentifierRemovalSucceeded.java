@@ -1,4 +1,5 @@
 package com.softwarearchetypes.events;
 
-public interface RegisteredIdentifierRemovalSucceeded extends PartyRelatedEvent {
+public sealed interface RegisteredIdentifierRemovalSucceeded extends PartyRelatedEvent permits RegisteredIdentifierRemovalSkipped, RegisteredIdentifierRemoved {
+
 }

@@ -1,4 +1,4 @@
 package com.softwarearchetypes.events;
 
-public interface RegisteredIdentifierAdditionSucceeded extends PartyRelatedEvent {
+public sealed interface RegisteredIdentifierAdditionSucceeded extends PartyRelatedEvent permits RegisteredIdentifierAdded, RegisteredIdentifierAdditionSkipped {
 }

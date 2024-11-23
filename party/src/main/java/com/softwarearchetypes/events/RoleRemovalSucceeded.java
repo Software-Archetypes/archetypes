@@ -1,4 +1,5 @@
 package com.softwarearchetypes.events;
 
-public interface RoleRemovalSucceeded extends PartyRelatedEvent {
+public sealed interface RoleRemovalSucceeded extends PartyRelatedEvent permits RoleRemovalSkipped, RoleRemoved {
+
 }

@@ -4,7 +4,7 @@ public record Version(long value) {
 
     private static final long INITIAL_VALUE = 0L;
 
-    static Version initial() {
+    public static Version initial() {
         return new Version(INITIAL_VALUE);
     }
 

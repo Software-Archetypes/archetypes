@@ -1,5 +1,5 @@
 package com.softwarearchetypes.events;
 
-//TODO: seal
-public interface AddressDefinitionFailed extends AddressRelatedEvent {
+public sealed interface AddressDefinitionFailed extends AddressRelatedEvent permits AddressAdditionFailed, AddressUpdateFailed {
+
 }

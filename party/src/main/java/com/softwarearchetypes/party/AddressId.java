@@ -14,6 +14,10 @@ public record AddressId(UUID value) {
         return new AddressId(value);
     }
 
+    public static AddressId random() {
+        return of(UUID.randomUUID());
+    }
+
     public String asString() {
         return value.toString();
     }

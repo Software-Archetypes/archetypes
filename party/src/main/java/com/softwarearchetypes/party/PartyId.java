@@ -17,4 +17,8 @@ public record PartyId(UUID value) {
     public static PartyId of(UUID value) {
         return new PartyId(value);
     }
+
+    public static PartyId random() {
+        return of(UUID.randomUUID());
+    }
 }

@@ -1,5 +1,5 @@
 package com.softwarearchetypes.events;
 
-//TODO: seal
-public interface AddressRemovalSucceeded extends AddressRelatedEvent {
+public sealed interface AddressRemovalSucceeded extends AddressRelatedEvent permits AddressRemovalSkipped, GeoAddressRemoved {
+
 }
