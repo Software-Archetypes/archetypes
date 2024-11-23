@@ -46,14 +46,28 @@ public class CarConfigurationFacade {
 
     public Set<Option> getMissingOptions(CarConfigProcessId carConfigProcessId) {
         CarConfigurationProcess carConfigurationProcess = configurationProcessRepository.load(carConfigProcessId);
-        Set<Integer> picked =
-                carConfigurationProcess.pickedOptions().stream().map(x -> x.option().id()).collect(Collectors.toSet());
-        List<Clause> rules = carConfigurationProcess.rules().stream()
-                .map(rule -> rule.toClause()).flatMap(Collection::stream).toList();
+        List<Clause> pickedOptionsWithRules = Stream.concat(carConfigurationProcess.rules().stream()
+                .map(rule -> rule.toClause()).flatMap(Collection::stream),
+                carConfigurationProcess.pickedOptionsClauses().stream()).collect(Collectors.toList());
 
-        Set<Option> missingOptions =
-                booleanLogic.getNeededLiterals(rules, picked)
-                        .stream().flatMap(x -> x.stream()).map(x -> new Option(x)).collect(Collectors.toSet());
+        Set<Option> missingOptions = new HashSet<>();
+        for (Option nonPickedOption : carConfigurationProcess.getNonPickedOptions()) {
+            Clause positiveClause = new Clause(nonPickedOption.id());
+            Clause negativeClause = new Clause(-nonPickedOption.id());
+
+            boolean canBeTrue = this.dpllSolver.solve(Stream.concat(
+                    pickedOptionsWithRules.stream(),
+                    Stream.of(positiveClause)
+            ).collect(Collectors.toList()), new HashMap<>());
+
+            boolean canBeFalse = this.dpllSolver.solve(Stream.concat(
+                    pickedOptionsWithRules.stream(),
+                    Stream.of(negativeClause)
+            ).collect(Collectors.toList()), new HashMap<>());
+
+            if(canBeTrue && !canBeFalse) missingOptions.add(nonPickedOption);
+        }
+
         return missingOptions;
     }
 }
