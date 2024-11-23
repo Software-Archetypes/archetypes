@@ -1,7 +1,6 @@
 package softwarearchetypes.carconfig;
 
 import org.junit.jupiter.api.Test;
-import softwarearchetypes.sat.BooleanLogic;
 import softwarearchetypes.sat.DPLLSolver;
 
 import java.util.List;
@@ -19,7 +18,7 @@ public class CarConfiguringScenarios {
     OptionsRepository optionsRepository = new OptionsRepository();
 
     CarConfigurationDefinitionFacade carConfigDefinitionFacade = new CarConfigurationDefinitionFacade(optionsRepository, new DPLLSolver());
-    CarConfigurationFacade carConfigFacade = new CarConfigurationFacade(optionsRepository, new CarConfigurationProcessRepository(), new BooleanLogic(), new DPLLSolver());
+    CarConfigurationFacade carConfigFacade = new CarConfigurationFacade(optionsRepository, new CarConfigurationProcessRepository(), new DPLLSolver());
 
     @Test
     void userCannotPick_IfProcessIsNotStarted() {

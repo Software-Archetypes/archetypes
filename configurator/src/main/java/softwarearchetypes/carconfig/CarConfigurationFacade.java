@@ -1,6 +1,5 @@
 package softwarearchetypes.carconfig;
 
-import softwarearchetypes.sat.BooleanLogic;
 import softwarearchetypes.sat.Clause;
 import softwarearchetypes.sat.DPLLSolver;
 
@@ -12,13 +11,11 @@ public class CarConfigurationFacade {
 
     private final OptionsRepository optionsRepository;
     private final CarConfigurationProcessRepository configurationProcessRepository;
-    private final BooleanLogic booleanLogic;
     private final DPLLSolver dpllSolver;
 
-    public CarConfigurationFacade(OptionsRepository optionsRepository, CarConfigurationProcessRepository configurationProcessRepository, BooleanLogic booleanLogic, DPLLSolver dpllSolver) {
+    public CarConfigurationFacade(OptionsRepository optionsRepository, CarConfigurationProcessRepository configurationProcessRepository, DPLLSolver dpllSolver) {
         this.optionsRepository = optionsRepository;
         this.configurationProcessRepository = configurationProcessRepository;
-        this.booleanLogic = booleanLogic;
         this.dpllSolver = dpllSolver;
     }
 
@@ -47,7 +44,7 @@ public class CarConfigurationFacade {
     public Set<Option> getMissingOptions(CarConfigProcessId carConfigProcessId) {
         CarConfigurationProcess carConfigurationProcess = configurationProcessRepository.load(carConfigProcessId);
         List<Clause> pickedOptionsWithRules = Stream.concat(carConfigurationProcess.rules().stream()
-                .map(rule -> rule.toClause()).flatMap(Collection::stream),
+                        .map(rule -> rule.toClause()).flatMap(Collection::stream),
                 carConfigurationProcess.pickedOptionsClauses().stream()).collect(Collectors.toList());
 
         Set<Option> missingOptions = new HashSet<>();
@@ -65,7 +62,7 @@ public class CarConfigurationFacade {
                     Stream.of(negativeClause)
             ).collect(Collectors.toList()), new HashMap<>());
 
-            if(canBeTrue && !canBeFalse) missingOptions.add(nonPickedOption);
+            if (canBeTrue && !canBeFalse) missingOptions.add(nonPickedOption);
         }
 
         return missingOptions;
