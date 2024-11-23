@@ -34,15 +34,18 @@ public class CarConfigurationProcess {
         pickedOptions.add(pickedOption);
     }
 
-    public List<Option> availableOptions() {
-        return List.of();
+    public Set<Option> getNonPickedOptions() {
+        return possibleOptions.stream()
+                .filter(option -> pickedOptions.stream()
+                        .noneMatch(picked -> picked.option().equals(option)))
+                .collect(Collectors.toSet());
     }
 
     public List<Clause> pickedOptionsClauses() {
         List<Clause> picked = pickedOptions.stream().map(option -> new Clause(option.option().id())).collect(Collectors.toList());
         return picked;
     }
-
+    
     public List<Rule> rules() {
         return this.rulesInDuty.stream().toList();
     }
