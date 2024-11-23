@@ -134,6 +134,36 @@ public class MissingOptionsToSatisfyConfigurationScenarios {
         assertThat(missingOptions).containsExactly(LEATHER_SEATS);
     }
 
+    @Test
+    void oneOfMustBeTaken_intersectsWithCantBeTakenTogether() {
+        //given
+        carConfigDefinitionFacade.oneOfMustBeTaken(DACIA, List.of(LEATHER_SEATS, BLUETOOTH));
+        carConfigDefinitionFacade.cantBeTakenTogether(DACIA, PARKING_SENSORS, BLUETOOTH);
+        CarConfigProcessId carConfigProcessId = startedCarConfiguration(DACIA);
+        carConfigFacade.pickOption(carConfigProcessId, new PickedOption(PARKING_SENSORS));
+
+        //when
+        Set<Option> missingOptions = carConfigFacade.getMissingOptions(carConfigProcessId);
+
+        //then
+        assertThat(missingOptions).containsExactly(LEATHER_SEATS);
+    }
+
+    @Test
+    void oneOfMustBeTaken_intersectsWithExcludedConditionally() {
+        //given
+        carConfigDefinitionFacade.oneOfMustBeTaken(DACIA, List.of(LEATHER_SEATS, BLUETOOTH));
+        carConfigDefinitionFacade.excludedConditionally(DACIA, PARKING_SENSORS, List.of(BLUETOOTH));
+        CarConfigProcessId carConfigProcessId = startedCarConfiguration(DACIA);
+        carConfigFacade.pickOption(carConfigProcessId, new PickedOption(PARKING_SENSORS));
+
+        //when
+        Set<Option> missingOptions = carConfigFacade.getMissingOptions(carConfigProcessId);
+
+        //then
+        assertThat(missingOptions).containsExactly(LEATHER_SEATS);
+    }
+
     private CarConfigProcessId startedCarConfiguration(CarConfigId forCar) {
         CarConfigProcessId carConfigProcessId = CarConfigProcessId.random();
         carConfigFacade.start(carConfigProcessId, forCar);
