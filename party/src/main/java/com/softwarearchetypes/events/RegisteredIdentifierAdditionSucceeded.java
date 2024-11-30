@@ -1,4 +1,0 @@
-package com.softwarearchetypes.events;
-
-public sealed interface RegisteredIdentifierAdditionSucceeded extends PartyRelatedEvent permits RegisteredIdentifierAdded, RegisteredIdentifierAdditionSkipped {
-}

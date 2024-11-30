@@ -4,11 +4,11 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.softwarearchetypes.common.Result;
-import com.softwarearchetypes.events.AddressAdditionFailed;
-import com.softwarearchetypes.events.AddressDefinitionFailed;
-import com.softwarearchetypes.events.AddressRemovalFailed;
-import com.softwarearchetypes.events.AddressRemovalSkipped;
-import com.softwarearchetypes.events.AddressUpdateSkipped;
+import com.softwarearchetypes.party.events.AddressAdditionFailed;
+import com.softwarearchetypes.party.events.AddressDefinitionFailed;
+import com.softwarearchetypes.party.events.AddressRemovalFailed;
+import com.softwarearchetypes.party.events.AddressRemovalSkipped;
+import com.softwarearchetypes.party.events.AddressUpdateSkipped;
 
 import static com.softwarearchetypes.party.GeoAddressFixture.someGeoAddressFor;
 import static com.softwarearchetypes.party.GeoAddressFixture.someGeoAddressWith;

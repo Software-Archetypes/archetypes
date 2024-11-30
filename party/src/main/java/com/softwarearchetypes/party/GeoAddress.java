@@ -5,14 +5,15 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-import com.softwarearchetypes.events.AddressDefinitionSucceeded;
-import com.softwarearchetypes.events.AddressRemovalSucceeded;
-import com.softwarearchetypes.events.AddressUpdateSucceeded;
-import com.softwarearchetypes.events.GeoAddressDefined;
-import com.softwarearchetypes.events.GeoAddressRemoved;
-import com.softwarearchetypes.events.GeoAddressUpdated;
+import com.softwarearchetypes.party.events.AddressDefinitionSucceeded;
+import com.softwarearchetypes.party.events.AddressRemovalSucceeded;
+import com.softwarearchetypes.party.events.AddressUpdateSucceeded;
+import com.softwarearchetypes.party.events.GeoAddressDefined;
+import com.softwarearchetypes.party.events.GeoAddressRemoved;
+import com.softwarearchetypes.party.events.GeoAddressUpdated;
 
 public final class GeoAddress implements Address {
 
@@ -114,6 +115,16 @@ public final class GeoAddress implements Address {
     @Override
     public int hashCode() {
         return Objects.hash(id, partyId, geoAddressDetails, useTypes);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", GeoAddress.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("partyId=" + partyId)
+                .add("geoAddressDetails=" + geoAddressDetails)
+                .add("useTypes=" + useTypes)
+                .toString();
     }
 
     public record GeoAddressDetails(String name, String street, String building, String flat, String city, ZipCode zip,

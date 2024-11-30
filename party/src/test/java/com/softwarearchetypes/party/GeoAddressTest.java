@@ -6,12 +6,12 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import com.softwarearchetypes.events.AddressDefinitionSucceeded;
-import com.softwarearchetypes.events.AddressRemovalSucceeded;
-import com.softwarearchetypes.events.AddressUpdateSucceeded;
-import com.softwarearchetypes.events.GeoAddressDefined;
-import com.softwarearchetypes.events.GeoAddressRemoved;
-import com.softwarearchetypes.events.GeoAddressUpdated;
+import com.softwarearchetypes.party.events.AddressDefinitionSucceeded;
+import com.softwarearchetypes.party.events.AddressRemovalSucceeded;
+import com.softwarearchetypes.party.events.AddressUpdateSucceeded;
+import com.softwarearchetypes.party.events.GeoAddressDefined;
+import com.softwarearchetypes.party.events.GeoAddressRemoved;
+import com.softwarearchetypes.party.events.GeoAddressUpdated;
 
 import static com.softwarearchetypes.common.CollectionFixture.stringSetFrom;
 import static com.softwarearchetypes.party.GeoAddressFixture.someGeoAddressDetails;

@@ -223,6 +223,63 @@ To avoid confusion, and ensure flexibility and functional scalability of the mod
 
 Beyond the need for unique identification of parties, which we addressed with `PartyId`, there is often a requirement to identify parties using semantic values such as tax numbers, personal identification numbers, passport numbers, or identity card numbers. As noted previously in the section on `PartyId`, these identifiers may not be unique and may not apply to all types of parties. However, addressing this need allows us to enrich the `Party` model with additional types of identifiers and to implement policies or rules that govern their use. Each party can have zero or more associated registered identifiers.
 
+We modeled this using the `RegisteredIdentifier` interface.
+
+```java
+public interface RegisteredIdentifier {
+
+    String type();
+
+    String asString();
+}
+```
+
+Objects whose classes implement this interface are aggregated into a collection represented by `RegisteredIdentifiers`
+
+```java
+public final class RegisteredIdentifiers {
+
+    private final Set<RegisteredIdentifier> values;
+
+    private RegisteredIdentifiers(Set<RegisteredIdentifier> values) {
+        this.values = Optional.ofNullable(values).map(HashSet::new).orElse(new HashSet<>());
+    }
+
+    static RegisteredIdentifiers from(Set<RegisteredIdentifier> values) {
+        return new RegisteredIdentifiers(values);
+    }
+
+    Result<RegisteredIdentityAdditionFailed, RegisteredIdentifierAdditionSucceeded> add(RegisteredIdentifier identifier) {
+        checkNotNull(identifier, "Registered identifier cannot be null");
+        if (!values.contains(identifier)) {
+            values.add(identifier);
+            return Result.success(new RegisteredIdentifierAdded(identifier.type(), identifier.asString()));
+        } else {
+            //for idempotency
+            return Result.success(RegisteredIdentifierAdditionSkipped.dueToDataDuplicationFor(identifier.type(), identifier.asString()));
+        }
+    }
+
+    Result<RegisteredIdentityRemovalFailed, RegisteredIdentifierRemovalSucceeded> remove(RegisteredIdentifier identifier) {
+        checkNotNull(identifier, "Registered identifier cannot be null");
+        if (values.contains(identifier)) {
+            values.remove(identifier);
+            return Result.success(new RegisteredIdentifierRemoved(identifier.type(), identifier.asString()));
+        } else {
+            //for idempotency
+            return Result.success(RegisteredIdentifierRemovalSkipped.dueToMissingIdentifierFor(identifier.type(), identifier.asString()));
+        }
+    }
+
+    //...
+}
+
+```
+
+Similar to the [Addresses](#Addresses) described in the documentation, we also prioritize idempotency in this model. This means that repeatedly adding or removing the same identifiers will not cause errors, and the events returned as a result of such processing will either indicate a successful operation or its omission. However, only events that signal an actual change in the system's state are publishable, namely `RegisteredIdentifierAdded` and `RegisteredIdentifierRemoved`.
+
+Przykładową implementację identyfikatora umieściliśmy w klasie `PersonalIdentificationNumber`. 
+
 ### Roles
 
 A *role archetype* is intended to represent both the general role a given party might have, regardless of the specific use case, and the role it may play in its relationships with other parties. Here, we focus on the former.
@@ -284,7 +341,7 @@ public final class GeoAddress implements Address {
 
 ```
 
-Our experience shows that there are usually rules governing addresses, such as "each party can have exactly one active contact address." Rules and policies may also pertain to the type of entity, e.g., "only companies, not individuals, can have a billing address," or "a party may modify an address no more than once per quarter." These considerations led us to model addresses as a uniquely identifiable collection, which we modify atomically. This means that _the critical section_ is built around all addresses, not each address individually. The group of addresses is also uniquely identifiable—this time, we can use the `PartyId` identifier for this purpose. Policies can be defined for any action as needed.
+Our experience shows that there are usually rules governing addresses, such as "each party can have exactly one active contact address." Rules and policies may also pertain to the type of entity, e.g., "only companies, not individuals, can have a billing address," or "a party may modify an address no more than once per quarter." These considerations led us to model addresses as a uniquely identifiable collection, which we modify atomically. This means that _the critical section_ is built around all addresses, not each address individually. The group of addresses is also uniquely identifiable—this time, we can use the `PartyId` identifier for this purpose. Policies can be defined for any action as needed. An example we proposed is the `AddressDefiningPolicy`, which allows rules to be checked during address definition. 
 
 ```java
 public class Addresses {
@@ -348,11 +405,36 @@ public class Addresses {
         }
     }
 
+    List<PublishedEvent> publishedEvents() {
+        return events.stream().filter(PublishedEvent.class::isInstance).map(PublishedEvent.class::cast).collect(Collectors.toList());
+    }
+
     //...
 }
 ```
 
 Despite the connection between `Addresses` and `Party`, we have observed that their management (i.e., creation, updates, deletion) usually exhibits a different dynamic compared to operations such as authentication or role definition. _Immediate consistency_ rules typically concern either authentication-related aspects or address-related matters. Rarely do we encounter rules that tie these areas together and require atomicity. Therefore, we decided to model `Party` and `Addresses` as separate aggregates. This opens up a potential opportunity to create a dedicated module for managing the address book, and consequently, perhaps even a microservice.
+
+The model provides multiple events that inform us about the outcomes of executing specific actions, such as adding an address, updating it, or deleting it. The model ensures idempotency of operations. This means that multiple updates to an address with the same data, or repeated attempts to add or delete it, will not result in errors—the model interprets such situations as valid. This approach simplifies the model's usage by the infrastructure layer (such as REST controllers), which will not need to handle error mapping to response codes on its own.
+
+To make the model as clear as possible, method signatures return a monadic `Result` type, which, in case of an error, contains information about its source, and in case of success, returns a valid business object. This object, in particular, includes the aforementioned events. Examples of such events may include:
+
+//KOD EVENTÓW
+
+Not every event is worth publishing. Broadcasting the fact of identifying a duplicate request to update an already updated object would only introduce informational noise into the communication channel used for event distribution. Therefore, only a subset of events extends the marker interface `PublishedEvent`.
+
+To ensure that the model protects the address collection from violating consistency rules, access to it will be secured via the `AddressesRepository` interface.
+
+```java
+interface AddressesRepository {
+
+    Optional<Addresses> findFor(PartyId partyId);
+
+    void save(Addresses addresses);
+}
+```
+
+The functions described above, namely interaction with the address collection model, the repository, and event distribution, are orchestrated within the `AddressesFacade`, which serves as the entry point to the model.
 
 ### Authentication
 

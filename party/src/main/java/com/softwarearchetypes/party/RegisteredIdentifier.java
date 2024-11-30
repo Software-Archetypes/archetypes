@@ -1,6 +1,6 @@
 package com.softwarearchetypes.party;
 
-//TODO: seal the interface
+//can be sealed
 public interface RegisteredIdentifier {
 
     String type();

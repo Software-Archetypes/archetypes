@@ -1,8 +1,8 @@
 package com.softwarearchetypes.party;
 
-import com.softwarearchetypes.events.AddressDefinitionSucceeded;
-import com.softwarearchetypes.events.AddressRemovalSucceeded;
-import com.softwarearchetypes.events.AddressUpdateSucceeded;
+import com.softwarearchetypes.party.events.AddressDefinitionSucceeded;
+import com.softwarearchetypes.party.events.AddressRemovalSucceeded;
+import com.softwarearchetypes.party.events.AddressUpdateSucceeded;
 
 interface AddressLifecycle {
 

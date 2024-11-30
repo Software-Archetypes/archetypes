@@ -1,7 +1,5 @@
 package com.softwarearchetypes.party;
 
-import org.apache.commons.lang3.RandomStringUtils;
-
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 
 class PersonalDataFixture {
@@ -12,5 +10,9 @@ class PersonalDataFixture {
 
     static String someLastName() {
         return randomAlphabetic(10);
+    }
+
+    static PersonalData somePersonalData() {
+        return PersonalData.from(someFirstName(), someLastName());
     }
 }

@@ -6,16 +6,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.softwarearchetypes.common.Result;
 import com.softwarearchetypes.common.Version;
-import com.softwarearchetypes.events.AddressAdditionFailed;
-import com.softwarearchetypes.events.AddressDefinitionFailed;
-import com.softwarearchetypes.events.AddressRelatedEvent;
-import com.softwarearchetypes.events.AddressRemovalFailed;
-import com.softwarearchetypes.events.AddressRemovalSkipped;
-import com.softwarearchetypes.events.AddressUpdateFailed;
-import com.softwarearchetypes.events.AddressUpdateSkipped;
+import com.softwarearchetypes.party.events.AddressAdditionFailed;
+import com.softwarearchetypes.party.events.AddressDefinitionFailed;
+import com.softwarearchetypes.party.events.AddressRelatedEvent;
+import com.softwarearchetypes.party.events.AddressRemovalFailed;
+import com.softwarearchetypes.party.events.AddressRemovalSkipped;
+import com.softwarearchetypes.party.events.AddressUpdateFailed;
+import com.softwarearchetypes.party.events.AddressUpdateSkipped;
+import com.softwarearchetypes.party.events.PublishedEvent;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -101,5 +103,9 @@ public class Addresses {
 
     private static Map<AddressId, Address> mapFrom(Set<Address> addresses) {
         return Optional.ofNullable(addresses).orElse(new HashSet<>()).stream().collect(toMap(Address::id, it -> it));
+    }
+
+    List<PublishedEvent> publishedEvents() {
+        return events.stream().filter(PublishedEvent.class::isInstance).map(PublishedEvent.class::cast).collect(Collectors.toList());
     }
 }
