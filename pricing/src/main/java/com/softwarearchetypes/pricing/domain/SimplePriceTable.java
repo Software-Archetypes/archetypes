@@ -30,25 +30,15 @@ public class SimplePriceTable implements PriceTable {
         return Collections.unmodifiableList(rows);
     }
 
-    private static class SimplePriceTableRow implements PriceTableRow {
+    private record SimplePriceTableRow(BigDecimal value, List<BigDecimal> costs) implements PriceTableRow {
 
-        private final BigDecimal value;
-        private final List<BigDecimal> costs;
-
-        public SimplePriceTableRow(BigDecimal value, List<BigDecimal> costs) {
+        private SimplePriceTableRow {
             Objects.requireNonNull(value, "value must not be null");
             Objects.requireNonNull(costs, "costs must not be null");
-            this.value = value;
-            this.costs = costs;
         }
 
         @Override
-        public BigDecimal getValue() {
-            return value;
-        }
-
-        @Override
-        public List<BigDecimal> getCosts() {
+        public List<BigDecimal> costs() {
             return Collections.unmodifiableList(costs);
         }
     }

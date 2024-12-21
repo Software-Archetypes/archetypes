@@ -14,14 +14,14 @@ import java.util.Optional;
 
 public class Pricing {
 
-    private final String name;
+    private final String name; //For now name is optional
     private final String formula;
     private final CurrencyUnit currency;
     private final OffsetDateTime validFrom;
-    private final OffsetDateTime validTo;
+    private OffsetDateTime validTo;
 
     public Pricing(
-            String name, //For now name is optional
+            String name,
             String formula,
             CurrencyUnit currency,
             OffsetDateTime validFrom,
@@ -31,8 +31,13 @@ public class Pricing {
             throw new IllegalArgumentException("Formula can not be empty");
         }
 
+        if (!validTo.isAfter(validFrom)) {
+            throw new IllegalArgumentException("Valid from can not be after valid to");
+        }
+
         Objects.requireNonNull(currency, "Currency can not be null");
         Objects.requireNonNull(validFrom, "Valid from can not be null");
+
 
         this.name = name;
         this.formula = formula;
@@ -52,6 +57,18 @@ public class Pricing {
         } catch (JsonLogicException e) {
             return Result.failure(new PriceCalculationFailure(e));
         }
+    }
+
+    public void disableAtDate(OffsetDateTime disableDate) {
+        if (!disableDate.isAfter(validFrom)) {
+            throw new IllegalArgumentException("Disable date must be after valid from");
+        }
+
+        this.validTo = disableDate;
+    }
+
+    public boolean isActiveAt(OffsetDateTime checkedDate) {
+        return checkedDate.isAfter(validFrom) && checkedDate.isBefore(validTo);
     }
 
     public Optional<String> getName() {

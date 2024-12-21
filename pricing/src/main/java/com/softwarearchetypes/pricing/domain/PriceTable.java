@@ -15,8 +15,8 @@ public interface PriceTable {
 
 
     interface PriceTableRow {
-        BigDecimal getValue();
+        BigDecimal value();
 
-        List<BigDecimal> getCosts();
+        List<BigDecimal> costs();
     }
 }

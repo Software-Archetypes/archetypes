@@ -1,18 +1,25 @@
 package com.softwarearchetypes.pricing.domain;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import org.springframework.util.StringUtils;
+
+import java.util.*;
 
 public class RuleContext {
 
-    private final String name;
+    private final String name; //For now name is optional
     private final Map<String, String> context;
 
+    public RuleContext() {
+        this.name = null;
+        this.context = new HashMap<>();
+    }
+
     public RuleContext(String name) {
-        this.name = name; //For now name is optional
-        context = new HashMap<>();
+        if (!StringUtils.hasText(name)) {
+            throw new IllegalArgumentException("If name should be empty please use dedicated constructor");
+        }
+        this.name = name;
+        this.context = new HashMap<>();
     }
 
     public void addVariable(String name, Object value) {
@@ -24,5 +31,9 @@ public class RuleContext {
 
     public Map<String, String> getContextVariables() {
         return Collections.unmodifiableMap(context);
+    }
+
+    public Optional<String> getName() {
+        return Optional.ofNullable(name);
     }
 }
