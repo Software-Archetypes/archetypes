@@ -6,4 +6,8 @@ public record OrganizationName(String value) {
         return new OrganizationName(value);
     }
 
+    String asString() {
+        return value;
+    }
+
 }

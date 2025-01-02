@@ -20,4 +20,8 @@ final class RoleFixture {
         return IntStream.range(0, size).mapToObj(it -> someRole()).collect(toSet());
     }
 
+    static Set<String> stringSetFrom(Set<Role> roles) {
+        return roles.stream().map(Role::asString).collect(toSet());
+    }
+
 }

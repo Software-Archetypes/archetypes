@@ -2,6 +2,7 @@ package com.softwarearchetypes.party;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 class PartyFixture {
 
@@ -22,6 +23,24 @@ class PartyFixture {
             return (PartyAbstractTestDataBuilder<T>) testDataBuilder.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static class FixablePartyIdSupplier implements Supplier<PartyId> {
+
+        private PartyId fixedValue;
+
+        public void clear() {
+            fixedValue = null;
+        }
+
+        public void fixPartyIdTo(PartyId value) {
+            fixedValue = value;
+        }
+
+        @Override
+        public PartyId get() {
+            return fixedValue != null ? fixedValue : PartyId.random();
         }
     }
 

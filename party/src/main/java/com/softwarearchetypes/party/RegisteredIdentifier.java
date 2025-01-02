@@ -1,6 +1,6 @@
 package com.softwarearchetypes.party;
 
-//can be sealed
+//can be enhanced with validity period
 public interface RegisteredIdentifier {
 
     String type();
