@@ -443,3 +443,166 @@ TBD
 ### Further improvements
 
 Everything you've seen so far is only a glimpse of what the Party archetype can offer. Soon, we'll explore more about inter-party relationships, capabilities, and assets.
+
+# Party relationship
+
+## Problem statement
+
+The previous model primarily focused on how to collect and structure information about individuals and organizations. Most of the model's behavior revolves around CRUD operations (Create, Read, Update, Delete). Within these operations, we identified areas where policies could be added (depending on requirements) and even where complex business processes, such as registration, could be built.
+
+In reality, modeling parties as standalone entities is rarely sufficient. Typically, parties stored in a system are interconnected through various relationships, and reflecting these relationships is crucial to effectively manage and support complex business processes. In many systems, modeling parties as standalone entities falls short of capturing the complexity of real-world interactions. Relationships between parties are not merely connections; they carry rich semantics and play a critical role in business logic, authorization, and compliance. Without a robust mechanism for managing these relationships, organizations face several challenges.
+
+### Level 1 - semantic meaning of relationships
+
+Every relationship must have a clear meaning. For instance, is the connection between two parties that of a "Supplier-Customer," "Employer-Employee," or "Parent-Child"? Misinterpreting or failing to define these semantics leads to confusion and unreliable system behavior. In a healthcare system for example, a "Doctor-Patient" relationship is distinct from a "Doctor-Consultant" relationship. The former involves direct care and medical decisions, while the latter might involve second opinions or advisory roles. Failing to distinguish these relationships could result in errors, such as granting the wrong party access to sensitive patient data.
+
+### Level 2 - symmetry vs asymmetry
+
+Party relationships can be symmetric (mutual) or asymmetric (directional). While symmetric relationships are simpler, asymmetric ones are more concrete, as they require explicit role definitions and directionality. 
+
+Symmetry implies mutuality, requiring consistent status for both parties. For example, in a "Friend-Friend" relationship, the system must ensure reciprocity, such as reflecting changes like blocking or removing correctly for both sides.  Symmetric relationships are more abstract and less specific, which can limit their usefulness in scenarios where distinct roles or responsibilities are critical.
+
+Asymmetric relationships on the other hand need distinct roles and clear directionality. For example, in a "Manager-Subordinate" relationship, the system must define the manager's authority and scope (e.g., teams, projects).
+
+In reality, most relationships are asymmetric, where each party plays a distinct role. For example, a person may be a "Manager" in one relationship and a "Subordinate" in another. Capturing and managing these roles accurately is essential for proper functionality.
+
+### Level 3 - roles in relationships
+
+One critical aspect of relationship modeling is that a party can take on different roles depending on the context of each relationship. This flexibility reflects real-world scenarios where individuals or organizations often operate in varying capacities across multiple interactions.
+
+In a corporate setting, an employee might be:
+- A "Manager" in a relationship with their subordinates.
+- A "Team Member" in a project-based team relationship.
+- A "Mentor" in a mentorship program.
+
+In an organizational context, a company might simultaneously be:
+- A "Supplier" to one business partner.
+- A "Customer" to another.
+- A "Partner" in a strategic alliance.
+
+It is important to capture these roles to gain the ability to assign specific roles ensures that the system accurately represents the responsibilities, permissions, and expectations associated with each relationship. Different roles may also have different levels of authority or access within the system. For instance, a "Manager" may have permission to approve tasks, while a "Team Member" may only view or execute them. Modeling roles dynamically allows for scenarios where the same party operates in multiple capacities without redundancy or conflict.
+
+If roles are not clearly tied to specific relationships, the system risks applying incorrect permissions or responsibilities universally to a party, which can lead to errors in workflows, compliance issues, or security breaches. By allowing parties to take on different roles in different relationships, the system can better reflect real-world complexities and support nuanced business processes.
+
+### Level 4 - on-behalf-of scenarios
+
+Relationships often involve acting on behalf of another party. For example, in the e-mobility domain, a Charging Point Operator can log into the system on behalf of the station owner (Local Charge Provider) to assist with configuring the station. This approach ensures that the CPO has exactly the same view and capabilities as the station owner, making it much easier to manage access rights and permissions. This type of delegation requires precise modeling of roles and permissions.
+
+### Level 5 - type constraints on relationships
+
+Some relationships may need to be restricted based on the type of party. For example, only organizations may be suppliers, as a business policy prohibits contracting with individuals as vendors. For example, in a procurement system, a rule might enforce that "Supplier-Customer" relationships can only exist between companies, rejecting any attempt to register an individual as a supplier. Without this restriction, contracts could be improperly established, leading to compliance or legal issues.
+
+### Level 6 - enforcement of business rules
+
+Business rules play a critical role in defining and restricting the nature and scope of party relationships. By enforcing these rules, systems can ensure compliance with organizational policies, maintain operational efficiency, and support scalability. Modeling these constraints effectively can be challenging but is necessary for real-world scenarios. Business rules might relate to:
+- Quantitative Constraints - Rules that limit the number of specific relationships a party can have. For example, a company may enforce a rule that it can have no more than 10 active suppliers at any given time, ensuring manageability and focus on strategic partnerships. In an HR system, a manager might be restricted to supervising no more than 12 direct reports to maintain a practical workload and oversight capacity.
+- Qualitative Constraints - Rules that define which types of parties can engage in specific relationships. For example, an organization might prohibit individuals from being suppliers, restricting this role to registered businesses. This ensures compliance with legal and procurement policies.
+- Temporal Rules - Constraints based on the time period of the relationship. A contract might stipulate that a supplier relationship cannot be terminated before a 6-month minimum term or seasonal employees can only have an active relationship during specific months.
+
+### What's next?
+The above demonstrates that managing relationships among users, clients, partners, and various types of entities can be a very complex issue, where entities can assume multiple roles across multiple relationships forming big graphs of interconnections. 
+
+## Possible solutions
+
+While searching for the appropriate model, we identified key questions that will serve as our architectural drivers:
+1. Do we need to ensure immediate consistency of the business rules concerning relationships? Is ensuring immediate consistency even feasible? What would be the consequences of relaxing consistency?
+2. Should any changes to a Party affect its relationships? For example: can we add relationships to a Party that has been blocked?
+3. Should any changes in relationships affect a Party? For instance: can we deactivate a Party that serves as a "Manager" for 10 subordinates, or must I first dissolve those relationships?
+4. How should relationships be stored? Should they be part of the Party model or constitute a separate entity, similar to addresses?
+
+Additionally, we must remember the two dimensions of the model. Relationships allow us not only to manage the rules of associations between parties (i.e., who can establish a relationship with whom, what types of relationships are permissible, and how many such relationships are possible) but also to answer key questions from the perspective of business process rules (e.g., what is the workload of a manager, which partner company operates in Warsaw and can repair faucets) and authorization (e.g., what role a person plays in relation to a specific company or who is the payer for a given customer's orders).
+
+### Analysis
+In terms of consistency we might distinguish two types of business rules - immediately consistent, and eventually consistent. Let's consider following set of constraints:
+- quantitative constraint, like _"a manager can have no more than 10 subordinates"_
+- qualitative constraint, like _"MANAGER OF relationship can be only assigned between persons with employee role"
+
+We could keep outgoing relations within `Party` model:
+
+```java
+import com.softwarearchetypes.party.PartyRelationship;
+
+class Party {
+
+    private final PartyId partyId;
+    private Set<PartyRelationship> relationships;
+
+    void addRelationship(PartyRelationship partyRelationship) {
+        relationships.add(partyRelationship);
+    }
+    //...
+}
+
+class PartyFacade {
+
+    //...
+    
+    void addRelationship(PartyId fromId, Role fromPartyRole, PartyId toId, Role toPartyRole, RelationshipName name) {
+        Party fromParty = partyRepository.findBy(fromId); //with all relationships
+        Party toParty = partyRepository.findBy(fromId); //with all relationships
+
+        if (canCreateRelationshipFor(fromParty, fromPartyRole, toParty, toPartyRole, relationshipName)) {
+            fromParty.addRelationship(new PartyRelationship(fromId, fromPartyRole, toId, toPartyRole, relationshipName));
+        }
+        partyRepository.save(fromParty);
+    }
+    
+    //...
+
+}
+```
+In this case:
+- All relationships are directly available within the `Party` model, making it easier to retrieve, manage, and update them in one place. Fetching all relationships for a given party requires a single query or operation.
+- Relationships are inherently tied to the party they belong to, aligning closely with the domain model.
+For example, a "Customer" entity naturally holds all its relationships, such as purchases, suppliers, or representatives.
+- For smaller datasets or systems with limited relationships, embedding relationships directly simplifies the architecture and avoids the need for a separate relationship table.
+- Operations focused on a single party’s relationships (e.g., viewing a customer’s suppliers) might be faster, as data is already localized within the Party model.
+- Keeping relationships tied to a party ensures context is preserved and reduces the risk of orphaned or unrelated relationships.
+- Embedding relationships in the `Party` model eliminates the need for additional infrastructure, such as separate tables or services, simplifying the initial development process.
+
+On the other hand, we might identify following issues:
+- For quantitative constraints large numbers of relationships can overload the Party model, leading to performance degradation and inefficiency in handling high-volume entities.
+- The Party model becomes a "God Object," tightly coupled with relationship logic, making it harder to maintain and evolve.
+- Retrieving or filtering relationships can become slow and resource-intensive, especially for complex queries or large datasets.
+- Combining entity data and relationship management in one model reduces separation of concerns, complicating testing, maintenance, and integration.
+- For qualitative constraints (concerning roles, types, existing relationships for both upstream and downstream party), enforcing business rules or extending the relationship model for new scenarios becomes harder when all logic is embedded in the `Party` model.
+- The centralized object model is supposed to support atomicity (especially in case of concurrent access). Qualitative constraints that are based on the details of the other side of relationship might need the second object to be locked), which might effectively degrade system's availability. 
+
+We may conclude that this option would work well for:
+- Systems with a small or manageable number of relationships.
+- Scenarios where the primary focus is on individual parties and their direct connections.
+- Environments where simplicity and fast development outweigh concerns about scalability or modularity.
+
+## Solution
+
+The bigger the scale gets, the less manageable and scalable the model becomes. Is it possible, then, to loosen the consistency requirements? To answer this question, we should ask what would be the consequences of keeping relationships separately? What would happen if a manager have 11 subordinates assigned? What would happen if "manager of" relation is incorrectly assigned to a non-employee (because an employee became a partner "in the meantime")? Maybe these situations are rare enough that breaking the business rule has very little impact and is acceptable. Maybe asynchronous reconciliation would do the job. Our experience shows that scalability, flexibility and availability are usually way more important than strong consistency, especially, when managing party metadata and relations are processes that are separated in time by design.
+
+This is why we propose the following solution.
+
+![PartyRelationship](diagrams/party-relationship-model.puml)
+
+The *Party relationship* archetype complements the *Party* archetype, providing a model to represent different types of relationships between entities.
+
+## Features of the Party Relationship Archetype
+
+1. *Role-Based Relationships supporting symmetry and asymmetry* - the Party Relationship Archetype distinct roles for each party in a relationship, enabling modeling of asymmetric interactions (e.g., "Manager-Employee" or "Supplier-Customer"). It is possible to have both mutual (e.g., "Friend-Friend") and directional relationships (e.g., "Parent-Child"), offering flexibility to represent real-world scenarios.
+
+2. *Temporal Context* - the archetype allows relationships to include start and end dates, supporting the management of active, expired, and historical relationships.
+
+3. *Scalability* - the solution accommodates complex networks of relationships with potentially large datasets, enabling scalability for hierarchical, many-to-many, and multi-party scenarios.
+
+4. *Dynamic and Flexible Typing* - it supports a wide variety of relationship types, with the ability to extend and adapt to evolving business needs without significant structural changes.
+
+5. *Policy and Rule Enforcement* - the Party Relationship Archetype integrates business rules and constraints, such as restricting certain relationship types or limiting the number of active relationships for a given party. Rules can be implemented via policies (aka strategy patern) or via integration with rule engine.
+
+6. *Delegation and Representation* - the model supports cases, such as identifying a user’s role within the system or determining which entities they are associated with, particularly for authentication or access control, and for "on-behalf-of" scenarios.
+
+## How it works?
+
+### Party Relationship
+
+TBD
+
+### Party Role
+
+TBD
