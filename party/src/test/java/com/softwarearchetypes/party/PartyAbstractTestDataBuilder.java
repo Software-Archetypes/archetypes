@@ -22,8 +22,18 @@ sealed abstract class PartyAbstractTestDataBuilder<T extends Party> permits Comp
         return this;
     }
 
+    PartyAbstractTestDataBuilder<T> withRoleSetOf(Set<Role> roleSet) {
+        roles.addAll(roleSet);
+        return this;
+    }
+
     PartyAbstractTestDataBuilder<T> with(RegisteredIdentifier identifier) {
         registeredIdentifiers.add(identifier);
+        return this;
+    }
+
+    PartyAbstractTestDataBuilder<T> withRegisteredIdentifierSetOf(Set<RegisteredIdentifier> identifierSet) {
+        registeredIdentifiers.addAll(identifierSet);
         return this;
     }
 

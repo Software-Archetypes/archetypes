@@ -23,8 +23,6 @@ public final class Person extends Party {
         this.personalData = personalData;
     }
 
-    //TODO: metody kreacyjne - jedna do odtwarzania stanu, druga do tworzenia zasobu wraz z eventem + to samo dla ORG
-
     public Result<PersonalDataUpdateFailed, Person> update(PersonalData personalData) {
         if (!this.personalData.equals(personalData)) {
             this.personalData = personalData;

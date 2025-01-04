@@ -10,6 +10,10 @@ class PartyFixture {
         return new PersonTestDataBuilder();
     }
 
+    static CompanyTestDataBuilder someCompany() {
+        return new CompanyTestDataBuilder();
+    }
+
     @SuppressWarnings("unchecked")
     static <T extends Party> PartyAbstractTestDataBuilder<T> somePartyOfType(Class<T> clazz) {
         try {

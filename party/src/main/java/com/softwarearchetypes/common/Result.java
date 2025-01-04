@@ -1,6 +1,7 @@
 package com.softwarearchetypes.common;
 
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -120,6 +121,14 @@ public sealed interface Result<F, S> permits Result.Success, Result.Failure {
             return rightMapper.apply(getSuccess());
         } else {
             return leftMapper.apply(getFailure());
+        }
+    }
+
+    default <FAILURE, SUCCESS> Result<FAILURE, SUCCESS> combine(Result<F, S> secondResult, BiFunction<F, F, FAILURE> failureCombiner, BiFunction<S, S, SUCCESS> successCombiner) {
+        if (success() && secondResult.success()) {
+            return new Success<>(successCombiner.apply(getSuccess(), secondResult.getSuccess()));
+        } else {
+            return new Failure<>(failureCombiner.apply(failure() ? getFailure() : null, secondResult.failure() ? secondResult.getFailure() : null));
         }
     }
 

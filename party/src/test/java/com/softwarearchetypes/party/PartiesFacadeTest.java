@@ -2,9 +2,6 @@ package com.softwarearchetypes.party;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +14,6 @@ import com.softwarearchetypes.party.events.OrganizationUnitRegistered;
 import com.softwarearchetypes.party.events.PartyRelatedFailureEvent;
 import com.softwarearchetypes.party.events.PersonRegistered;
 import com.softwarearchetypes.party.events.PersonalDataUpdated;
-import com.softwarearchetypes.party.events.PublishedEvent;
 import com.softwarearchetypes.party.events.RegisteredIdentifierAdded;
 import com.softwarearchetypes.party.events.RegisteredIdentifierRemoved;
 import com.softwarearchetypes.party.events.RoleAdded;
@@ -27,7 +23,6 @@ import static com.softwarearchetypes.common.CollectionFixture.copyAndAdd;
 import static com.softwarearchetypes.party.OrganizationNameFixture.someOrganizationName;
 import static com.softwarearchetypes.party.PartyFixture.somePerson;
 import static com.softwarearchetypes.party.PersonalDataFixture.somePersonalData;
-import static com.softwarearchetypes.party.RegisteredIdentifierFixture.someIdentifierSetOfSize;
 import static com.softwarearchetypes.party.RegisteredIdentifierFixture.someRegisteredIdentifier;
 import static com.softwarearchetypes.party.RoleFixture.someRole;
 import static com.softwarearchetypes.party.RoleFixture.someRoleSetOfSize;
@@ -42,6 +37,7 @@ class PartiesFacadeTest {
     private final InMemoryPartyRepository repository = new InMemoryPartyRepository();
     private final FixablePartyIdSupplier partyIdSupplier = new FixablePartyIdSupplier();
     private final PartiesFacade partiesFacade = new PartiesFacade(repository, eventPublisher, partyIdSupplier);
+    private final PartyTestSupport testSupport = new PartyTestSupport(repository);
     private final PartiesQueries partiesQueries = new PartiesQueries(repository);
 
     private final PartiesTestEventListener testEventListener = new PartiesTestEventListener(eventPublisher);
@@ -181,7 +177,7 @@ class PartiesFacadeTest {
     @Test
     void canAddRoleToParty() {
         //given
-        Party party = thereIsSomeParty();
+        Party party = testSupport.thereIsSomePerson();
         Role newRole = someRole();
 
         //when
@@ -196,7 +192,7 @@ class PartiesFacadeTest {
     @Test
     void roleAddedEventIsEmittedWhenOperationSucceeds() {
         //given
-        Party party = thereIsSomeParty();
+        Party party = testSupport.thereIsSomePerson();
         Role newRole = someRole();
 
         //and
@@ -213,7 +209,8 @@ class PartiesFacadeTest {
     void canRemoveRoleFromParty() {
         //given
         Role roleToBeRemoved = someRole();
-        Party party = thereIs(somePerson().withRandomPartyId().with(roleToBeRemoved).build());
+        Party party1 = somePerson().withRandomPartyId().with(roleToBeRemoved).build();
+        Party party = testSupport.thereIs(party1);
 
         //when
         partiesFacade.remove(party.id(), roleToBeRemoved);
@@ -228,7 +225,8 @@ class PartiesFacadeTest {
     void roleRemovedEventIsEmittedWhenOperationSucceeds() {
         //given
         Role roleToBeRemoved = someRole();
-        Party party = thereIs(somePerson().withRandomPartyId().with(roleToBeRemoved).build());
+        Party party1 = somePerson().withRandomPartyId().with(roleToBeRemoved).build();
+        Party party = testSupport.thereIs(party1);
 
         //and
         RoleRemoved expectedEvent = new RoleRemoved(party.id().asString(), roleToBeRemoved.asString());
@@ -243,7 +241,7 @@ class PartiesFacadeTest {
     @Test
     void canAddRegisteredIdentifierToParty() {
         //given
-        Party party = thereIsSomeParty();
+        Party party = testSupport.thereIsSomePerson();
         RegisteredIdentifier newRegisteredIdentifier = someRegisteredIdentifier();
 
         //when
@@ -258,7 +256,7 @@ class PartiesFacadeTest {
     @Test
     void registeredIdentifierAddedEventIsEmittedWhenOperationSucceeds() {
         //given
-        Party party = thereIsSomeParty();
+        Party party = testSupport.thereIsSomePerson();
         RegisteredIdentifier newRegisteredIdentifier = someRegisteredIdentifier();
 
         //and
@@ -276,7 +274,8 @@ class PartiesFacadeTest {
     void canRemoveRegisteredIdentifierFromParty() {
         //given
         RegisteredIdentifier idToBeRemoved = someRegisteredIdentifier();
-        Party party = thereIs(somePerson().withRandomPartyId().with(idToBeRemoved).build());
+        Party party1 = somePerson().withRandomPartyId().with(idToBeRemoved).build();
+        Party party = testSupport.thereIs(party1);
 
         //when
         partiesFacade.remove(party.id(), idToBeRemoved);
@@ -291,7 +290,8 @@ class PartiesFacadeTest {
     void registeredIdentifierRemovedEventIsEmittedWhenRegisteredIdentifierIsRemovedFromParty() {
         //given
         RegisteredIdentifier idToBeRemoved = someRegisteredIdentifier();
-        Party party = thereIs(somePerson().withRandomPartyId().with(idToBeRemoved).build());
+        Party party1 = somePerson().withRandomPartyId().with(idToBeRemoved).build();
+        Party party = testSupport.thereIs(party1);
 
         //and
         RegisteredIdentifierRemoved expectedEvent = new RegisteredIdentifierRemoved(party.id().asString(), idToBeRemoved.type(), idToBeRemoved.asString());
@@ -306,7 +306,7 @@ class PartiesFacadeTest {
     @Test
     void canUpdatePersonalDataOfExistingPerson() {
         //given
-        Person party = thereIsSomePerson();
+        Person party = testSupport.thereIsSomePerson();
         PersonalData newPersonalData = somePersonalData();
 
         //when
@@ -321,7 +321,7 @@ class PartiesFacadeTest {
     @Test
     void cannotUpdateOrganizationNameOfExistingPerson() {
         //given
-        Person party = thereIsSomePerson();
+        Person party = testSupport.thereIsSomePerson();
         OrganizationName newOrganizationName = someOrganizationName();
 
         //and
@@ -337,7 +337,7 @@ class PartiesFacadeTest {
     @Test
     void cannotUpdatePersonalDataOfOrganization() {
         //given
-        Party party = thereIsSomeOrganization();
+        Party party = testSupport.thereIsSomeOrganization();
         PersonalData newPersonalData = somePersonalData();
 
         //and
@@ -353,7 +353,7 @@ class PartiesFacadeTest {
     @Test
     void personalDataUpdatedEventIsEmittedWhenOperationSucceeds() {
         //given
-        Person party = thereIsSomePerson();
+        Person party = testSupport.thereIsSomePerson();
         PersonalData newPersonalData = somePersonalData();
 
         //and
@@ -366,42 +366,4 @@ class PartiesFacadeTest {
         assertTrue(testEventListener.thereIsAnEventEqualTo(expectedEvent));
     }
 
-    private Party thereIsSomeParty() {
-        return thereIsSomePerson();
-    }
-
-    private Person thereIsSomePerson() {
-        return partiesFacade.registerPersonFor(somePersonalData(), someRoleSetOfSize(5), someIdentifierSetOfSize(5)).getSuccess();
-    }
-
-    private Organization thereIsSomeOrganization() {
-        return partiesFacade.registerCompanyFor(someOrganizationName(), someRoleSetOfSize(5), someIdentifierSetOfSize(5)).getSuccess();
-    }
-
-    private Party thereIs(Party party) {
-        repository.save(party);
-        return party;
-    }
-
-    static class PartiesTestEventListener implements InMemoryEventsPublisher.InMemoryEventObserver {
-
-        private BlockingQueue<PublishedEvent> events = new LinkedBlockingQueue<>();
-
-        PartiesTestEventListener(InMemoryEventsPublisher eventsPublisher) {
-            eventsPublisher.register(this);
-        }
-
-        @Override
-        public void handle(PublishedEvent event) {
-            events.add(event);
-        }
-
-        Optional<PublishedEvent> findMatching(Predicate<PublishedEvent> predicate) {
-            return events.stream().filter(predicate).findFirst();
-        }
-
-        boolean thereIsAnEventEqualTo(PublishedEvent expectedEvent) {
-            return findMatching(it -> it.equals(expectedEvent)).isPresent();
-        }
-    }
 }
