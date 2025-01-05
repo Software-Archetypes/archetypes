@@ -173,11 +173,11 @@ The essence of the problem lies in the role-centric model. Both the attempt to e
 
 Then we get a structure similar to this one:
 
-![Party](diagrams/party-basic-model.puml)
+![Party](diagrams/party-basic-model.png)
 
 Now we can enrich it with all kinds of data necessary in our business, such as address or authentication data as well as behavior - like authentication strategies:
 
-![Party](diagrams/party-basic-model.puml)
+![Party](diagrams/party-basic-model.png)
 
 In this way, we can model any entity of any type, dynamically change its roles, and supplement it with policies and behaviors specific to the use case.
 
@@ -201,7 +201,120 @@ The *Party* archetype is a reusable business model used to represent different t
 
 ### Party
 
-TBD
+`Party`, as a central part of the model, aggregates data and functions common to all types of parties. It includes the management of [roles](#Roles), [registered identifiers](#RegisteredIdentifier), and is capable of handling other types of metadata.
+
+```java
+public sealed abstract class Party permits Organization, Person {
+
+    private final PartyId partyId;
+    private final Set<Role> roles;
+    private final Set<RegisteredIdentifier> registeredIdentifiers;
+    private final List<PartyRelatedEvent> events = new LinkedList<>();
+    private final Version version;
+
+    Party(PartyId partyId, Set<Role> roles, Set<RegisteredIdentifier> registeredIdentifiers, Version version) {
+        checkArgument(partyId != null, "Party Id cannot be null");
+        checkArgument(roles != null, "Roles cannot be null");
+        checkArgument(registeredIdentifiers != null, "Registered identifiers cannot be null");
+        checkArgument(version != null, "Version cannot be null");
+        this.partyId = partyId;
+        this.roles = new HashSet<>(roles);
+        this.registeredIdentifiers = new HashSet<>(registeredIdentifiers);
+        this.version = version;
+    }
+
+    public Result<RoleAdditionFailed, Party> add(Role role) {
+        //...
+    }
+
+    Result<RoleRemovalFailed, Party> remove(Role role) {
+        //...
+    }
+
+    public Result<RegisteredIdentifierAdditionFailed, Party> add(RegisteredIdentifier identifier) {
+        //...
+    }
+
+    public Result<RegisteredIdentifierRemovalFailed, Party> remove(RegisteredIdentifier identifier) {
+        //...
+    }
+    
+    //...
+}
+```
+
+Each specific type of party has to extend the base class. It gives us the ability to extend these types with additional metadata (like personal data) and appropriate behavior. We can present a `Person` as an example.
+
+```java
+public final class Person extends Party {
+
+    private PersonalData personalData;
+
+    Person(PartyId id, PersonalData personalData, Set<Role> roles, Set<RegisteredIdentifier> registeredIdentifiers, Version version) {
+        super(id, roles, registeredIdentifiers, version);
+        checkArgument(personalData != null, "Personal data cannot be null");
+        this.personalData = personalData;
+    }
+
+    public Result<PersonalDataUpdateFailed, Person> update(PersonalData personalData) {
+        if (!this.personalData.equals(personalData)) {
+            this.personalData = personalData;
+            register(new PersonalDataUpdated(id().asString(), personalData.firstName(), personalData.lastName()));
+        } else {
+            register(PersonalDataUpdateSkipped.dueToNoChangeIdentifiedFor(id().asString(), personalData.firstName(), personalData.lastName()));
+        }
+        return Result.success(this);
+    }
+
+    //...
+}
+```
+
+Parties are managed by `PartiesFacade` that is a service providing CRUD-like operations for registering parties of different types and manipulating their metadata.
+
+```java
+class PartiesFacade {
+
+    //...
+
+    Result<PartyRelatedFailureEvent, Person> registerPersonFor(PersonalData personalData, Set<Role> roles, Set<RegisteredIdentifier> registeredIdentifiers) {
+        //...
+    }
+
+    Result<PartyRelatedFailureEvent, Company> registerCompanyFor(OrganizationName organizationName, Set<Role> roles, Set<RegisteredIdentifier> registeredIdentifiers) {
+        //...
+    }
+
+    Result<PartyRelatedFailureEvent, OrganizationUnit> registerOrganizationUnitFor(OrganizationName organizationName, Set<Role> roles, Set<RegisteredIdentifier> registeredIdentifiers) {
+        //...
+    }
+
+    Result<PartyRelatedFailureEvent, Party> add(PartyId partyId, Role role) {
+        //...
+    }
+
+    Result<PartyRelatedFailureEvent, Party> remove(PartyId partyId, Role role) {
+        //...
+    }
+
+    Result<PartyRelatedFailureEvent, Party> add(PartyId partyId, RegisteredIdentifier identifier) {
+        //...
+    }
+
+    Result<PartyRelatedFailureEvent, Party> remove(PartyId partyId, RegisteredIdentifier identifier) {
+        //...
+    }
+
+    Result<PartyRelatedFailureEvent, Person> update(PartyId partyId, PersonalData personalData) {
+        //...
+    }
+
+    Result<PartyRelatedFailureEvent, Organization> update(PartyId partyId, OrganizationName organizationName) {
+        //...
+    }
+
+}
+```
 
 ### PartyId
 
@@ -234,41 +347,37 @@ public interface RegisteredIdentifier {
 }
 ```
 
-Objects whose classes implement this interface are aggregated into a collection represented by `RegisteredIdentifiers`
+Objects whose classes implement this interface are aggregated into a collection and managed within `Party` object.
 
 ```java
-public final class RegisteredIdentifiers {
+public sealed abstract class Party permits Organization, Person {
 
-    private final Set<RegisteredIdentifier> values;
+    private final PartyId partyId;
+    private final Set<RegisteredIdentifier> registeredIdentifiers;
+    //...
 
-    private RegisteredIdentifiers(Set<RegisteredIdentifier> values) {
-        this.values = Optional.ofNullable(values).map(HashSet::new).orElse(new HashSet<>());
-    }
-
-    static RegisteredIdentifiers from(Set<RegisteredIdentifier> values) {
-        return new RegisteredIdentifiers(values);
-    }
-
-    Result<RegisteredIdentityAdditionFailed, RegisteredIdentifierAdditionSucceeded> add(RegisteredIdentifier identifier) {
+    public Result<RegisteredIdentifierAdditionFailed, Party> add(RegisteredIdentifier identifier) {
         checkNotNull(identifier, "Registered identifier cannot be null");
-        if (!values.contains(identifier)) {
-            values.add(identifier);
-            return Result.success(new RegisteredIdentifierAdded(identifier.type(), identifier.asString()));
+        if (!registeredIdentifiers.contains(identifier)) {
+            registeredIdentifiers.add(identifier);
+            events.add(new RegisteredIdentifierAdded(partyId.asString(), identifier.type(), identifier.asString()));
         } else {
             //for idempotency
-            return Result.success(RegisteredIdentifierAdditionSkipped.dueToDataDuplicationFor(identifier.type(), identifier.asString()));
+            events.add(RegisteredIdentifierAdditionSkipped.dueToDataDuplicationFor(partyId.asString(), identifier.type(), identifier.asString()));
         }
+        return Result.success(this);
     }
 
-    Result<RegisteredIdentityRemovalFailed, RegisteredIdentifierRemovalSucceeded> remove(RegisteredIdentifier identifier) {
+    public Result<RegisteredIdentifierRemovalFailed, Party> remove(RegisteredIdentifier identifier) {
         checkNotNull(identifier, "Registered identifier cannot be null");
-        if (values.contains(identifier)) {
-            values.remove(identifier);
-            return Result.success(new RegisteredIdentifierRemoved(identifier.type(), identifier.asString()));
+        if (registeredIdentifiers.contains(identifier)) {
+            registeredIdentifiers.remove(identifier);
+            events.add(new RegisteredIdentifierRemoved(partyId.asString(), identifier.type(), identifier.asString()));
         } else {
             //for idempotency
-            return Result.success(RegisteredIdentifierRemovalSkipped.dueToMissingIdentifierFor(identifier.type(), identifier.asString()));
+            events.add(RegisteredIdentifierRemovalSkipped.dueToMissingIdentifierFor(partyId.asString(), identifier.type(), identifier.asString()));
         }
+        return Result.success(this);
     }
 
     //...
@@ -278,7 +387,7 @@ public final class RegisteredIdentifiers {
 
 Similar to the [Addresses](#Addresses) described in the documentation, we also prioritize idempotency in this model. This means that repeatedly adding or removing the same identifiers will not cause errors, and the events returned as a result of such processing will either indicate a successful operation or its omission. However, only events that signal an actual change in the system's state are publishable, namely `RegisteredIdentifierAdded` and `RegisteredIdentifierRemoved`.
 
-Przykładową implementację identyfikatora umieściliśmy w klasie `PersonalIdentificationNumber`. 
+We have included a sample implementation of the identifier in the class `PersonalIdentificationNumber`. 
 
 ### Roles
 
@@ -287,6 +396,43 @@ A *role archetype* is intended to represent both the general role a given party 
 A *role* is a simple value object containing the name (or type) of the role. Roles can be added or removed in an idempotent manner. A specific role may be represented either by an instance of the `Role` type with a specific name (e.g., `"Customer"`) or through inheritance by creating subtypes. Each party can have zero or more associated roles.
 
 Defining roles for a given party can be further refined with policies or rules that restrict the assignment of certain roles (e.g., roles specific to organizations cannot be assigned to individuals).
+
+Roles are aggregated into a collection and managed within `Party` object.
+
+```java
+public sealed abstract class Party permits Organization, Person {
+
+    private final PartyId partyId;
+    private final Set<Role> roles;
+    //...
+
+    public Result<RoleAdditionFailed, Party> add(Role role) {
+        checkNotNull(role, "Role cannot be null");
+        if (!roles.contains(role)) {
+            roles.add(role);
+            events.add(new RoleAdded(partyId.asString(), role.asString()));
+        } else {
+            //for idempotency
+            events.add(RoleAdditionSkipped.dueToDuplicationFor(partyId.asString(), role.asString()));
+        }
+        return Result.success(this);
+    }
+
+    Result<RoleRemovalFailed, Party> remove(Role role) {
+        checkNotNull(role, "Role cannot be null");
+        if (roles.contains(role)) {
+            roles.remove(role);
+            events.add(new RoleRemoved(partyId.asString(), role.asString()));
+        } else {
+            //for idempotency
+            events.add(RoleRemovalSkipped.dueToMissingRoleFor(partyId.asString(), role.asString()));
+        }
+        return Result.success(this);
+    }
+
+    //...
+}
+```
 
 ### Addresses
 
@@ -440,10 +586,6 @@ The functions described above, namely interaction with the address collection mo
 
 TBD
 
-### Further improvements
-
-Everything you've seen so far is only a glimpse of what the Party archetype can offer. Soon, we'll explore more about inter-party relationships, capabilities, and assets.
-
 # Party relationship
 
 ## Problem statement
@@ -579,7 +721,7 @@ The bigger the scale gets, the less manageable and scalable the model becomes. I
 
 This is why we propose the following solution.
 
-![PartyRelationship](diagrams/party-relationship-model.puml)
+![PartyRelationship](diagrams/party-relationship-model.png)
 
 The *Party relationship* archetype complements the *Party* archetype, providing a model to represent different types of relationships between entities.
 
@@ -601,8 +743,61 @@ The *Party relationship* archetype complements the *Party* archetype, providing 
 
 ### Party Relationship
 
-TBD
+Although the problem of managing party relationships is complex, the model of the relationships themselves is straightforward.
+
+```java
+public record PartyRelationship(PartyRelationshipId id, PartyRole from, PartyRole to, RelationshipName name) {
+    //...
+}
+```
+
+It is a simple record that holds information about party IDs, their roles, and the relationship name, and is uniquely identifiable. This design allows relationships to be managed independently of parties, addressing the issues identified in the [analysis](#Analysis).
+
+The logic behind creating/removing relations is defined in `PartyRelationshipsFacade`
+
+```java
+public class PartyRelationshipsFacade {
+    
+    //...
+    
+    public Result<PartyRelationshipDefinitionFailed, PartyRelationship> assign(PartyId fromId, Role fromRole, PartyId toId, Role toRole, RelationshipName name) {
+        //...
+    }
+
+    public Result<PartyRelationshipDefinitionFailed, PartyRelationshipId> remove(PartyRelationshipId partyRelationshipId) {
+        //...
+    }
+
+}
+```
 
 ### Party Role
 
-TBD
+Like we have already mentioned, a *role archetype* is intended to represent both the general role a given party might have, regardless of the specific use case, and the role it may play in its relationships with other parties. Here, we focus on the latter.
+
+A *party role* is a simple value object containing the name (or type) of the role and the identifier of a party it is assigned to. The reason for holding the party identifier is to enable party relationship to connect role with particular side of the relation. 
+
+Defining party roles might be further refined with policies or rules that restrict the assignment of certain roles (e.g., roles specific to organizations cannot be assigned to individuals). We implemented that by providing `PartyRoleDefiningPolicy` interface.
+
+```java
+interface PartyRelationshipDefiningPolicy {
+
+    boolean canDefineFor(PartyRole from, PartyRole to, RelationshipName relationshipName);
+}
+```
+
+The interface is used in `PartyRoleFactory` which is responsible for creating objects that align with the current rule set.
+
+# Further considerations
+
+## How to store parties and their relations?
+
+TBD - relational DB, graph DB
+
+## How to use the potential?
+
+TBD - although it is CRUD, the read models might be powerful
+
+# Further improvements
+
+Everything you've seen so far is only a glimpse of what the Party archetype can offer. Soon, we'll explore more about inter-party, capabilities, and assets.

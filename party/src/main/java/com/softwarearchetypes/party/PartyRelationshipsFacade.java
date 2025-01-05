@@ -10,8 +10,6 @@ import com.softwarearchetypes.party.events.PartyRelationshipDefinitionFailed;
 import com.softwarearchetypes.party.events.PartyRelationshipRemoved;
 
 //tx required
-//TODO: docsy
-//TODO: rozkmina jakie zapytania można budować + zależności pomiedzy klasami/modułami jak dojdzie uwierzytelnianie
 public class PartyRelationshipsFacade {
 
     private static final BiFunction<PartyRelationshipDefinitionFailed, PartyRelationshipDefinitionFailed, PartyRelationshipDefinitionFailed> ANY_FAILURE = (fromFailure, toFailure) -> fromFailure != null ? fromFailure : toFailure;
