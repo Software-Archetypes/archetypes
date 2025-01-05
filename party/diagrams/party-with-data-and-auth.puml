@@ -1,0 +1,76 @@
+@startuml
+skinparam MinClassWidth 150
+skinparam linetype ortho
+
+object Party
+object Person
+object PartyRole {
+  name: String
+}
+object PartyIdentifier {
+  value: UUID
+}
+object RegisteredIdentifier {
+  value: String
+  type: String
+  validFrom: Date
+  validTo: Date
+}
+object PartyAuthentication
+
+object Address {
+  validFrom: Date
+  validTo: Date
+}
+object EmailAddress {
+  value: String
+}
+object GeographicAddress {
+  addressLine: String[]
+  city: String
+  region: String
+  zipCode: String
+}
+
+object PersonName {
+  givenName: String
+  familyName: String
+}
+
+object Organization
+object OrganizationName {
+  value: String
+}
+object Company
+object JointStock
+object LimitedLiability
+object LimitedPartnership
+
+object OrganizationUnit
+object Division
+object Department
+object Team
+
+Party "1" *-- "1" PartyIdentifier
+Party "1" -- "0..*" PartyRole
+Party "1..*" -- "0..*" Address
+Party "1..*" *-- "0..*" RegisteredIdentifier
+Party "1..*" *-- "0..*" PartyAuthentication
+
+Person "1" *-- "1..*" PersonName
+Organization "1" *-- "1..*" OrganizationName
+
+Person -up-|> Party
+Organization -up-|> Party
+Company --up-|> Organization
+JointStock ---up-|> Company
+LimitedLiability ---up-|> Company
+LimitedPartnership ---up-|> Company
+OrganizationUnit --up-|> Organization
+Division ---up-|> OrganizationUnit
+Department ---up-|> OrganizationUnit
+Team ---up-|> OrganizationUnit
+
+EmailAddress --up-|> Address
+GeographicAddress --up-|> Address
+@enduml

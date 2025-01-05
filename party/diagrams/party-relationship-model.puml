@@ -1,0 +1,34 @@
+@startuml
+skinparam MinClassWidth 100
+skinparam linetype ortho
+
+object Party
+object Person
+object Organization
+object PartyRelationship
+
+object Company
+
+object OrganizationUnit
+
+object PartyRole {
+  name: String
+}
+
+object PartyRelationshipIdentifier {
+  value: UUID
+}
+
+PartyRelationship "1" *-left- "1" PartyRelationshipIdentifier
+
+Person --up-|> Party
+Organization --up-|> Party
+Company -up-|> Organization
+OrganizationUnit -up-|> Organization
+
+PartyRelationship "0..*" -up- "from 1" PartyRole
+PartyRelationship "0..*" -up- "to 1" PartyRole
+
+Party "1" -- "0..*" PartyRole
+
+@enduml
