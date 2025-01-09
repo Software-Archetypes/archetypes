@@ -68,7 +68,6 @@ class PartiesFacade {
 
     private final PartyRepository partyRepository;
     private final EventPublisher eventPublisher;
-
     private final Supplier<PartyId> newPartyIdSupplier;
 
     PartiesFacade(PartyRepository partyRepository, EventPublisher eventPublisher, Supplier<PartyId> newPartyIdSupplier) {

@@ -22,6 +22,12 @@ object Address {
   validFrom: Date
   validTo: Date
 }
+object AddressId {
+  value: UUID
+}
+object AddressUseType {
+  value: String
+}
 object EmailAddress {
   value: String
 }
@@ -53,7 +59,9 @@ object Team
 
 Party "1" *-- "1" PartyIdentifier
 Party "1" -- "0..*" PartyRole
-Party "1..*" -- "0..*" Address
+Party "1" -- "0..*" Address
+Address "1" *-- "1..*" AddressUseType
+Address "1" *-- "1*" AddressId
 Party "1..*" *-- "0..*" RegisteredIdentifier
 Party "1..*" *-- "0..*" PartyAuthentication
 

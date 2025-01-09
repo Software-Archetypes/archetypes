@@ -563,12 +563,6 @@ Despite the connection between `Addresses` and `Party`, we have observed that th
 
 The model provides multiple events that inform us about the outcomes of executing specific actions, such as adding an address, updating it, or deleting it. The model ensures idempotency of operations. This means that multiple updates to an address with the same data, or repeated attempts to add or delete it, will not result in errors—the model interprets such situations as valid. This approach simplifies the model's usage by the infrastructure layer (such as REST controllers), which will not need to handle error mapping to response codes on its own.
 
-To make the model as clear as possible, method signatures return a monadic `Result` type, which, in case of an error, contains information about its source, and in case of success, returns a valid business object. This object, in particular, includes the aforementioned events. Examples of such events may include:
-
-//KOD EVENTÓW
-
-Not every event is worth publishing. Broadcasting the fact of identifying a duplicate request to update an already updated object would only introduce informational noise into the communication channel used for event distribution. Therefore, only a subset of events extends the marker interface `PublishedEvent`.
-
 To ensure that the model protects the address collection from violating consistency rules, access to it will be secured via the `AddressesRepository` interface.
 
 ```java
