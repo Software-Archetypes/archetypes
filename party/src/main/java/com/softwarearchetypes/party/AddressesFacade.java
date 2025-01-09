@@ -1,7 +1,5 @@
 package com.softwarearchetypes.party;
 
-import java.util.Optional;
-
 import com.softwarearchetypes.common.Result;
 import com.softwarearchetypes.party.events.AddressDefinitionFailed;
 import com.softwarearchetypes.party.events.AddressRemovalFailed;
@@ -15,10 +13,6 @@ public class AddressesFacade {
     AddressesFacade(AddressesRepository repository, EventPublisher publisher) {
         this.repository = repository;
         this.publisher = publisher;
-    }
-
-    Optional<Addresses> findFor(PartyId partyId) {
-        return repository.findFor(partyId);
     }
 
     //can be enhanced with check against missing party (here we accept addresses for any partyId)

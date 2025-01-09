@@ -2,6 +2,7 @@ package com.softwarearchetypes.party;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public interface PartyRelationshipRepository {
 
@@ -14,4 +15,6 @@ public interface PartyRelationshipRepository {
     void save(PartyRelationship partyRelationship);
 
     Optional<PartyRelationshipId> delete(PartyRelationshipId relationshipId);
+
+    List<PartyRelationship> findMatching(Predicate<PartyRelationship> predicate);
 }

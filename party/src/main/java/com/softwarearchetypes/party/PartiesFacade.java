@@ -64,7 +64,7 @@ import com.softwarearchetypes.party.events.RegisteredIdentifierRemovalFailed;
  **
  */
 //tx required
-class PartiesFacade {
+public class PartiesFacade {
 
     private final PartyRepository partyRepository;
     private final EventPublisher eventPublisher;
@@ -76,19 +76,19 @@ class PartiesFacade {
         this.newPartyIdSupplier = newPartyIdSupplier != null ? newPartyIdSupplier : PartyId::random;
     }
 
-    Result<PartyRelatedFailureEvent, Person> registerPersonFor(PersonalData personalData, Set<Role> roles, Set<RegisteredIdentifier> registeredIdentifiers) {
+    public Result<PartyRelatedFailureEvent, Person> registerPersonFor(PersonalData personalData, Set<Role> roles, Set<RegisteredIdentifier> registeredIdentifiers) {
         return registerPartyAccordingTo(() -> new Person(newPartyIdSupplier.get(), personalData, roles, registeredIdentifiers, Version.initial())).map(Person.class::cast);
     }
 
-    Result<PartyRelatedFailureEvent, Company> registerCompanyFor(OrganizationName organizationName, Set<Role> roles, Set<RegisteredIdentifier> registeredIdentifiers) {
+    public Result<PartyRelatedFailureEvent, Company> registerCompanyFor(OrganizationName organizationName, Set<Role> roles, Set<RegisteredIdentifier> registeredIdentifiers) {
         return registerPartyAccordingTo(() -> new Company(newPartyIdSupplier.get(), organizationName, roles, registeredIdentifiers, Version.initial())).map(Company.class::cast);
     }
 
-    Result<PartyRelatedFailureEvent, OrganizationUnit> registerOrganizationUnitFor(OrganizationName organizationName, Set<Role> roles, Set<RegisteredIdentifier> registeredIdentifiers) {
+    public Result<PartyRelatedFailureEvent, OrganizationUnit> registerOrganizationUnitFor(OrganizationName organizationName, Set<Role> roles, Set<RegisteredIdentifier> registeredIdentifiers) {
         return registerPartyAccordingTo(() -> new OrganizationUnit(newPartyIdSupplier.get(), organizationName, roles, registeredIdentifiers, Version.initial())).map(OrganizationUnit.class::cast);
     }
 
-    Result<PartyRelatedFailureEvent, Party> add(PartyId partyId, Role role) {
+    public Result<PartyRelatedFailureEvent, Party> add(PartyId partyId, Role role) {
         return partyRepository.findBy(partyId)
                               .map(party -> party.add(role))
                               .map(party -> party.mapFailure(PartyRelatedFailureEvent.class::cast))
@@ -97,7 +97,7 @@ class PartiesFacade {
                               .peekSuccess(party -> eventPublisher.publish(party.publishedEvents()));
     }
 
-    Result<PartyRelatedFailureEvent, Party> remove(PartyId partyId, Role role) {
+    public Result<PartyRelatedFailureEvent, Party> remove(PartyId partyId, Role role) {
         return partyRepository.findBy(partyId)
                               .map(party -> party.remove(role))
                               .map(party -> party.mapFailure(PartyRelatedFailureEvent.class::cast))
@@ -106,7 +106,7 @@ class PartiesFacade {
                               .peekSuccess(party -> eventPublisher.publish(party.publishedEvents()));
     }
 
-    Result<PartyRelatedFailureEvent, Party> add(PartyId partyId, RegisteredIdentifier identifier) {
+    public Result<PartyRelatedFailureEvent, Party> add(PartyId partyId, RegisteredIdentifier identifier) {
         return partyRepository.findBy(partyId)
                               .map(party -> party.add(identifier))
                               .map(party -> party.mapFailure(PartyRelatedFailureEvent.class::cast))
@@ -115,7 +115,7 @@ class PartiesFacade {
                               .peekSuccess(party -> eventPublisher.publish(party.publishedEvents()));
     }
 
-    Result<PartyRelatedFailureEvent, Party> remove(PartyId partyId, RegisteredIdentifier identifier) {
+    public Result<PartyRelatedFailureEvent, Party> remove(PartyId partyId, RegisteredIdentifier identifier) {
         return partyRepository.findBy(partyId)
                               .map(party -> party.remove(identifier))
                               .map(party -> party.mapFailure(PartyRelatedFailureEvent.class::cast))
@@ -124,7 +124,7 @@ class PartiesFacade {
                               .peekSuccess(party -> eventPublisher.publish(party.publishedEvents()));
     }
 
-    Result<PartyRelatedFailureEvent, Person> update(PartyId partyId, PersonalData personalData) {
+    public Result<PartyRelatedFailureEvent, Person> update(PartyId partyId, PersonalData personalData) {
         return partyRepository.findBy(partyId, Person.class)
                               .map(Person.class::cast)
                               .map(party -> party.update(personalData))
@@ -134,7 +134,7 @@ class PartiesFacade {
                               .peekSuccess(party -> eventPublisher.publish(party.publishedEvents()));
     }
 
-    Result<PartyRelatedFailureEvent, Organization> update(PartyId partyId, OrganizationName organizationName) {
+    public Result<PartyRelatedFailureEvent, Organization> update(PartyId partyId, OrganizationName organizationName) {
         return partyRepository.findBy(partyId, Organization.class)
                               .map(Organization.class::cast)
                               .map(party -> party.update(organizationName))

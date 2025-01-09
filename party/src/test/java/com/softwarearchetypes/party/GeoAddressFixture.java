@@ -15,6 +15,10 @@ class GeoAddressFixture {
         return someGeoAddressWith(AddressId.random(), partyId);
     }
 
+    static GeoAddress someGeoAddressFor(PartyId partyId, String city) {
+        return new GeoAddress(AddressId.random(), partyId, GeoAddress.GeoAddressDetails.from(someName(), someStreet(), someBuilding(), someFlat(), city, someZipCode(), someLocale()), someUseTypes());
+    }
+
     static GeoAddress someGeoAddressWith(AddressId addressId, PartyId partyId) {
         return new GeoAddress(addressId, partyId, someGeoAddressDetails(), someUseTypes());
     }
@@ -65,7 +69,7 @@ class GeoAddressFixture {
 
     static Set<AddressUseType> someUseTypesDifferentThan(Set<AddressUseType> useTypes) {
         Set<AddressUseType> newUseTypes = someUseTypes();
-        while(newUseTypes.equals(useTypes)) {
+        while (newUseTypes.equals(useTypes)) {
             newUseTypes = someUseTypes();
         }
         return newUseTypes;
