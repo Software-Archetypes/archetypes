@@ -5,7 +5,9 @@ skinparam linetype ortho
 object Party
 object Person
 object Organization
-object PartyRelationship
+object PartyRelationship {
+  name: String
+}
 
 object Company
 
