@@ -22,6 +22,7 @@ class AddressesFacadeTest {
     private InMemoryEventsPublisher eventPublisher = new InMemoryEventsPublisher();
     private InMemoryAddressesRepository repository = new InMemoryAddressesRepository();
     private AddressesFacade addressesFacade = new AddressesFacade(repository, eventPublisher);
+    private AddressesQueries addressesQueries = new AddressesQueries(repository);
 
     private AddressesTestEventListener testEventListener = new AddressesTestEventListener(eventPublisher);
 
@@ -35,7 +36,7 @@ class AddressesFacadeTest {
         addressesFacade.addOrUpdate(partyId, address);
 
         //then
-        Addresses addresses = addressesFacade.findFor(partyId).get();
+        Addresses addresses = addressesQueries.findFor(partyId).get();
         assertEquals(Set.of(address), addresses.asSet());
     }
 
@@ -68,7 +69,7 @@ class AddressesFacadeTest {
         addressesFacade.addOrUpdate(partyId, newAddress);
 
         //then
-        Addresses addresses = addressesFacade.findFor(partyId).get();
+        Addresses addresses = addressesQueries.findFor(partyId).get();
         assertEquals(Set.of(newAddress), addresses.asSet());
     }
 
@@ -101,7 +102,7 @@ class AddressesFacadeTest {
         addressesFacade.remove(partyId, address.id());
 
         //then
-        Addresses addresses = addressesFacade.findFor(partyId).get();
+        Addresses addresses = addressesQueries.findFor(partyId).get();
         assertTrue(addresses.asSet().isEmpty());
     }
 

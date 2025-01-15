@@ -1,0 +1,41 @@
+@startuml
+skinparam MinClassWidth 150
+skinparam linetype ortho
+
+object Party
+object PartyIdentifier {
+  value: UUID
+}
+
+object Address {
+  validFrom: Date
+  validTo: Date
+}
+object AddressId {
+  value: UUID
+}
+object AddressUseType {
+  value: String
+}
+object EmailAddress {
+  value: String
+}
+object GeographicAddress {
+  addressLine: String[]
+  city: String
+  region: String
+  zipCode: String
+}
+object WebPageAddress {
+  url: String
+}
+
+Party "1" *- "1" PartyIdentifier
+Party "1" --- "0..*" Address
+Address "1" *-- "1..*" AddressUseType
+Address "1" *-- "1*" AddressId
+
+EmailAddress --up-|> Address
+GeographicAddress --up-|> Address
+WebPageAddress --up-|> Address
+@enduml

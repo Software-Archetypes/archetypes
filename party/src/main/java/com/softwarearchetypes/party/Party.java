@@ -103,6 +103,10 @@ public sealed abstract class Party permits Organization, Person {
         return Set.copyOf(roles);
     }
 
+    public final Version version() {
+        return version;
+    }
+
     public final Set<RegisteredIdentifier> registeredIdentifiers() {
         return Set.copyOf(registeredIdentifiers);
     }

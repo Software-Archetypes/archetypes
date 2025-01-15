@@ -15,4 +15,8 @@ class PersonalDataFixture {
     static PersonalData somePersonalData() {
         return PersonalData.from(someFirstName(), someLastName());
     }
+
+    static PersonalData nameOf(String firstName) {
+        return PersonalData.from(firstName, null);
+    }
 }

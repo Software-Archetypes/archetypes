@@ -3,6 +3,7 @@ package com.softwarearchetypes.party;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 class InMemoryPartyRepository implements PartyRepository {
@@ -33,6 +34,13 @@ class InMemoryPartyRepository implements PartyRepository {
     public List<Party> findBy(RegisteredIdentifier registeredIdentifier) {
         return map.values().parallelStream()
                   .filter(party -> party.registeredIdentifiers().contains(registeredIdentifier))
+                  .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Party> findMatching(Predicate<Party> predicate) {
+        return map.values().parallelStream()
+                  .filter(predicate)
                   .collect(Collectors.toList());
     }
 }

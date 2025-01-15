@@ -3,6 +3,7 @@ package com.softwarearchetypes.party;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 class InMemoryPartyRelationshipRepository implements PartyRelationshipRepository {
@@ -37,5 +38,12 @@ class InMemoryPartyRelationshipRepository implements PartyRelationshipRepository
     public Optional<PartyRelationshipId> delete(PartyRelationshipId relationshipId) {
         PartyRelationship result = map.remove(relationshipId);
         return Optional.ofNullable(result).map(PartyRelationship::id);
+    }
+
+    @Override
+    public List<PartyRelationship> findMatching(Predicate<PartyRelationship> predicate) {
+        return map.values().parallelStream()
+                  .filter(predicate)
+                  .collect(Collectors.toList());
     }
 }

@@ -563,12 +563,6 @@ Despite the connection between `Addresses` and `Party`, we have observed that th
 
 The model provides multiple events that inform us about the outcomes of executing specific actions, such as adding an address, updating it, or deleting it. The model ensures idempotency of operations. This means that multiple updates to an address with the same data, or repeated attempts to add or delete it, will not result in errors—the model interprets such situations as valid. This approach simplifies the model's usage by the infrastructure layer (such as REST controllers), which will not need to handle error mapping to response codes on its own.
 
-To make the model as clear as possible, method signatures return a monadic `Result` type, which, in case of an error, contains information about its source, and in case of success, returns a valid business object. This object, in particular, includes the aforementioned events. Examples of such events may include:
-
-//KOD EVENTÓW
-
-Not every event is worth publishing. Broadcasting the fact of identifying a duplicate request to update an already updated object would only introduce informational noise into the communication channel used for event distribution. Therefore, only a subset of events extends the marker interface `PublishedEvent`.
-
 To ensure that the model protects the address collection from violating consistency rules, access to it will be secured via the `AddressesRepository` interface.
 
 ```java
@@ -792,12 +786,87 @@ The interface is used in `PartyRoleFactory` which is responsible for creating ob
 
 ## How to store parties and their relations?
 
-TBD - relational DB, graph DB
+The example in the code is based on an in-memory database that relies on hash tables. In reality, however, we should choose one of the available types of databases, such as relational, document-based, or graph databases.
+
+Relational and document-based databases generally allow us to store our parties and their relationships in a similar way. In relational databases, we can either have a separate table for the parties and another table for the list of relationships (edges of the graph), or we can have a single table where a field for relationships stores all outgoing relationships from a given node in a JSON format.
+
+Document databases, such as MongoDB, allow you to store data in flexible documents. A common approach is to store parties as individual documents in a collection, and either reference the relationships in separate documents (a collection for edges) or embed the relationship data directly within the party document. This approach offers flexibility and scalability but might become cumbersome with very complex relationships.
+
+Alternatively, we can also use graph databases, such as Neo4j, which are purpose-built for managing relationships between entities. In a graph database, parties would be stored as nodes, and relationships between them would be stored as edges. This model is highly optimized for querying relationships and is especially effective when the relationships themselves are as important as the entities.  By using graph databases, we can easily traverse relationships and query the graph structure without needing complex JOINs or relationships tables. This is a powerful solution for cases where relationship querying and pathfinding are core features of the application.
+
+It's also important to note that the choice of a database does not mean that everything has to be stored within a single engine. There's nothing preventing us from writing data to a relational database (where it's easier to manage transactions and implement an outbox for emitting events), while using a graph database for more complex queries needed for building the read model.
 
 ## How to use the potential?
 
-TBD - although it is CRUD, the read models might be powerful
+Many of the functions of the Party and Party Relationship model is CRUD-like. We have pointed out that any of these functions might be enhanced with policies, integration with rule engine or simply become a business process on its own (like party registration or address change). 
+
+However, **the potential is even bigger**. Let's consider a following graph of parties.
+
+![Party Graph](diagrams/party-sample-graph.jpg)
+
+Apart from finding particular by their identifiers or parties that are directly related with others we could create a query like this:
+
+    Find an employee of our supplier who operates in Warsaw
+
+If we look at the graph we could manually find the path to the answer
+
+![Party Graph Path](diagrams/party-sample-graph-path.jpg)
+
+Just to give you an example of how to approach automating such queries, we created a `PartySearch` class
+
+```java
+public class PartySearch {
+
+    private final PartiesQueries partiesQueries;
+    private final PartyRelationshipsQueries partyRelationshipsQueries;
+    private final AddressesQueries addressesQueries;
+
+    PartySearch(PartiesQueries partiesQueries, PartyRelationshipsQueries partyRelationshipsQueries, AddressesQueries addressesQueries) {
+        this.partiesQueries = partiesQueries;
+        this.partyRelationshipsQueries = partyRelationshipsQueries;
+        this.addressesQueries = addressesQueries;
+    }
+
+    //sample query - here is the place where we could apply graph database queries
+    List<Party> findMatching(Search search) {
+        List<Party> result = new LinkedList<>();
+        if (search.partyPredicate != null) {
+            result = partiesQueries.findMatching(search.partyPredicate);
+        }
+        if (search.partyRelationshipPredicate != null) {
+            if (!result.isEmpty()) {
+                List<PartyId> foundIds = result.stream().map(Party::id).toList();
+                List<PartyId> toPartyIds = partyRelationshipsQueries
+                        .findMatching(it -> foundIds.contains(it.from().partyId()) && search.partyRelationshipPredicate.test(it))
+                        .stream()
+                        .map(rel -> rel.to().partyId())
+                        .toList();
+                result = partiesQueries.findMatching(it -> toPartyIds.contains(it.id()));
+            }
+        }
+        if (search.addressPredicate != null) {
+            if (!result.isEmpty()) {
+                result = result.stream().filter(party -> !addressesQueries.findMatching(party.id(), search.addressPredicate).isEmpty()).collect(toList());
+            }
+        }
+        return result;
+    }
+}
+```
+
+This is a very simple query that utilizes a set of predicated, defined in a `Search` object
+
+```java
+record Search(Predicate<Party> partyPredicate,
+              Predicate<PartyRelationship> partyRelationshipPredicate,
+              Predicate<Address> addressPredicate) {
+}
+```
+
+We could develop the mechanism further bringing the specification pattern int play, joining predicates with logical operators like `AND`, `OR`, etc. However, these are the graph databases that are optimised for this kind of queries. That is why we see a huge potential there.
+
+If we think of parties and their relations as graphs, we can query the model in endless number of ways to answer questions important in other business processes. 
 
 # Further improvements
 
-Everything you've seen so far is only a glimpse of what the Party archetype can offer. Soon, we'll explore more about inter-party, capabilities, and assets.
+Everything you've seen so far is only a glimpse of what the Party archetype can offer. Soon, we'll explore more about capabilities and assets.
