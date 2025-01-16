@@ -94,6 +94,10 @@ record IncludeOneOfRule(Option ifTaken, List<Option> oneHasToBeTaken) implements
                                 .toList()));
     }
 }
+interface Rule {
+
+    List<Clause> toClause();
+}
 
 record IncludeRule(Option ifTaken, Option mustBeTakenToo) implements Rule {
     @Override
