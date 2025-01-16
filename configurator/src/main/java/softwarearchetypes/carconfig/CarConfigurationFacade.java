@@ -29,6 +29,10 @@ public class CarConfigurationFacade {
         List<Clause> all = Stream.concat(pickedWithNew.stream(),
                 carConfigurationProcess.rules().stream().map(rule -> rule.toClause()).flatMap(Collection::stream).toList().stream()).toList();
 
+        //SAT is used to check if the defition of a confiuration is satisafable
+        //here we check if certain choise is proper
+        //which means SAT is NOT needed, we use it as an experiment, to maybe get an answer to a question: what should I remove/add to fulffil all the rules?
+
         boolean satisfiableAfterPick = this.dpllSolver.solve(all, new HashMap<>());
         if (!satisfiableAfterPick) throw new IllegalArgumentException("Configuration is not satisfiable after pick!");
         carConfigurationProcess.pick(pickedOption);
