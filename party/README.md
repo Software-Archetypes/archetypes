@@ -177,7 +177,7 @@ Then we get a structure similar to this one:
 
 Now we can enrich it with all kinds of data necessary in our business, such as address or authentication data as well as behavior - like authentication strategies:
 
-![Party](diagrams/party-basic-model.png)
+![Party](diagrams/party-with-data-and-auth.png)
 
 In this way, we can model any entity of any type, dynamically change its roles, and supplement it with policies and behaviors specific to the use case.
 
