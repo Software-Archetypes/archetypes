@@ -39,11 +39,7 @@ Following sets are possible having such intial conditions:
 | MegaSpeed, UltraIce               |    No   |     No      | -- indirect exclusion, there is no way of completing such a configuration without removing MegaSpeed
 | SuperFreeze, UltraIce             |    No   |     No      |
 | MegaSpeed, SuperFreeze, UltraIce  |    No   |     No      |
-
-
-
 ```
-
 
 Knowing basic Domain Driven Design principles one might want to adhere to well known principle of Ubiquitous Language. There is Computer Configuration with Computer Parts, each Computer Part has a list of parts that are excluded or required (for simplicty sake's let strip off `one of many must be taken`). Configuration might be valid or not and voila:
 
