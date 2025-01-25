@@ -33,36 +33,83 @@ Therefore one step further can be taken - system could assist the user and lead 
 
 ### Level 4
 
-Not only customers might hurt themselves during complex configuration processes - crafting one from scratch quite a challenge for business personas. Imagine there are thousands of rules already and administrator wants to add another one. It is impossible to iterate over each rule and check if new condition will not cause any conflicts and as a result - will disallow client to finish process smoothly. System needs to be designed in a robust way that detects contradicting rules preliminarly and guards against breaking customer journey.
+Not only customers might hurt themselves during complex configuration processes - crafting one from scratch quite a challenge for business personas. Imagine there are thousands of rules already and administrator wants to add another one.
+It is impossible to iterate over each rule and check if new condition will not cause any conflicts and as a result - will disallow client to finish process smoothly.
+System needs to be designed in a robust way that detects contradicting rules preliminarly and guards against breaking customer journey.
 
 Let's see how aformentioned problems could be tackled with several approaches.
-
 
 ## Use cases
 
 Based on problem statements from the beginning four major use cases might be identified: 
 
 1. Setting up configuration rules as an admin
-2. Adding or removing new configuration parts as a user
-3. Blocking or suggesting parts for user as a system
-4. Completing configuration as a user
+2. Adding or removing parts during configuration process as a customer
+3. Blocking or suggesting parts during for customer configuration process as a system
+4. Completing configuration process as a customer
 
 ### Use case #1 - Setting up configuration rules as an admin
 
 At first we need to define what kind of rules come into play. The most trivial ones are of course the following:
 
-- if part A is added then part B cannot be excluded
-- if part C is added then part D must be included
+- if part A is added then part B cannot be excluded (single exclusion rule)
+- if part C is added then part D must be included (single inclusion rule)
 
-But sometimes adding e.g. processor with more power means that one of several additional coolers should be included - however it does not neccesserly forces particular choice. Same with excludance
+But sometimes adding e.g. processor with more power means that one of several additional coolers should be included - however it does not neccesserly forces particular choice. 
+Same with excludance - if one web camera is already chosen then any other processor cannot be picked! Deducing from that the following rules can be formed:
+
+- if part E is added then part F and G and H and... cannot be included (this is an equvialent of many single exclusion rules)
+- if part A is added then part B or C or D or... must be included (one of inclusion rule)
 
 But hey! Do not sleep on fundamentals! For each computer some processor, RAM memory, keyboard and other basic staff must be chosen - thing couldn't even be named computer without them! Hence additional rule category is identified:
 
-- one of parts E,F,G,... must be always present
+- one of parts E,F,G,... must be always present (presence rule)
 
 Take a notice that this rule allows admin to force picking single part always - just instead of collection single value can be used.
+To sum things up there are four types of rules that allows for creating whatever configuration one could have imagined:
 
-However, we can complicate it a little bit more. 
+- single exclusion rule
+- single inclusion rule
+- one of inclusion rule
+- presence rule
+
+But - as always - complexity lies in details. How to ensure that they are not interfering with each other making the configuration impossible to finish? That's the hard part we'll try to answer later.
+
+This use case looks as following - admin adds a new rule, system checks if there even is a set of parts that meets all rules defined in the configuration - and if yes new rule is successfully added.
+
+![Admin adds rule use case](./diagrams/admin-adds-rule-use-case.png)
+
+### Use case #2 - Configuring a computer as a customer
+
+Let's assume that admin has already done their job and set up configuration properly - end users are finally able to start playing with possible option to buy their dreamed machine.
+In simple words - they start *configuration process*.
+Before jumping into any solutions let's distinguish two crucial concepts of configuration process being `Valid` and `Completed`.
+
+If configuration process is `Completed` it means that all rules regarding product are satisfied and it can be purchased. On the other side,
+`Valid` configuration process does not mean that all rules are met, it just means they are not in conflict, but still picking proper parts may lead to `Completing` the process.
+To highlight difference let's work on the following example:
+
+```
+There are three rules: 
+1. Any processor must be taken
+2. If processor MegaSpeed is taken then cooler SuperFreeze must be taken
+3. If cooler SuperFreeze is taken then cooler UltraIce cannot be taken
+
+Following sets are possible having such intial conditions: 
+|         Picked items              | IsValid | IsCompleted |
+|-----------------------------------|---------|-------------|
+| None                              |   Yes   |     No      |
+| MegaSpeed                         |   Yes   |     No      |
+| UltraIce                          |   Yes   |     No      |
+| SuperFreeze                       |   Yes   |     No      |
+| MegaSpeed, SuperFreeze            |   Yes   |     Yes     |
+| MegaSpeed, UltraIce               |    No   |     No      | -- indirect exclusion, there is no way of completing such a configuration without removing MegaSpeed
+| SuperFreeze, UltraIce             |    No   |     No      |
+| MegaSpeed, SuperFreeze, UltraIce  |    No   |     No      |
+```
+
+So after delving into meandrs of configuring processes 
+### Use case #3 -
 
 ## Possible solutions
 
