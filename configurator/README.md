@@ -144,8 +144,17 @@ Let's assume there are two rules:
 
 The scenario might look like followed then!
 
+##### Initial state
+
 ![System suggests automatically 1](./diagrams/system-suggests-automatically-1.png)
+
+##### First pick
+
 ![System suggests automatically 2](./diagrams/system-suggests-automatically-2.png)
+
+##### Second pick
+
+![System suggests automatically 3](./diagrams/system-suggests-automatically-3.png)
 
 ## Possible solutions
 
