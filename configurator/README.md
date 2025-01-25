@@ -45,7 +45,7 @@ Based on problem statements from the beginning four major use cases might be ide
 
 1. Setting up configuration rules as an admin
 2. Adding or removing parts during configuration process as a customer
-3. Blocking or suggesting parts during for customer configuration process as a system
+3. Blocking or suggesting parts for customer during configuration process as a system
 4. Completing configuration process as a customer
 
 ### Use case #1 - Setting up configuration rules as an admin
@@ -86,7 +86,7 @@ But - as always - complexity lies in details. How to ensure that they are not in
 
 **In the scenario above no matter how hard one will try there is now way to configure a computer with keyboard!**
 
-#### Final use case structure
+#### Use case #1 diagram
 
 So as it might be seen - system should prevent admin from boxing customer in a corner.
 Visualization of this use case looks as following - admin adds a new rule, system checks if at least one set of parts that meets all rules defined in the configuration exists - and if yes new rule is successfully added.
@@ -122,8 +122,27 @@ Following sets are possible having such intial conditions:
 | MegaSpeed, SuperFreeze, UltraIce  |    No   |     No      |
 ```
 
-So after delving into meandrs of configuring processes 
-### Use case #3 -
+So after delving into meandrs of configuring processes it is clear that system needs to guard against customer boxing themselves into the corner - end users do not know all rules and even if they do, this would have nothing in common with seamless user experience.
+
+#### Use case #2 diagram
+
+![Customer picks new part use case](./diagrams/customer-picks-new-part-use-case.png)
+
+### Use case #3 - Blocking or suggesting parts for customer during configuration process as a system
+
+However, as pointed out in the beginning, customer might be led by hand by system. Two enhancements were identified to do so:
+
+- If there is a part that is unambiguously needed to be picked, because otherwise configuration will not ever be completed system could suggest it automatically to make things easier - sooner or later customer would be forced to pick it anyway.
+- If there is a part which peaking will lead to make configuration process invalid it can be blocked at the time of picking another part, which causes this exclusion. There is no point in customer trying to blindly pick what they thinks is needed and learning that their choice is not possible due to rules contradiction.
+
+#### Suggestion scenario
+
+Let's assume there are two rules:
+
+1. If processor MegaSpeed is taken then one of coolers SuperFreeze or UltraIce must be taken
+2. If keyboard ComfyType is taken then cooler UltraIce cannot be taken
+
+If client picks 
 
 ## Possible solutions
 
