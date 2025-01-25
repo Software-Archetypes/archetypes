@@ -166,29 +166,6 @@ This clearly shows us
 
 ## Possible solutions
 
-Before jumping into any solutions let's distinguish two crucial concepts configuration being `Valid` and `Completed`. 
-
-If configuration is `Completed` it means that all rules regarding product are satisfied and it can be purchased. On the other side, `Valid` configuration does not mean that all rules are met, it just means they are not in conflict. To highlight difference let's work on the following example:
-
-```
-There are three rules: 
-1. Any processor must be taken
-2. If processor MegaSpeed is taken then cooler SuperFreeze must be taken
-3. If cooler SuperFreeze is taken then cooler UltraIce cannot be taken
-
-Following sets are possible having such intial conditions: 
-|         Picked items              | IsValid | IsCompleted |
-|-----------------------------------|---------|-------------|
-| None                              |   Yes   |     No      |
-| MegaSpeed                         |   Yes   |     No      |
-| UltraIce                          |   Yes   |     No      |
-| SuperFreeze                       |   Yes   |     No      |
-| MegaSpeed, SuperFreeze            |   Yes   |     Yes     |
-| MegaSpeed, UltraIce               |    No   |     No      | -- indirect exclusion, there is no way of completing such a configuration without removing MegaSpeed
-| SuperFreeze, UltraIce             |    No   |     No      |
-| MegaSpeed, SuperFreeze, UltraIce  |    No   |     No      |
-```
-
 Knowing basic Domain Driven Design principles one might want to adhere to well known principle of Ubiquitous Language. There is Computer Configuration with Computer Parts, each Computer Part has a list of parts that are excluded or required (for simplicty sake's let strip off `one of many must be taken`). Configuration might be valid or not and voila:
 
 ```java
