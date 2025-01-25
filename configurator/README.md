@@ -135,14 +135,17 @@ However, as pointed out in the beginning, customer might be led by hand by syste
 - If there is a part that is unambiguously needed to be picked, because otherwise configuration will not ever be completed system could suggest it automatically to make things easier - sooner or later customer would be forced to pick it anyway.
 - If there is a part which peaking will lead to make configuration process invalid it can be blocked at the time of picking another part, which causes this exclusion. There is no point in customer trying to blindly pick what they thinks is needed and learning that their choice is not possible due to rules contradiction.
 
-#### Suggestion scenario
+#### Auto-suggestion scenario
 
 Let's assume there are two rules:
 
 1. If processor MegaSpeed is taken then one of coolers SuperFreeze or UltraIce must be taken
 2. If keyboard ComfyType is taken then cooler UltraIce cannot be taken
 
-If client picks 
+The scenario might look like followed then!
+
+![System suggests automatically 1](./diagrams/system-suggests-automatically-1.png)
+![System suggests automatically 2](./diagrams/system-suggests-automatically-2.png)
 
 ## Possible solutions
 
