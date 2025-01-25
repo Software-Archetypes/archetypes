@@ -73,16 +73,30 @@ To sum things up there are four types of rules that allows for creating whatever
 - one of inclusion rule
 - presence rule
 
-But - as always - complexity lies in details. How to ensure that they are not interfering with each other making the configuration impossible to finish? That's the hard part we'll try to answer later.
+But - as always - complexity lies in details. How to ensure that they are not interfering with each other making the configuration impossible to finish? That's the hard part, if admin slips there the whole purchase of product will not be completable, so customers won't be able to buy anything. That smells badly - like a lot of money lost.
 
-This use case looks as following - admin adds a new rule, system checks if there even is a set of parts that meets all rules defined in the configuration - and if yes new rule is successfully added.
+#### *Scenario with configuration impossible to complete*
+
+##### Step 1
+![Admin adds conflicting rules step 1](./diagrams/admin-adds-conflicting-rules-1.png)
+##### Step 2
+![Admin adds conflicting rules step 2](./diagrams/admin-adds-conflicting-rules-2.png)
+##### Step 3
+![Admin adds conflicting rules step 3](./diagrams/admin-adds-conflicting-rules-3.png)
+
+**In the scenario above no matter how hard one will try there is now way to configure a computer with keyboard!**
+
+#### Final use case structure
+
+So as it might be seen - system should prevent admin from boxing customer in a corner.
+Visualization of this use case looks as following - admin adds a new rule, system checks if at least one set of parts that meets all rules defined in the configuration exists - and if yes new rule is successfully added.
 
 ![Admin adds rule use case](./diagrams/admin-adds-rule-use-case.png)
 
-### Use case #2 - Configuring a computer as a customer
+### Use case #2 - Adding or removing parts during configuration process as a customer
 
-Let's assume that admin has already done their job and set up configuration properly - end users are finally able to start playing with possible option to buy their dreamed machine.
-In simple words - they start *configuration process*.
+Let's assume that admin has already done their job and set up configuration properly - end users are finally able to start playing with possible options to buy their dreamed machine.
+In simple words - they can finally start *configuration process*.
 Before jumping into any solutions let's distinguish two crucial concepts of configuration process being `Valid` and `Completed`.
 
 If configuration process is `Completed` it means that all rules regarding product are satisfied and it can be purchased. On the other side,
