@@ -41,7 +41,7 @@ Let's see how aformentioned problems could be tackled with several approaches.
 
 ## Use cases
 
-Based on problem statements from the beginning four major use cases might be identified: 
+Based on problem statements from the beginning four major use cases might be identified
 
 1. Setting up configuration rules as an admin
 2. Adding or removing parts during configuration process as a customer
@@ -49,6 +49,11 @@ Based on problem statements from the beginning four major use cases might be ide
 4. Completing configuration process as a customer
 
 ### Use case #1 - Setting up configuration rules as an admin
+
+#### Main questions use case answers
+
+- Which laptop configurations are valid?
+- Is configuration completable?
 
 At first we need to define what kind of rules come into play. The most trivial ones are of course the following:
 
@@ -86,7 +91,7 @@ But - as always - complexity lies in details. How to ensure that they are not in
 
 **In the scenario above no matter how hard one will try there is now way to configure a computer with keyboard!**
 
-#### Use case #1 flow
+#### Use case #1 - FLOW
 
 So as it might be seen - system should prevent admin from boxing customer in a corner.
 Visualization of this use case looks as following - admin adds a new rule, system checks if at least one set of parts that meets all rules defined in the configuration exists - and if yes new rule is successfully added.
@@ -94,6 +99,10 @@ Visualization of this use case looks as following - admin adds a new rule, syste
 ![Admin adds rule use case](./diagrams/admin-adds-rule-use-case.png)
 
 ### Use case #2 - Adding or removing parts during configuration process as a customer
+
+#### Main questions use case answers
+
+- Could part be added to an existing configuration without violating any rule?
 
 Let's assume that admin has already done their job and set up configuration properly - end users are finally able to start playing with possible options to buy their dreamed machine.
 In simple words - they can finally start *configuration process*.
@@ -124,11 +133,16 @@ Following sets are possible having such intial conditions:
 
 So after delving into meandrs of configuring processes it is clear that system needs to guard against customer boxing themselves into the corner - end users do not know all rules and even if they do, this would have nothing in common with seamless user experience.
 
-#### Use case #2 flow
+#### Use case #2 - FLOW
 
 ![Customer picks new part use case](./diagrams/customer-picks-new-part-use-case.png)
 
 ### Use case #3 - Blocking or suggesting parts for customer during configuration process as a system
+
+#### Main questions use case answers
+
+- Which parts should be blocked/suggested after given part is added?
+- Which parts should be unblocked/not suggested anymore given part is removed?
 
 However, as pointed out in the beginning, customer might be led by hand by system. Two enhancements were identified to do so:
 
@@ -155,14 +169,36 @@ Customer picks MegaSpeed processor, it doesn't have any consequences.
 ![System blocks/suggests automatically 3](./diagrams/system-blocks-suggests-automatically-3.png)
 System should autosuggest picking SuperFreeze cooler, since it is the only viable option now for configuration process to be completed! UltraIce cooler, on the other hand, should be blocked! As it is shown in previous use case picking it will lead to an error, because configuration process would be invalid after such a decision.
 
-##### **Step 3 - ComfyType keyboard resignation**
+##### **Step 3 - ComfyType keyboard removal**
 
 ![System blocks/suggests automatically 4](./diagrams/system-blocks-suggests-automatically-4.png)
 Of course in the face of these cirumctances customer might just decide to resign from MegaSpeed processor which should result in SuperFreeze cooler not being suggested anymore and UltraIce processor unblocked.
 
-#### Use case #3 flows
+#### Use case #3 - FLOW
 
-This clearly shows us 
+This use case is build on top of previous one - it reacts to part being added/removed. Using Event Storming notion it would be called [policy.](https://github.com/ddd-crew/eventstorming-glossary-cheat-sheet?tab=readme-ov-file#process-modelling-eventstorming)
+
+##### **Add part policies**
+
+![Add part policies](./diagrams/blocking-and-suggesting-parts-use-case.png)
+
+##### **Remove part policies**
+
+![Remove part policies](./diagrams/unblocking-parts-use-case.png)
+
+### Use case #4 - Completing configuration process
+
+At some point of time user wants to proceed to checkout and buy their carefully polished computer. Obviously, system needs to guard if configuration is `Completed` - in other words whether all rules are satisfied. No merchant wants to sell computer without a keyboard or with a processor that will die in seconds after running due to insufficient cooler. Here scenario is rather easy (of course it assumes proper configuration is already in place)
+
+![Complete configuration process use case](./diagrams/complete-configuration-process-use-case.png)
+
+## Glossary
+
+- `Configuration`
+- `Configuration process`
+- `Completeable configuration`
+- `Completed configuration`
+- `Valid configuration`
 
 ## Possible solutions
 
@@ -205,4 +241,12 @@ class ComputerConfiguration {
 ```
 
 At first glance looks like it all went pretty smooth - however many questions remain unanswered with the aformentioned design:
-* it can check whether end configuration fulfills all requirements in absolute terms, though it cannot check whether configuration is `valid` or not. `Valid` configuration might still be incomplete
+
+- it can check whether end configuration fulfills all requirements in absolute terms, though it cannot check whether configuration is `valid` or not. `Valid` configuration might still be `incomplete`. 
+- 
+
+## Better solution
+
+Let's take a step back and reflect on what is the main problem to solve. We are looking for an answer to two questions
+ - is there a set of choices that satisfies given set of rules? ()
+ - are all rules satisfied 
