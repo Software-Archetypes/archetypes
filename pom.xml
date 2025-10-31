@@ -20,6 +20,11 @@
         <module>general-assignment</module>
         <module>waitlist</module>
         <module>configurator</module>
+        <module>accounting</module>
+        <module>common</module>
+        <module>quantity</module>
+        <module>pricing</module>
+        <module>product</module>
     </modules>
 
 </project>
