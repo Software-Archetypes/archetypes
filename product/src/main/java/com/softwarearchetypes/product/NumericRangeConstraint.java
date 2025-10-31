@@ -19,6 +19,10 @@ class NumericRangeConstraint implements FeatureValueConstraint {
         this.max = max;
     }
 
+    static FeatureValueConstraint between(int min, int max) {
+        return new NumericRangeConstraint(min, max);
+    }
+
     @Override
     public FeatureValueType valueType() {
         return FeatureValueType.INTEGER;

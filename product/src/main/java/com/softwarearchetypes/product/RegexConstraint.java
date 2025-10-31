@@ -21,6 +21,10 @@ class RegexConstraint implements FeatureValueConstraint {
         this.pattern = Pattern.compile(pattern);
     }
 
+    static FeatureValueConstraint of(String pattern) {
+        return new RegexConstraint(pattern);
+    }
+
     @Override
     public FeatureValueType valueType() {
         return FeatureValueType.TEXT;

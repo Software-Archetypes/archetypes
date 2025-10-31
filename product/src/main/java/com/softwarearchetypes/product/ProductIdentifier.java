@@ -1,6 +1,6 @@
 package com.softwarearchetypes.product;
 
-interface ProductIdentifier {
+public interface ProductIdentifier {
 
     String type();
     String toString();

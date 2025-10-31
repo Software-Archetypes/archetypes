@@ -71,7 +71,7 @@ class ProductFeatureType {
      * Example: expiry date between 2024-01-01 and 2024-12-31
      */
     static ProductFeatureType withDateRange(String name, String from, String to) {
-        return new ProductFeatureType(name, DateRangeConstraint.of(from, to));
+        return new ProductFeatureType(name, DateRangeConstraint.between(from, to));
     }
 
     /**

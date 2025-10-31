@@ -27,6 +27,10 @@ class DecimalRangeConstraint implements FeatureValueConstraint {
         return new DecimalRangeConstraint(new BigDecimal(min), new BigDecimal(max));
     }
 
+    static FeatureValueConstraint between(BigDecimal min, BigDecimal max) {
+        return new DecimalRangeConstraint(min, max);
+    }
+
     @Override
     public FeatureValueType valueType() {
         return FeatureValueType.DECIMAL;

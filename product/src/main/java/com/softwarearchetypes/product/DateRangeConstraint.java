@@ -23,7 +23,7 @@ class DateRangeConstraint implements FeatureValueConstraint {
         this.to = to;
     }
 
-    static DateRangeConstraint of(String from, String to) {
+    static DateRangeConstraint between(String from, String to) {
         return new DateRangeConstraint(LocalDate.parse(from), LocalDate.parse(to));
     }
 
