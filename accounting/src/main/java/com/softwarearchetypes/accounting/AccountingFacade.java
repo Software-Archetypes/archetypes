@@ -53,20 +53,20 @@ public class AccountingFacade {
         }
         Set<AccountId> createdAccounts = new HashSet<>();
         requests.forEach(req -> {
-            createAccount(req.accountId(), AccountCategory.valueOf(req.category()), AccountName.of(req.name()));
+            createAccount(req.accountId(), AccountType.valueOf(req.type()), AccountName.of(req.name()));
         });
         return Result.success(createdAccounts);
     }
 
     public Result<String, AccountId> createAccount(CreateAccount request) {
-        return createAccount(request.accountId(), AccountCategory.valueOf(request.category()), AccountName.of(request.name()));
+        return createAccount(request.accountId(), AccountType.valueOf(request.type()), AccountName.of(request.name()));
     }
 
-    private Result<String, AccountId> createAccount(AccountId accountId, AccountCategory category, AccountName name) {
+    private Result<String, AccountId> createAccount(AccountId accountId, AccountType type, AccountName name) {
         if (accountRepository.find(accountId).isPresent()) {
             return Result.failure("Account with id " + accountId + " already exists");
         }
-        Account account = new Account(accountId, category, name, Version.initial());
+        Account account = new Account(accountId, type, name, Version.initial());
         accountRepository.save(account);
         return Result.success(account.id());
     }
@@ -113,6 +113,46 @@ public class AccountingFacade {
 
     public TransactionBuilder transaction() {
         return transactionBuilderFactory.transaction();
+    }
+
+    public Result<String, TransactionId> handle(ExecuteTransactionCommand command) {
+        try {
+            TransactionBuilder.TransactionEntriesBuilder entriesBuilder = transactionBuilderFactory.transaction()
+                    .occurredAt(command.occurredAt())
+                    .appliesAt(command.appliesAt())
+                    .withTypeOf(command.transactionType())
+                    .withMetadata(MetaData.of(command.metadata()))
+                    .executing();
+
+            for (ExecuteTransactionCommand.Entry entry : command.entries()) {
+                Validity validity = Validity.between(entry.validFrom(), entry.validTo());
+                AccountId accountId = AccountId.of(entry.accountId());
+                Money amount = entry.amount();
+
+                switch (entry.entryType()) {
+                    case CREDIT -> entriesBuilder.creditTo(accountId, amount, validity);
+                    case DEBIT -> entriesBuilder.debitFrom(accountId, amount, validity);
+                }
+            }
+
+            Transaction transaction = entriesBuilder.build();
+            return execute(transaction);
+        } catch (Exception ex) {
+            return Result.failure(ex.getMessage());
+        }
+    }
+
+    public Result<String, TransactionId> handle(ReverseTransactionCommand command) {
+        try {
+            Transaction transaction = transactionBuilderFactory.transaction()
+                    .occurredAt(command.occurredAt())
+                    .appliesAt(command.appliesAt())
+                    .reverting(TransactionId.of(command.refTransactionId()))
+                    .build();
+            return execute(transaction);
+        } catch (Exception ex) {
+            return Result.failure(ex.getMessage());
+        }
     }
 
     public Result<String, TransactionId> transfer(AccountId from, AccountId to, Money amount, Instant occurredAt, Instant appliesAt) {
@@ -225,7 +265,7 @@ public class AccountingFacade {
         return transaction.entries().entrySet().stream().map(
                 entry -> {
                     Account account = entry.getKey();
-                    AccountMetadataView accountView = new AccountMetadataView(account.id(), account.name(), account.category().name());
+                    AccountMetadataView accountView = new AccountMetadataView(account.id(), account.name(), account.type().name());
                     List<EntryView> entries = entry.getValue().stream().map(EntryView::from).toList();
                     return new TransactionAccountEntriesView(accountView, entries);
                 }
@@ -272,7 +312,7 @@ class AccountViewQueries {
 
     private AccountView accountViewFrom(Account acc) {
         List<EntryView> entries = entryRepository.findAllFor(acc.id()).stream().map(EntryView::from).collect(toList());
-        return new AccountView(acc.id(), acc.name(), acc.category().name(), acc.balance(), entries);
+        return new AccountView(acc.id(), acc.name(), acc.type().name(), acc.balance(), entries);
     }
 
 }

@@ -2,7 +2,6 @@ package com.softwarearchetypes.accounting.postingrules;
 
 import java.util.function.Predicate;
 
-import com.softwarearchetypes.accounting.String;
 import com.softwarearchetypes.accounting.AccountId;
 import com.softwarearchetypes.accounting.EntryView;
 
@@ -21,12 +20,12 @@ public interface EligibilityCondition {
                                  .anyMatch(it -> it.type().equals(entryType));
     }
 
-    static EligibilityCondition accountCategory(String category) {
+    static EligibilityCondition accountType(String type) {
         return context -> context.triggeringEntries().stream()
                                  .anyMatch(entry -> {
                                      return context.accountingFacade()
                                                    .findAccount(entry.accountId())
-                                                   .map(account -> account.category().equals(category))
+                                                   .map(account -> account.type().equals(type))
                                                    .orElse(false);
                                  });
     }

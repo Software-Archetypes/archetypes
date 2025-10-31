@@ -7,12 +7,12 @@ import com.softwarearchetypes.quantity.money.Money;
 
 import static java.util.stream.Collectors.toList;
 
-public record AccountView(AccountId id, String name, String category, Money balance, List<EntryView> entries) {
+public record AccountView(AccountId id, String name, String type, Money balance, List<EntryView> entries) {
 
     //intentionally left package private
     static AccountView from(Account account) {
         List<EntryView> entryViews = account.entries().stream().map(EntryView::from).collect(toList());
-        return new AccountView(account.id(), account.name(), account.category().name(), account.balance(), entryViews);
+        return new AccountView(account.id(), account.name(), account.type().name(), account.balance(), entryViews);
     }
 
     Money balanceAsOf(Instant time) {

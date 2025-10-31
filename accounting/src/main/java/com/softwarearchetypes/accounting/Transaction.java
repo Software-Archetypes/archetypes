@@ -84,6 +84,11 @@ interface TransactionEntriesConstraint extends Predicate<Map<Entry, Account>> {
 
     String errorMessage();
 
+    //TODO
+    default boolean isApplicable(Map<Entry, Account> entries) {
+        return true;
+    }
+
     TransactionEntriesConstraint BALANCING_CONSTRAINT = new TransactionEntriesConstraint() {
         @Override
         public String errorMessage() {
@@ -95,7 +100,7 @@ interface TransactionEntriesConstraint extends Predicate<Map<Entry, Account>> {
             Money balance = Optional.ofNullable(entries).orElse(Map.of())
                                     .entrySet()
                                     .stream()
-                                    .filter(entry -> entry.getValue().category().isDoubleEntryBookingEnabled())
+                                    .filter(entry -> entry.getValue().type().isDoubleEntryBookingEnabled())
                                     .map(entry -> entry.getKey().amount())
                                     .reduce(Money.zeroPln(), Money::add);
             return balance.isZero();

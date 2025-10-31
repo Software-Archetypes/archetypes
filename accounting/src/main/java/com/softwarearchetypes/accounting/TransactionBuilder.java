@@ -23,7 +23,7 @@ import static io.pillopl.common.CollectionTransformations.subtract;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 
-public class TransactionBuilder {
+class TransactionBuilder {
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;

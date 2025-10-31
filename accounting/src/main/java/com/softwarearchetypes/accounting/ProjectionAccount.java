@@ -17,10 +17,10 @@ class ProjectionAccount {
         this(accountId, filter, name, Version.initial());
     }
 
-    ProjectionAccount(AccountId accountId, Filter filter, String descirption, Version version) {
+    ProjectionAccount(AccountId accountId, Filter filter, String name, Version version) {
         this.accountId = accountId;
         this.filter = filter;
-        this.name = descirption;
+        this.name = name;
         this.version = version;
     }
 

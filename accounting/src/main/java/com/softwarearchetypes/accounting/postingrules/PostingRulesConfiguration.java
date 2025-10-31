@@ -3,7 +3,7 @@ package com.softwarearchetypes.accounting.postingrules;
 import java.time.Clock;
 
 import com.softwarearchetypes.accounting.AccountingFacade;
-import io.pillopl.common.EventPublisher;
+import com.softwarearchetypes.common.events.EventPublisher;
 
 public class PostingRulesConfiguration {
 

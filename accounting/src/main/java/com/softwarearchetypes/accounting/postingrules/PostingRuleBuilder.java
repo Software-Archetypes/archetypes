@@ -5,7 +5,7 @@ import java.util.Map;
 import com.softwarearchetypes.accounting.AccountId;
 import com.softwarearchetypes.accounting.EntryView;
 
-import static io.pillopl.common.Preconditions.checkArgument;
+import static com.softwarearchetypes.common.Preconditions.checkArgument;
 
 public class PostingRuleBuilder {
 

@@ -1,6 +1,6 @@
 package com.softwarearchetypes.accounting;
 
-public record CreateAccount(AccountId accountId, String name, String category) {
+public record CreateAccount(AccountId accountId, String name, String type) {
 
     public static CreateAccount generateAssetAccount(AccountId accountId) {
         return new CreateAccount(accountId, "", "ASSET");
@@ -10,8 +10,8 @@ public record CreateAccount(AccountId accountId, String name, String category) {
         return new CreateAccount(AccountId.generate(), name, "ASSET");
     }
 
-    public static CreateAccount generate(String category) {
-        return new CreateAccount(AccountId.generate(), "", category);
+    public static CreateAccount generate(String type) {
+        return new CreateAccount(AccountId.generate(), "", type);
     }
 
 }

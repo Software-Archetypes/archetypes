@@ -5,8 +5,14 @@ import java.util.Map;
 
 public record MetaData(Map<String, String> metadata) {
 
+    public static final MetaData EMPTY = new MetaData(Map.of());
+
     static MetaData empty() {
-        return new MetaData(new HashMap<>());
+        return EMPTY;
+    }
+
+    static MetaData of(Map<String, String> metadata) {
+        return metadata != null ? new MetaData(metadata) : EMPTY;
     }
 
     static MetaData of(String... keyValues) {

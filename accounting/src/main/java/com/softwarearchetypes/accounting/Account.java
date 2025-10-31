@@ -17,7 +17,7 @@ import static com.softwarearchetypes.common.Preconditions.checkArgument;
 class Account {
 
     private final AccountId accountId;
-    private final AccountCategory category;
+    private final AccountType type;
     private final AccountName name;
     private final Money balance;
     //for optimistic locking
@@ -27,21 +27,21 @@ class Account {
     private final Entries newEntries;
     private final List<AccountingEvent> pendingEvents = new LinkedList<>();
 
-    Account(AccountId accountId, AccountCategory category, AccountName name) {
-        this(accountId, category, name, Version.initial());
+    Account(AccountId accountId, AccountType type, AccountName name) {
+        this(accountId, type, name, Version.initial());
     }
 
-    Account(AccountId accountId, AccountCategory category, AccountName name, Version version) {
-        this(accountId, category, name, Money.zeroPln(), version);
+    Account(AccountId accountId, AccountType type, AccountName name, Version version) {
+        this(accountId, type, name, Money.zeroPln(), version);
     }
 
-    Account(AccountId accountId, AccountCategory category, AccountName name, Money balance, Version version) {
+    Account(AccountId accountId, AccountType type, AccountName name, Money balance, Version version) {
         checkArgument(accountId != null, "Account ID must be defined");
-        checkArgument(category != null, "Account category must be defined");
+        checkArgument(type != null, "Account type must be defined");
         checkArgument(name != null, "Account name must be defined");
         checkArgument(version != null, "Account version must be defined");
         this.accountId = accountId;
-        this.category = category;
+        this.type = type;
         this.name = name;
         this.version = version;
         this.balance = Optional.ofNullable(balance).orElse(Money.zeroPln());
@@ -106,8 +106,8 @@ class Account {
         return newEntries.copy();
     }
 
-    AccountCategory category() {
-        return category;
+    AccountType type() {
+        return type;
     }
 
     Money balance() {

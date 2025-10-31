@@ -3,9 +3,11 @@ package com.softwarearchetypes.accounting.postingrules;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.softwarearchetypes.accounting.AccountingFacade;
 import com.softwarearchetypes.accounting.EntryView;
+import com.softwarearchetypes.accounting.TransactionId;
 import com.softwarearchetypes.common.Result;
 
 /**
@@ -56,7 +58,7 @@ public class PostingRulesFacade {
         return postingRuleRepository.findAll();
     }
 
-    public Result executeRulesFor(List<EntryView> triggeringEntries) {
+    public Result<String, Set<TransactionId>> executeRulesFor(List<EntryView> triggeringEntries) {
         PostingContext context = new PostingContext(triggeringEntries, accountingFacade, clock);
         return postingRuleExecutor.executeEligibleRules(context, accountingFacade::execute);
     }

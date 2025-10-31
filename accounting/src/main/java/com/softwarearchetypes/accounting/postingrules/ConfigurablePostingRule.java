@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.softwarearchetypes.accounting.Transaction;
 
-import static io.pillopl.common.Preconditions.checkArgument;
+import static com.softwarearchetypes.common.Preconditions.checkArgument;
 
 class ConfigurablePostingRule implements PostingRule {
 
