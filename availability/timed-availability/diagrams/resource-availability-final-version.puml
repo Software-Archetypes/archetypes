@@ -1,0 +1,71 @@
+@startuml
+skinparam MinClassWidth 100
+skinparam linetype ortho
+
+object ResourceGroupedAvailability {
+  - resourceAvailabilities: List<ResourceAvailability>
+  __
+  + of(resourceId: ResourceId, timeslot: TimeSlot): ResourceGroupedAvailability
+  + block(requester: Owner): boolean
+  + release(requester: Owner): boolean
+  + disable(requester: Owner): boolean
+}
+
+object ResourceAvailability {
+  - id: ResourceAvailabilityId
+  - resourceId: ResourceId
+  - resourceParentId: ResourceId
+  - segment: TimeSlot
+  - blockade: Blockade
+  - version: int
+  __
+  + block(requester: Owner): boolean
+  + release(requester: Owner): boolean
+  + disable(requester: Owner): boolean
+  - isAvailableFor(requester: Owner): boolean
+}
+
+object Blockade {
+  + takenBy: Owner
+  + disabled: boolean
+  __
+  + none(): Blockade
+  + disabledBy(owner: Owner): Blockade
+  + ownedBy(owner: Owner): Blockade
+  + canBeTakenBy(requester: Owner): boolean
+  + isDisabledBy(owner: Owner): boolean
+}
+
+object Owner {
+  + owner: UUID
+  __
+  + none(): Owner
+  + newOne(): Owner
+  + of(id: UUID): Owner
+  + byNone(): boolean
+  + id(): UUID
+}
+
+object ResourceAvailabilityId {
+  + value: UUID
+}
+
+object ResourceId {
+  + value: UUID
+}
+
+object TimeSlot {
+  + from: Instant
+  + to: Instant
+}
+
+
+ResourceGroupedAvailability "1" o-- "1..*" ResourceAvailability
+ResourceAvailability "1" *-- "1" Blockade
+ResourceAvailability --> ResourceAvailabilityId
+ResourceAvailability --> ResourceId
+ResourceAvailability --> ResourceId
+ResourceAvailability --> TimeSlot
+Blockade --> Owner
+
+@enduml

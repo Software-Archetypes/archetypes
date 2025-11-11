@@ -1,0 +1,59 @@
+@startuml
+skinparam MinClassWidth 100
+skinparam linetype ortho
+
+object Calendar {
+  - blockades: List<ResourceBlockade>
+  __
+  + block(resourceId: ResourceId, timeSlot: TimeSlot, owner: Owner): boolean
+  + release(resourceId: ResourceId, timeSlot: TimeSlot, owner: Owner): boolean
+}
+
+object ResourceBlockade {
+  + resource: ResourceId
+  + timeSlot: TimeSlot
+  + owner: Owner
+}
+
+object AvailabilityFacade {
+  + block(resourceId: ResourceId, timeSlot: TimeSlot, owner: Owner): boolean
+  + release(resourceId: ResourceId, timeSlot: TimeSlot, owner: Owner): boolean
+}
+
+object CarService {
+  - availabilityFacade: AvailabilityFacade
+  - relocationService: RelocationService
+  - maintenanceService: MaintenanceService
+  - reservationRepository: ReservationRepository
+  - carRepository: CarRepository
+  __
+  + reserve(carId: CarId, riderId: RiderId, slot: TimeSlot): boolean
+  + putIntoMaintenanceMode(carId: CarId): boolean
+  + registerRelocation(carId: CarId, slot: TimeSlot): boolean
+}
+
+object Owner {
+  + value: UUID
+  __
+  + of(value: UUID): Owner
+}
+
+object ResourceId {
+  + value: UUID
+  __
+  + of(value: UUID): ResourceId
+}
+
+object TimeSlot {
+  + from: Instant
+  + to: Instant
+}
+
+CarService --> AvailabilityFacade
+AvailabilityFacade ..> Calendar : «loads»
+Calendar "1" *-- "0..*" ResourceBlockade
+ResourceBlockade --> ResourceId
+ResourceBlockade --> TimeSlot
+ResourceBlockade --> Owner
+
+@enduml
