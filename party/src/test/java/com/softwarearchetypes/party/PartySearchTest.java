@@ -25,7 +25,7 @@ class PartySearchTest {
     private final PartyRoleFactory partyRoleFactory = new PartyRoleFactory();
     private final PartyRelationshipFactory partyRelationshipFactory = new PartyRelationshipFactory(PartyRelationshipId::random);
     private final InMemoryPartyRelationshipRepository partyRelationshipRepository = new InMemoryPartyRelationshipRepository();
-    private final PartyRelationshipsFacade facade = new PartyRelationshipsFacade(partyRoleFactory, partyRelationshipFactory, partyRelationshipRepository, partiesQueries, eventPublisher);
+    private final PartyRelationshipsFacade facade = new PartyRelationshipsFacade(partyRoleFactory, partyRelationshipFactory, partyRelationshipRepository, repository, eventPublisher);
     private final PartyRelationshipsQueries partyRelationshipsQueries = new PartyRelationshipsQueries(partyRelationshipRepository);
     private final PartyRelationshipTestSupport partyRelationshipTestSupport = new PartyRelationshipTestSupport(facade);
 
@@ -88,11 +88,11 @@ class PartySearchTest {
                 rel -> rel.name().equals(EMPLOYMENT),
                 address -> address instanceof GeoAddress && ((GeoAddress.GeoAddressDetails) address.addressDetails()).city().equals("WARSAW")
         );
-        List<Party> result = partySearch.findMatching(search);
+        List<PartyView> result = partySearch.findMatching(search);
 
         //then
         assertEquals(1, result.size());
-        assertEquals(adamTheEmployeeFromWarsaw, result.getFirst());
+        assertEquals(PartyViewMapper.toView(adamTheEmployeeFromWarsaw), result.getFirst());
     }
 
 }

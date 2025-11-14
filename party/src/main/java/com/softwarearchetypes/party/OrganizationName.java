@@ -6,7 +6,7 @@ public record OrganizationName(String value) {
         return new OrganizationName(value);
     }
 
-    String asString() {
+    public String asString() {
         return value;
     }
 

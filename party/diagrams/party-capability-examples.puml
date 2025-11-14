@@ -1,0 +1,375 @@
+@startuml
+skinparam linetype ortho
+title Party Capability - Concrete Examples
+
+' ===== EXAMPLE 1: ULTRASOUND TECHNICIAN =====
+package "Example 1: Ultrasound Technician" #FFE0E0 {
+  object maryTech {
+    Party: Person
+    name: "Maria Nowak"
+  }
+
+  object usgCapability {
+    Capability
+    --
+    type: Medical Imaging
+    validity: 2024-2026
+  }
+
+  object usgProtocolScope {
+    ProtocolScope
+    --
+    protocol: "Ultrasound Imaging"
+    procedures: ["Abdominal", "Cardiac", "Prenatal", "Thyroid"]
+  }
+
+  object usgLocationScope {
+    LocationScope
+    --
+    location: "Medicode Warszawa Mokotów"
+  }
+
+  object usgTemporalScope {
+    TemporalScope
+    --
+    hours: 8:00 - 16:00
+    days: Mon-Fri
+  }
+
+  object usgQuantityScope {
+    QuantityScope
+    --
+    quantity: 15 patients
+    period: per day
+  }
+
+  maryTech -- usgCapability
+  usgCapability *-- usgProtocolScope
+  usgCapability *-- usgLocationScope
+  usgCapability *-- usgTemporalScope
+  usgCapability *-- usgQuantityScope
+}
+
+' ===== EXAMPLE 2: ELECTRICIAN =====
+package "Example 2: Electrician" #E0FFE0 {
+  object janElectric {
+    Party: Person
+    name: "Jan Kowalski"
+  }
+
+  object electricCapability {
+    Capability
+    --
+    type: Electrical Installation
+    validity: forever
+  }
+
+  object electricSkillScope {
+    SkillLevelScope
+    --
+    skill: "Electrical Installation"
+    level: 9/10
+    certifications: ["SEP G1", "SEP D"]
+  }
+
+  object electricProtocolScope {
+    ProtocolScope
+    --
+    protocol: "Building Installations"
+    procedures: ["Residential", "Commercial", "Industrial"]
+  }
+
+  object electricLocationScope {
+    LocationScope
+    --
+    location: "Kraków"
+    radius: 30 km
+  }
+
+  object electricTemporalScope {
+    TemporalScope
+    --
+    hours: 7:00 - 19:00
+    days: Mon-Sat
+  }
+
+  janElectric -- electricCapability
+  electricCapability *-- electricSkillScope
+  electricCapability *-- electricProtocolScope
+  electricCapability *-- electricLocationScope
+  electricCapability *-- electricTemporalScope
+}
+
+' ===== EXAMPLE 3: DELIVERY DRIVER =====
+package "Example 3: Delivery Driver" #E0E0FF {
+  object piotrDriver {
+    Party: Person
+    name: "Piotr Wiśniewski"
+  }
+
+  object deliveryCapability {
+    Capability
+    --
+    type: Goods Delivery
+    validity: 2024-2025
+  }
+
+  object deliveryLocationScope {
+    LocationScope
+    --
+    location: "Warszawa i okolice"
+    radius: 50 km
+  }
+
+  object deliveryProductScope {
+    ProductScope
+    --
+    categories: ["Electronics", "Furniture", "Food"]
+    maxWeight: 500 kg
+  }
+
+  object deliveryQuantityScope {
+    QuantityScope
+    --
+    quantity: 25 deliveries
+    period: per day
+  }
+
+  object deliveryResourceScope {
+    ResourceScope
+    --
+    resourceTypes: ["Van 3.5t"]
+    maxCapacity: 15 m³
+  }
+
+  object deliveryTemporalScope {
+    TemporalScope
+    --
+    hours: 6:00 - 22:00
+    days: Mon-Sun
+  }
+
+  piotrDriver -- deliveryCapability
+  deliveryCapability *-- deliveryLocationScope
+  deliveryCapability *-- deliveryProductScope
+  deliveryCapability *-- deliveryQuantityScope
+  deliveryCapability *-- deliveryResourceScope
+  deliveryCapability *-- deliveryTemporalScope
+}
+
+' ===== EXAMPLE 4: BEAUTICIAN =====
+package "Example 4: Beautician" #FFFFE0 {
+  object annaBeauty {
+    Party: Person
+    name: "Anna Zielińska"
+  }
+
+  object beautyCapability {
+    Capability
+    --
+    type: Beauty Services
+    validity: 2024-2026
+  }
+
+  object beautyProtocolScope {
+    ProtocolScope
+    --
+    protocol: "Facial Treatments"
+    procedures: ["Deep Cleansing", "Anti-aging", "Acne Treatment", "Hydration"]
+  }
+
+  object beautySkillScope {
+    SkillLevelScope
+    --
+    skill: "Cosmetology"
+    level: 8/10
+    certifications: ["Cosmetology Diploma", "Dermapen Certification"]
+  }
+
+  object beautyLocationScope {
+    LocationScope
+    --
+    location: "Beauty Studio Gdańsk Wrzeszcz"
+  }
+
+  object beautyTemporalScope {
+    TemporalScope
+    --
+    hours: 10:00 - 20:00
+    days: Tue-Sat
+  }
+
+  object beautyQuantityScope {
+    QuantityScope
+    --
+    quantity: 8 clients
+    period: per day
+  }
+
+  annaBeauty -- beautyCapability
+  beautyCapability *-- beautyProtocolScope
+  beautyCapability *-- beautySkillScope
+  beautyCapability *-- beautyLocationScope
+  beautyCapability *-- beautyTemporalScope
+  beautyCapability *-- beautyQuantityScope
+}
+
+' ===== EXAMPLE 5: SOFTWARE HOUSE (ORGANIZATION) =====
+package "Example 5: Software House (Organization)" #FFE0FF {
+  object devProsoftware {
+    Party: Organization
+    name: "DevPro Software Sp. z o.o."
+  }
+
+  object softwareDevCapability {
+    Capability
+    --
+    type: Software Development
+    validity: forever
+  }
+
+  object techStackScope1 {
+    SkillLevelScope
+    --
+    skill: "Java/Spring Boot"
+    level: 9/10
+    certifications: ["Oracle Partner", "Spring Certified"]
+  }
+
+  object techStackScope2 {
+    SkillLevelScope
+    --
+    skill: "React/TypeScript"
+    level: 8/10
+    certifications: []
+  }
+
+  object projectScope {
+    ProductScope
+    --
+    categories: ["Web Applications", "Mobile Apps", "API Development", "Cloud Migration"]
+  }
+
+  object locationScope {
+    LocationScope
+    --
+    location: "Poland (Warszawa, Kraków, Wrocław)"
+    radius: unlimited (remote teams)
+  }
+
+  object capacityScope {
+    QuantityScope
+    --
+    quantity: 15 concurrent projects
+    period: at any time
+  }
+
+  object resourceScope {
+    ResourceScope
+    --
+    resourceTypes: ["Senior Developers: 25", "Mid Developers: 40", "QA Engineers: 10"]
+    maxCapacity: 75 people
+  }
+
+  devProsoftware -- softwareDevCapability
+  softwareDevCapability *-- techStackScope1
+  softwareDevCapability *-- techStackScope2
+  softwareDevCapability *-- projectScope
+  softwareDevCapability *-- locationScope
+  softwareDevCapability *-- capacityScope
+  softwareDevCapability *-- resourceScope
+}
+
+' ===== EXAMPLE 6: DEVELOPMENT TEAM (ORGANIZATION UNIT) =====
+package "Example 6: Development Team (Org Unit)" #E0F0FF {
+  object backendTeam {
+    Party: OrganizationUnit
+    name: "Backend Team Alpha"
+  }
+
+  object teamCapability {
+    Capability
+    --
+    type: Backend Development
+    validity: 2024-2025
+  }
+
+  object teamSkillScope {
+    SkillLevelScope
+    --
+    skill: "Microservices Architecture"
+    level: 9/10
+    certifications: ["AWS Certified", "Kubernetes Certified"]
+  }
+
+  object teamProtocolScope {
+    ProtocolScope
+    --
+    protocol: "Agile/Scrum Development"
+    procedures: ["Sprint Planning", "Code Review", "CI/CD", "Pair Programming"]
+  }
+
+  object teamProductScope {
+    ProductScope
+    --
+    categories: ["REST APIs", "Event-Driven Systems", "Database Design"]
+  }
+
+
+  object teamResourceScope {
+    ResourceScope
+    --
+    resourceTypes: ["Backend Developers: 6", "Tech Lead: 1", "DevOps: 1"]
+    maxCapacity: 8 people
+  }
+
+  object teamTemporalScope {
+    TemporalScope
+    --
+    hours: 9:00 - 17:00
+    days: Mon-Fri
+  }
+
+  backendTeam -- teamCapability
+  teamCapability *-- teamSkillScope
+  teamCapability *-- teamProtocolScope
+  teamCapability *-- teamProductScope
+  teamCapability *-- teamResourceScope
+  teamCapability *-- teamTemporalScope
+}
+
+'note bottom of maryTech
+'  **Capability Query Examples:**
+'
+'  **Person Examples:**
+'  Can Maria do prenatal USG on Wednesday at 10:00?
+'  → YES (has ProtocolScope "Prenatal" + TemporalScope Wed 8-16)
+'
+'  Can Maria do USG on Saturday?
+'  → NO (TemporalScope: Mon-Fri only)
+'
+'  Can Jan install industrial electrical system in Wieliczka (15 km)?
+'  → YES (has ProtocolScope "Industrial" + LocationScope 30 km radius)
+'
+'  Can Piotr deliver 30 packages in one day?
+'  → NO (QuantityScope: max 25 deliveries/day)
+'
+'  Can Anna do anti-aging treatment on Monday?
+'  → NO (TemporalScope: Tue-Sat only)
+'
+'  **Organization Examples:**
+'  Can DevPro Software handle a new React project?
+'  → YES (has SkillLevelScope "React/TypeScript" 8/10)
+'
+'  Can DevPro Software take on 20 projects at once?
+'  → NO (QuantityScope: max 15 concurrent projects)
+'
+'  **Team Examples:**
+'  Can Backend Team Alpha deliver 150 story points in 2 weeks?
+'  → NO (QuantityScope: max 120 SP per sprint)
+'
+'  Can Backend Team Alpha design event-driven system?
+'  → YES (has ProductScope "Event-Driven Systems")
+'end note
+
+@enduml

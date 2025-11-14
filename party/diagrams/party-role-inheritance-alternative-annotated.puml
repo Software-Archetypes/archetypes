@@ -1,0 +1,96 @@
+@startuml
+skinparam MinClassWidth 120
+skinparam linetype ortho
+title Party Role - Inheritance Alternative (Annotated)
+
+' ===== PARTY BASE =====
+package "Core Party Archetype" {
+  object Party
+  object Person
+  object Organization
+
+  Person -up-|> Party
+  Organization -up-|> Party
+}
+
+' ===== COMPANY HIERARCHY =====
+package "Company Types" #FFFFEE {
+  object Company
+  object JointStock
+  object LimitedLiability
+  object LimitedPartnership
+
+  Company -up-|> Organization
+  JointStock -up-|> Company
+  LimitedLiability -up-|> Company
+  LimitedPartnership -up-|> Company
+}
+
+' ===== ORGANIZATION UNIT HIERARCHY =====
+package "Organization Unit Types" #EEEEFF {
+  object OrganizationUnit
+  object Division
+  object Department
+  object Team
+
+  OrganizationUnit -up-|> Organization
+  Division -up-|> OrganizationUnit
+  Department -up-|> OrganizationUnit
+  Team -up-|> OrganizationUnit
+}
+
+' ===== PARTY ROLE - INHERITANCE APPROACH =====
+package "Party Role - Inheritance" #FFEEEE {
+  object PartyRole {
+    partyId: PartyId
+  }
+
+  object Employee
+  object Employer
+  object Customer
+  object Supplier
+
+  Employee -up-|> PartyRole
+  Employer -up-|> PartyRole
+  Customer -up-|> PartyRole
+  Supplier -up-|> PartyRole
+
+  Party "1" -- "0..*" PartyRole : plays
+}
+
+note right of PartyRole
+  <b>Inheritance Approach</b>
+
+  PartyRole is abstract base.
+  Each role type is a subclass:
+  - Employee extends PartyRole
+  - Employer extends PartyRole
+  - Customer extends PartyRole
+  - Supplier extends PartyRole
+
+  Pros:
+  ✓ Type-safe at compile time
+  ✓ Can add role-specific behavior
+  ✓ IDE autocomplete
+
+  Cons:
+  ✗ New role = new class
+  ✗ Not runtime configurable
+  ✗ Code changes for new roles
+  ✗ Many classes to maintain
+end note
+
+note bottom of Employee
+  <b>Alternative to String-based roles</b>
+
+  Instead of:
+  PartyRole { name: "EMPLOYEE" }
+
+  We have:
+  class Employee extends PartyRole
+
+  MDA book suggests this, but we
+  chose PartyRoleType pattern instead.
+end note
+
+@enduml

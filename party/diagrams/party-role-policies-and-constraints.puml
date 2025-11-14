@@ -1,0 +1,40 @@
+@startuml
+skinparam MinClassWidth 120
+skinparam linetype ortho
+skinparam packageMargin 20
+skinparam nodesep 80
+skinparam ranksep 80
+title Party Role - text-based approach
+
+' ===== PARTY BASE =====
+package "Core Party Archetype" {
+  object Party
+  object Person
+  object Organization
+
+  Person -up-|> Party
+  Organization -up-|> Party
+}
+
+' ===== PARTY ROLE =====
+package "PartyRole" #FFCCCC {
+  object PartyRole {
+    partyId: PartyId
+    role: Role
+  }
+
+  object Role {
+    name: String
+  }
+
+  object PartyRoleDefiningPolicy {
+    canDefineFor(Party, Role): boolean
+  }
+
+  PartyRole "1" *-- "1" Role
+  Party "1" -- "0..*" PartyRole : plays
+  PartyRoleDefiningPolicy ..> Party : validates
+  PartyRoleDefiningPolicy ..> Role : checks
+}
+
+@enduml

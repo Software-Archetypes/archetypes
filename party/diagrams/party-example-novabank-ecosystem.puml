@@ -1,0 +1,424 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+title NovaBank Ecosystem - Party Graph with Capabilities
+
+' ===== MAIN BANK =====
+package "NovaBank S.A." #E6F3FF {
+  object NovaBank <<Organization>> {
+    name: NovaBank S.A.
+    partyId: NB-001
+    --
+    **Role**: Bank Centralny Sieci
+  }
+
+  object "Credit Risk Management" as NB_Cap1 <<Capability>> {
+    type: Credit Risk Management
+    scope: EU
+    regulation: Basel III
+  }
+
+  object "Digital Banking API" as NB_Cap2 <<Capability>> {
+    type: Digital Banking API
+    protocol: PSD2
+    channels: [SEPA, SWIFT]
+  }
+
+  NovaBank -- NB_Cap1
+  NovaBank -- NB_Cap2
+}
+
+' ===== PAYNOVA FINTECH =====
+package "PayNova - FinTech Partner" #FFF4E6 {
+  object PayNova <<Organization>> {
+    name: PayNova
+    partyId: PN-001
+  }
+
+  object "API Integration" as PN_Cap1 <<Capability>> {
+    type: API Integration
+    throughput: 10k tx/day
+  }
+
+  object "Fraud Detection" as PN_Cap2 <<Capability>> {
+    type: Fraud Detection
+    accuracy: 97%
+    model: ML v2
+  }
+
+  object PN_Team <<OrgUnit>> {
+    name: PayNova Data Science Team
+    partyId: PN-TEAM-001
+  }
+
+  object "Data Science" as PNT_Cap1 <<Capability>> {
+    type: Data Science
+    skillLevel: 9
+    stack: [Python, TensorFlow]
+  }
+
+  object "Model Monitoring" as PNT_Cap2 <<Capability>> {
+    type: Model Monitoring
+    periodicity: daily
+    metric: F1 > 0.9
+  }
+
+  object Anna <<Person>> {
+    name: Anna Kowalczyk
+    partyId: AK-001
+  }
+
+  object "Data Scientist" as AK_Cap1 <<Capability>> {
+    type: Data Scientist
+    certification: TensorFlow Pro
+    experience: 6y
+  }
+
+  object PiotrM <<Person>> {
+    name: Piotr Mąka
+    partyId: PM-001
+  }
+
+  object "ML Engineer" as PM_Cap1 <<Capability>> {
+    type: ML Engineer
+    certification: AWS ML Specialty
+  }
+
+  PayNova -- PN_Cap1
+  PayNova -- PN_Cap2
+  PN_Team -- PNT_Cap1
+  PN_Team -- PNT_Cap2
+  Anna -- AK_Cap1
+  PiotrM -- PM_Cap1
+}
+
+' ===== SAFELEDGER FINTECH =====
+package "SafeLedger - Blockchain Partner" #E8F5E9 {
+  object SafeLedger <<Organization>> {
+    name: SafeLedger
+    partyId: SL-001
+  }
+
+  object "Blockchain Settlement" as SL_Cap1 <<Capability>> {
+    type: Blockchain Settlement
+    protocol: Ethereum
+    tps: 300
+  }
+
+  object "Compliance Reporting" as SL_Cap2 <<Capability>> {
+    type: Compliance Reporting
+    scope: [AML, GDPR]
+  }
+
+  object Tomasz <<Person>> {
+    name: Tomasz Baran
+    partyId: TB-001
+  }
+
+  object "Smart Contract Auditing" as TB_Cap1 <<Capability>> {
+    type: Smart Contract Auditing
+    certification: Solidity Expert
+    level: 9
+  }
+
+  object Magda <<Person>> {
+    name: Magda Stasiak
+    partyId: MS-001
+  }
+
+  object "LegalTech Analysis" as MS_Cap1 <<Capability>> {
+    type: LegalTech Analysis
+    expertise: Law+IT hybrid
+    level: 7
+  }
+
+  SafeLedger -- SL_Cap1
+  SafeLedger -- SL_Cap2
+  Tomasz -- TB_Cap1
+  Magda -- MS_Cap1
+}
+
+' ===== FINAUDIT =====
+package "FinAudit - External Auditor" #FFF0F5 {
+  object FinAudit <<Organization>> {
+    name: FinAudit Sp. z o.o.
+    partyId: FA-001
+  }
+
+  object "Financial Compliance Audit" as FA_Cap1 <<Capability>> {
+    type: Financial Compliance Audit
+    standards: [Basel III, AML, KYC]
+  }
+
+  object "Security Assessment" as FA_Cap2 <<Capability>> {
+    type: Security Assessment
+    standards: [OWASP, ISO27001]
+  }
+
+  object Pawel <<Person>> {
+    name: Paweł Brzeziński
+    partyId: PB-001
+  }
+
+  object "Auditor" as PB_Cap1 <<Capability>> {
+    type: Auditor
+    experience: 10y
+    certification: CISA
+  }
+
+  object Olga <<Person>> {
+    name: Olga Nowicka
+    partyId: ON-001
+  }
+
+  object "Data Protection Audit" as ON_Cap1 <<Capability>> {
+    type: Data Protection Audit
+    expertise: GDPR Expert
+    level: 8
+  }
+
+  FinAudit -- FA_Cap1
+  FinAudit -- FA_Cap2
+  Pawel -- PB_Cap1
+  Olga -- ON_Cap1
+}
+
+' ===== HORIZONTECH CLIENT =====
+package "HorizonTech - Corporate Client" #F0F8FF {
+  object HorizonTech <<Organization>> {
+    name: HorizonTech
+    partyId: HT-001
+  }
+
+  object "Payment Integration" as HT_Cap1 <<Capability>> {
+    type: Payment Integration
+    protocol: ISO20022
+    channels: [SEPA, SWIFT]
+  }
+
+  object "Reporting API" as HT_Cap2 <<Capability>> {
+    type: Reporting API
+    frequency: Daily
+    sla: 99.9%
+  }
+
+  object Maciej <<Person>> {
+    name: Maciej Rutkowski
+    partyId: MR-001
+  }
+
+  object "API Developer" as MR_Cap1 <<Capability>> {
+    type: API Developer
+    skillLevel: 8
+    stack: [Java, Spring]
+  }
+
+  object Agnieszka <<Person>> {
+    name: Agnieszka Sobczak
+    partyId: AS-001
+  }
+
+  object "QA Automation" as AS_Cap1 <<Capability>> {
+    type: QA Automation
+    stack: [Python, Cypress]
+    level: 7
+  }
+
+  HorizonTech -- HT_Cap1
+  HorizonTech -- HT_Cap2
+  Maciej -- MR_Cap1
+  Agnieszka -- AS_Cap1
+}
+
+' ===== CLOUDOPS TECH PARTNER =====
+package "CloudOps - Technical Partner" #FFE4E1 {
+  object CloudOps <<Organization>> {
+    name: CloudOps
+    partyId: CO-001
+  }
+
+  object "Cloud Infrastructure Management" as CO_Cap1 <<Capability>> {
+    type: Cloud Infrastructure Management
+    platforms: [AWS, Azure]
+    sla: 99.95%
+  }
+
+  object Daniel <<Person>> {
+    name: Daniel Król
+    partyId: DK-001
+  }
+
+  object "DevOps Engineer" as DK_Cap1 <<Capability>> {
+    type: DevOps Engineer
+    certification: AWS DevOps Pro
+  }
+
+  object NB_IT <<OrgUnit>> {
+    name: NovaBank IT
+    partyId: NB-IT-001
+  }
+
+  object "System Integration" as NBIT_Cap1 <<Capability>> {
+    type: System Integration
+    protocols: [REST, gRPC]
+  }
+
+  CloudOps -- CO_Cap1
+  Daniel -- DK_Cap1
+  NB_IT -- NBIT_Cap1
+}
+
+' ===== RELATIONSHIPS =====
+object "Partner FinTech" as Rel1 <<PartyRelationship>> {
+  type: FINTECH_PARTNERSHIP
+  from: NovaBank
+  to: PayNova
+}
+
+object "ZESPÓŁ" as Rel2 <<PartyRelationship>> {
+  type: TEAM
+  from: PayNova
+  to: PayNova DS Team
+}
+
+object "ZATRUDNIENIE" as Rel3 <<PartyRelationship>> {
+  type: EMPLOYMENT
+  from: PayNova DS Team
+  to: Anna
+}
+
+object "ZATRUDNIENIE" as Rel4 <<PartyRelationship>> {
+  type: EMPLOYMENT
+  from: PayNova
+  to: Piotr Mąka
+}
+
+object "Partner FinTech" as Rel5 <<PartyRelationship>> {
+  type: FINTECH_PARTNERSHIP
+  from: NovaBank
+  to: SafeLedger
+}
+
+object "ZATRUDNIENIE" as Rel6 <<PartyRelationship>> {
+  type: EMPLOYMENT
+  from: SafeLedger
+  to: Tomasz
+}
+
+object "ZATRUDNIENIE" as Rel7 <<PartyRelationship>> {
+  type: EMPLOYMENT
+  from: SafeLedger
+  to: Magda
+}
+
+object "Audytor Zewnętrzny" as Rel8 <<PartyRelationship>> {
+  type: EXTERNAL_AUDITOR
+  from: NovaBank
+  to: FinAudit
+}
+
+object "ZATRUDNIENIE" as Rel9 <<PartyRelationship>> {
+  type: EMPLOYMENT
+  from: FinAudit
+  to: Paweł
+}
+
+object "ZATRUDNIENIE" as Rel10 <<PartyRelationship>> {
+  type: EMPLOYMENT
+  from: FinAudit
+  to: Olga
+}
+
+object "Klient Korporacyjny" as Rel11 <<PartyRelationship>> {
+  type: CORPORATE_CLIENT
+  from: NovaBank
+  to: HorizonTech
+}
+
+object "ZATRUDNIENIE" as Rel12 <<PartyRelationship>> {
+  type: EMPLOYMENT
+  from: HorizonTech
+  to: Maciej
+}
+
+object "ZATRUDNIENIE" as Rel13 <<PartyRelationship>> {
+  type: EMPLOYMENT
+  from: HorizonTech
+  to: Agnieszka
+}
+
+object "Partner Techniczny" as Rel14 <<PartyRelationship>> {
+  type: TECHNICAL_PARTNERSHIP
+  from: NovaBank
+  to: CloudOps
+}
+
+object "ZATRUDNIENIE" as Rel15 <<PartyRelationship>> {
+  type: EMPLOYMENT
+  from: CloudOps
+  to: Daniel
+}
+
+object "PARTNERSTWO" as Rel16 <<PartyRelationship>> {
+  type: PARTNERSHIP
+  from: CloudOps
+  to: NovaBank IT
+}
+
+NovaBank ..> Rel1
+Rel1 ..> PayNova
+PayNova ..> Rel2
+Rel2 ..> PN_Team
+PN_Team ..> Rel3
+Rel3 ..> Anna
+PayNova ..> Rel4
+Rel4 ..> PiotrM
+
+NovaBank ..> Rel5
+Rel5 ..> SafeLedger
+SafeLedger ..> Rel6
+Rel6 ..> Tomasz
+SafeLedger ..> Rel7
+Rel7 ..> Magda
+
+NovaBank ..> Rel8
+Rel8 ..> FinAudit
+FinAudit ..> Rel9
+Rel9 ..> Pawel
+FinAudit ..> Rel10
+Rel10 ..> Olga
+
+NovaBank ..> Rel11
+Rel11 ..> HorizonTech
+HorizonTech ..> Rel12
+Rel12 ..> Maciej
+HorizonTech ..> Rel13
+Rel13 ..> Agnieszka
+
+NovaBank ..> Rel14
+Rel14 ..> CloudOps
+CloudOps ..> Rel15
+Rel15 ..> Daniel
+CloudOps ..> Rel16
+Rel16 ..> NB_IT
+
+note bottom of NovaBank
+  **Przykładowe zapytania:**
+
+  1. "Który partner FinTech potrafi audytować kontrakty Ethereum?"
+     → Tomasz Baran (SafeLedger)
+
+  2. "Kto w naszej sieci potrafi przeprowadzić audyt
+     bezpieczeństwa OWASP i ISO27001?"
+     → FinAudit Sp. z o.o.
+
+  3. "Czy NovaBank ma partnera zdolnego do utrzymania
+     infrastruktury chmurowej AWS?"
+     → CloudOps ✅
+
+  4. "Kto potrafi wdrożyć nowy model ML w systemie Fraud Detection?"
+     → Anna Kowalczyk i Piotr Mąka (PayNova)
+end note
+
+@enduml

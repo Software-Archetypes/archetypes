@@ -1,0 +1,178 @@
+@startuml
+skinparam MinClassWidth 150
+skinparam linetype ortho
+
+' ===== CORE PARTY MODEL =====
+package "Core Party Model" {
+  object Party {
+    id: PartyId
+  }
+
+  object Person {
+    personalData: PersonalData
+  }
+
+  object Organization {
+    organizationalData: OrganizationalData
+  }
+
+  Person -up-|> Party
+  Organization -up-|> Party
+}
+
+' ===== PARTY ROLE TYPE (CATALOG) =====
+package "Party Role Type - Catalog" {
+  object PartyRoleType {
+    id: PartyRoleTypeId
+    name: String
+    description: String
+  }
+
+  object PartyRoleConstraint <<interface>> {
+    isSatisfiedBy(Party): boolean
+  }
+
+  PartyRoleType "1" *-- "1..*" PartyRoleConstraint
+}
+
+' ===== PARTY ROLE (INSTANCE) =====
+package "Party Role - Instance" {
+  object PartyRole {
+    partyId: PartyId
+  }
+
+  PartyRole "0..*" -- "1" PartyRoleType : << instance of >>
+  PartyRole "0..*" -- "1" Party : << played by >>
+}
+
+' ===== PARTY RELATIONSHIP TYPE (CATALOG) =====
+package "Party Relationship Type - Catalog" {
+  object PartyRelationshipType {
+    id: PartyRelationshipTypeId
+    name: String
+    description: String
+  }
+
+  object PartyRelationshipConstraint {
+    clientRoleName: String
+    supplierRoleName: String
+  }
+
+  PartyRelationshipType "1" *-- "1..*" PartyRelationshipConstraint
+}
+
+' ===== PARTY RELATIONSHIP (INSTANCE) =====
+package "Party Relationship - Instance" {
+  object PartyRelationship {
+    id: PartyRelationshipId
+    validity: Validity
+  }
+
+  PartyRelationship "0..*" -- "1" PartyRelationshipType : << instance of >>
+  PartyRelationship "0..*" -up- "from 1" PartyRole
+  PartyRelationship "0..*" -up- "to 1" PartyRole
+}
+
+' ===== RESPONSIBILITIES (OPTIONAL EXTENSION) =====
+package "Responsibilities Extension <<optional>>" #FFEEEE {
+  object Responsibility {
+    id: ResponsibilityId
+    name: String
+    description: String
+    mandatory: boolean
+  }
+
+  object Rule <<interface>> {
+    evaluate(context): boolean
+  }
+
+  object AssignedResponsibility {
+    id: AssignedResponsibilityId
+    validity: Validity
+  }
+
+  PartyRoleType "1" -- "0..*" Responsibility : << defines >>
+
+  Responsibility "1" *-- "0..*" Rule : conditionsOfSatisfaction
+  Responsibility "1" *-- "0..*" Rule : requirementsForResponsibility
+
+  AssignedResponsibility "0..*" -- "1" Responsibility : << instance of >>
+  AssignedResponsibility "0..*" -- "1" PartyRole : << assigned to >>
+}
+
+' ===== CAPABILITIES (OPTIONAL EXTENSION) =====
+package "Capabilities Extension <<optional>>" #EEEEFF {
+  object Capability {
+    name: String
+    value: Object
+  }
+
+  Party "1" *-- "0..*" Capability : << has >>
+}
+
+' ===== VALIDITY =====
+object Validity {
+  validFrom: Instant
+  validTo: Instant
+}
+
+PartyRelationship "1" *-- "1" Validity
+AssignedResponsibility "1" *-- "1" Validity
+
+note right of PartyRoleType
+  <b>PartyRoleType</b> - catalog/definition of roles
+
+  Examples:
+  - TEAM_LEADER
+    * constraints: only Person
+    * responsibilities:
+      - Motivating team (mandatory)
+      - Performance reviews (optional)
+
+  - EMPLOYEE
+    * constraints: only Person
+    * responsibilities:
+      - Complete assigned tasks
+end note
+
+note right of Responsibility
+  <b>Responsibility</b> - what the role should do
+
+  Example:
+  - "Motivating the team"
+    * mandatory: true
+    * conditionsOfSatisfaction:
+      "avgMotivationScore >= 7"
+    * requirementsForResponsibility: []
+
+  - "Performance reviews"
+    * mandatory: false
+    * requirementsForResponsibility:
+      "grade > managedPersonGrade"
+end note
+
+note right of Capability
+  <b>Capability</b> - what Party can do
+
+  Examples for Person "Jane":
+  - javaProgramming: 8
+  - leadership: 9
+  - grade: "SENIOR"
+  - certified: "PMP"
+
+  Used to match against
+  requirementsForResponsibility
+end note
+
+note bottom of AssignedResponsibility
+  <b>AssignedResponsibility</b>
+  Concrete assignment of responsibility
+  to a specific PartyRole.
+
+  Example:
+  - Jane(TEAM_LEADER) assigned
+    "Motivating the team"
+    valid from 2024-01-01
+end note
+
+@enduml

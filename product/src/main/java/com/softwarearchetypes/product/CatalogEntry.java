@@ -9,10 +9,10 @@ import static com.softwarearchetypes.common.Preconditions.checkArgument;
  * CatalogEntry - commercial offering position.
  * Represents what the organization currently offers to customers.
  *
- * ProductType says what something IS (business/operational definition).
+ * Product (ProductType or PackageType) says what something IS (business/operational definition).
  * CatalogEntry says that something is FOR SALE (commercial availability).
  *
- * Key differences from ProductType:
+ * Key differences from Product:
  * - displayName: marketing name (vs technical name)
  * - description: sales copy (vs technical description)
  * - categories: for navigation/search
@@ -24,7 +24,7 @@ class CatalogEntry {
     private final CatalogEntryId id;
     private final String displayName;
     private final String description;
-    private final ProductType productType;
+    private final Product product;
     private final Set<String> categories;
     private final Validity validity;
     private final Map<String, String> metadata;
@@ -32,20 +32,20 @@ class CatalogEntry {
     private CatalogEntry(CatalogEntryId id,
                         String displayName,
                         String description,
-                        ProductType productType,
+                        Product product,
                         Set<String> categories,
                         Validity validity,
                         Map<String, String> metadata) {
         checkArgument(id != null, "CatalogEntryId must be defined");
         checkArgument(displayName != null && !displayName.isBlank(), "Display name must be defined");
         checkArgument(description != null && !description.isBlank(), "Description must be defined");
-        checkArgument(productType != null, "ProductType must be defined");
+        checkArgument(product != null, "Product must be defined");
         checkArgument(validity != null, "Validity must be defined");
 
         this.id = id;
         this.displayName = displayName;
         this.description = description;
-        this.productType = productType;
+        this.product = product;
         this.categories = categories != null ? Set.copyOf(categories) : Set.of();
         this.validity = validity;
         this.metadata = metadata != null ? Map.copyOf(metadata) : Map.of();
@@ -67,8 +67,8 @@ class CatalogEntry {
         return description;
     }
 
-    ProductType productType() {
-        return productType;
+    Product product() {
+        return product;
     }
 
     Set<String> categories() {
@@ -126,7 +126,7 @@ class CatalogEntry {
             id,
             displayName,
             description,
-            productType,
+            product,
             categories,
             newValidity,
             metadata
@@ -141,7 +141,7 @@ class CatalogEntry {
             id,
             displayName,
             description,
-            productType,
+            product,
             categories,
             validity,
             newMetadata
@@ -163,15 +163,15 @@ class CatalogEntry {
 
     @Override
     public String toString() {
-        return "CatalogEntry{id=%s, displayName='%s', productType=%s, categories=%s, validity=%s}"
-            .formatted(id, displayName, productType.name(), categories, validity);
+        return "CatalogEntry{id=%s, displayName='%s', product=%s, categories=%s, validity=%s}"
+            .formatted(id, displayName, product.name(), categories, validity);
     }
 
     static class Builder {
         private CatalogEntryId id;
         private String displayName;
         private String description;
-        private ProductType productType;
+        private Product product;
         private Set<String> categories = new HashSet<>();
         private Validity validity;
         private Map<String, String> metadata = new HashMap<>();
@@ -191,8 +191,8 @@ class CatalogEntry {
             return this;
         }
 
-        Builder productType(ProductType productType) {
-            this.productType = productType;
+        Builder product(Product product) {
+            this.product = product;
             return this;
         }
 
@@ -226,7 +226,7 @@ class CatalogEntry {
                 id,
                 displayName,
                 description,
-                productType,
+                product,
                 categories,
                 validity,
                 metadata

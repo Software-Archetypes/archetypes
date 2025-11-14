@@ -1,0 +1,59 @@
+@startuml
+!define LEVEL_TYPE #E6F3FF
+!define LEVEL_CATALOG #FFE6CC
+!define LEVEL_INSTANCE #E8F5E9
+
+title Product Type - Catalog Entry - Instance Model
+
+package "POZIOM TYPU (czym coś jest)" <<Rectangle>> {
+  object ProductType <<LEVEL_TYPE>> {
+    id: ProductIdentifier
+    name: ProductName
+    description: ProductDescription
+    trackingStrategy
+    featureTypes
+  }
+
+  note right of ProductType
+    Definicja techniczna produktu
+    Przykład: "iPhone 15 Pro 256GB"
+  end note
+}
+
+package "POZIOM OFERTY (jak to sprzedajemy)" <<Rectangle>> {
+  object CatalogEntry <<LEVEL_CATALOG>> {
+    id: CatalogEntryId
+    displayName: String
+    description: String
+    categories: Set<String>
+    validity: Validity
+    metadata: Map
+  }
+
+  note right of CatalogEntry
+    Pozycja w katalogu handlowym
+    Przykład: "Apple iPhone 15 Pro - Premium"
+    w kategorii "Smartfony"
+  end note
+}
+
+package "POZIOM INSTANCJI (konkretny egzemplarz)" <<Rectangle>> {
+  object ProductInstance <<LEVEL_INSTANCE>> {
+    id: InstanceId
+    serialNumber
+    batchId
+    quantity
+    features
+  }
+
+  note right of ProductInstance
+    Fizyczny/cyfrowy egzemplarz
+    Przykład: Telefon #ABC123
+    z partii LOT-2024-001
+  end note
+}
+
+CatalogEntry --> ProductType : oferuje
+ProductInstance --> ProductType : instancją
+
+@enduml

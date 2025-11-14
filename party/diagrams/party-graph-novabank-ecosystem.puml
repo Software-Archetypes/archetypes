@@ -1,0 +1,314 @@
+@startuml
+skinparam rectangle {
+  BackgroundColor<<Party>> #E6F3FF
+  BorderColor<<Party>> #333333
+}
+
+skinparam card {
+  BackgroundColor<<Capability>> #FFE6CC
+  BorderColor<<Capability>> #CC9966
+}
+
+skinparam cloud {
+  BackgroundColor<<Role>> #E8F5E9
+  BorderColor<<Role>> #66CC66
+}
+
+skinparam component {
+  BackgroundColor<<Relationship>> #F5E8E8
+  BorderColor<<Relationship>> #CC6666
+}
+
+title NovaBank Ecosystem - Party Graph with Roles and Capabilities
+
+' ===== PARTIES =====
+rectangle "NovaBank S.A.\n(Organization)" as NovaBank <<Party>>
+rectangle "PayNova\n(Organization)" as PayNova <<Party>>
+rectangle "PayNova Data Science Team\n(OrgUnit)" as PayNova_Team <<Party>>
+rectangle "Anna Kowalczyk\n(Person)" as Anna <<Party>>
+rectangle "Piotr Mąka\n(Person)" as PiotrM <<Party>>
+rectangle "SafeLedger\n(Organization)" as SafeLedger <<Party>>
+rectangle "Tomasz Baran\n(Person)" as Tomasz <<Party>>
+rectangle "Magda Stasiak\n(Person)" as Magda <<Party>>
+rectangle "FinAudit Sp. z o.o.\n(Organization)" as FinAudit <<Party>>
+rectangle "Paweł Brzeziński\n(Person)" as Pawel <<Party>>
+rectangle "Olga Nowicka\n(Person)" as Olga <<Party>>
+rectangle "HorizonTech\n(Organization)" as HorizonTech <<Party>>
+rectangle "Maciej Rutkowski\n(Person)" as Maciej <<Party>>
+rectangle "Agnieszka Sobczak\n(Person)" as Agnieszka <<Party>>
+rectangle "CloudOps\n(Organization)" as CloudOps <<Party>>
+rectangle "Daniel Król\n(Person)" as Daniel <<Party>>
+rectangle "NovaBank IT\n(OrgUnit)" as NovaBank_IT <<Party>>
+
+' ===== ROLES (independent) =====
+cloud "Central Bank" as Role_NovaBank <<Role>>
+cloud "FinTech Partner" as Role_PayNova <<Role>>
+cloud "Data Science\nTeam" as Role_PayNova_Team <<Role>>
+cloud "Data Scientist" as Role_Anna <<Role>>
+cloud "ML Engineer" as Role_PiotrM <<Role>>
+cloud "Blockchain\nProvider" as Role_SafeLedger <<Role>>
+cloud "Smart Contract\nAuditor" as Role_Tomasz <<Role>>
+cloud "Legal Analyst" as Role_Magda <<Role>>
+cloud "External Auditor" as Role_FinAudit <<Role>>
+cloud "Compliance\nAuditor" as Role_Pawel <<Role>>
+cloud "GDPR Auditor" as Role_Olga <<Role>>
+cloud "Corporate Client" as Role_HorizonTech <<Role>>
+cloud "Developer" as Role_Maciej <<Role>>
+cloud "QA Engineer" as Role_Agnieszka <<Role>>
+cloud "Cloud Provider" as Role_CloudOps <<Role>>
+cloud "DevOps Engineer" as Role_Daniel <<Role>>
+cloud "IT Unit" as Role_NovaBank_IT <<Role>>
+
+' ===== CAPABILITIES =====
+card "Credit Risk Management\nScope: EU\nRegulation: Basel III" as NovaBank_Cap1 <<Capability>>
+card "Digital Banking API\nProtocol: PSD2\nChannels: SEPA, SWIFT" as NovaBank_Cap2 <<Capability>>
+card "API Integration\n10k tx/day" as PayNova_Cap1 <<Capability>>
+card "Fraud Detection\nAccuracy: 97%\nML model v2" as PayNova_Cap2 <<Capability>>
+card "Data Science\nSkill: 9\nPython/TensorFlow" as PayNova_Team_Cap1 <<Capability>>
+card "Model Monitoring\nDaily, F1>0.9" as PayNova_Team_Cap2 <<Capability>>
+card "Data Scientist Cap\nTensorFlow Pro\n6y exp" as Anna_Cap1 <<Capability>>
+card "ML Engineer Cap\nAWS ML Specialty" as PiotrM_Cap1 <<Capability>>
+card "Blockchain Settlement\nEthereum, TPS: 300" as SafeLedger_Cap1 <<Capability>>
+card "Compliance Reporting\nAML, GDPR" as SafeLedger_Cap2 <<Capability>>
+card "Smart Contract Auditing\nSolidity Expert\nLevel: 9" as Tomasz_Cap1 <<Capability>>
+card "LegalTech Analysis\nLaw+IT hybrid\nLevel: 7" as Magda_Cap1 <<Capability>>
+card "Financial Compliance Audit\nBasel III, AML, KYC" as FinAudit_Cap1 <<Capability>>
+card "Security Assessment\nOWASP, ISO27001" as FinAudit_Cap2 <<Capability>>
+card "Auditor Cap\n10y exp\nCISA" as Pawel_Cap1 <<Capability>>
+card "Data Protection Audit\nGDPR Expert\nLevel: 8" as Olga_Cap1 <<Capability>>
+card "Payment Integration\nISO20022\nSEPA, SWIFT" as HorizonTech_Cap1 <<Capability>>
+card "Reporting API\nDaily\nSLA: 99.9%" as HorizonTech_Cap2 <<Capability>>
+card "API Developer Cap\nSkill: 8\nJava/Spring" as Maciej_Cap1 <<Capability>>
+card "QA Automation\nPython/Cypress\nLevel: 7" as Agnieszka_Cap1 <<Capability>>
+card "Cloud Infrastructure Management\nAWS, Azure\nSLA: 99.95%" as CloudOps_Cap1 <<Capability>>
+card "DevOps Engineer Cap\nAWS DevOps Pro" as Daniel_Cap1 <<Capability>>
+card "System Integration\nREST, gRPC" as NovaBank_IT_Cap1 <<Capability>>
+
+' ===== PARTY -> ROLE =====
+NovaBank --> Role_NovaBank : plays
+PayNova --> Role_PayNova : plays
+PayNova_Team --> Role_PayNova_Team : plays
+Anna --> Role_Anna : plays
+PiotrM --> Role_PiotrM : plays
+SafeLedger --> Role_SafeLedger : plays
+Tomasz --> Role_Tomasz : plays
+Magda --> Role_Magda : plays
+FinAudit --> Role_FinAudit : plays
+Pawel --> Role_Pawel : plays
+Olga --> Role_Olga : plays
+HorizonTech --> Role_HorizonTech : plays
+Maciej --> Role_Maciej : plays
+Agnieszka --> Role_Agnieszka : plays
+CloudOps --> Role_CloudOps : plays
+Daniel --> Role_Daniel : plays
+NovaBank_IT --> Role_NovaBank_IT : plays
+
+' ===== CAPABILITIES LINKS =====
+NovaBank ..> NovaBank_Cap1 : has
+NovaBank ..> NovaBank_Cap2 : has
+PayNova ..> PayNova_Cap1 : has
+PayNova ..> PayNova_Cap2 : has
+PayNova_Team ..> PayNova_Team_Cap1 : has
+PayNova_Team ..> PayNova_Team_Cap2 : has
+Anna ..> Anna_Cap1 : has
+PiotrM ..> PiotrM_Cap1 : has
+SafeLedger ..> SafeLedger_Cap1 : has
+SafeLedger ..> SafeLedger_Cap2 : has
+Tomasz ..> Tomasz_Cap1 : has
+Magda ..> Magda_Cap1 : has
+FinAudit ..> FinAudit_Cap1 : has
+FinAudit ..> FinAudit_Cap2 : has
+Pawel ..> Pawel_Cap1 : has
+Olga ..> Olga_Cap1 : has
+HorizonTech ..> HorizonTech_Cap1 : has
+HorizonTech ..> HorizonTech_Cap2 : has
+Maciej ..> Maciej_Cap1 : has
+Agnieszka ..> Agnieszka_Cap1 : has
+CloudOps ..> CloudOps_Cap1 : has
+Daniel ..> Daniel_Cap1 : has
+NovaBank_IT ..> NovaBank_IT_Cap1 : has
+
+' ===== RELATIONSHIPS WITH ROLES =====
+component "FINTECH\nPARTNERSHIP" as Rel1 <<Relationship>>
+component "TEAM\nRELATION" as Rel2 <<Relationship>>
+component "EMPLOYMENT" as Rel3 <<Relationship>>
+component "EMPLOYMENT" as Rel4 <<Relationship>>
+component "FINTECH\nPARTNERSHIP" as Rel5 <<Relationship>>
+component "EMPLOYMENT" as Rel6 <<Relationship>>
+component "EMPLOYMENT" as Rel7 <<Relationship>>
+component "EXTERNAL\nAUDIT" as Rel8 <<Relationship>>
+component "EMPLOYMENT" as Rel9 <<Relationship>>
+component "EMPLOYMENT" as Rel10 <<Relationship>>
+component "CLIENT\nRELATION" as Rel11 <<Relationship>>
+component "EMPLOYMENT" as Rel12 <<Relationship>>
+component "EMPLOYMENT" as Rel13 <<Relationship>>
+component "TECHNICAL\nPARTNERSHIP" as Rel14 <<Relationship>>
+component "EMPLOYMENT" as Rel15 <<Relationship>>
+component "PARTNERSHIP" as Rel16 <<Relationship>>
+
+' Relationship roles
+cloud "Bank" as Rel1_FromRole <<Role>>
+cloud "Service Provider" as Rel1_ToRole <<Role>>
+
+cloud "Organization" as Rel2_FromRole <<Role>>
+cloud "Internal Team" as Rel2_ToRole <<Role>>
+
+cloud "Team Lead" as Rel3_FromRole <<Role>>
+cloud "Team Member" as Rel3_ToRole <<Role>>
+
+cloud "Employer" as Rel4_FromRole <<Role>>
+cloud "Employee" as Rel4_ToRole <<Role>>
+
+cloud "Bank" as Rel5_FromRole <<Role>>
+cloud "Service Provider" as Rel5_ToRole <<Role>>
+
+cloud "Employer" as Rel6_FromRole <<Role>>
+cloud "Employee" as Rel6_ToRole <<Role>>
+
+cloud "Employer" as Rel7_FromRole <<Role>>
+cloud "Employee" as Rel7_ToRole <<Role>>
+
+cloud "Auditee" as Rel8_FromRole <<Role>>
+cloud "Auditor" as Rel8_ToRole <<Role>>
+
+cloud "Employer" as Rel9_FromRole <<Role>>
+cloud "Employee" as Rel9_ToRole <<Role>>
+
+cloud "Employer" as Rel10_FromRole <<Role>>
+cloud "Employee" as Rel10_ToRole <<Role>>
+
+cloud "Service Provider" as Rel11_FromRole <<Role>>
+cloud "Client" as Rel11_ToRole <<Role>>
+
+cloud "Employer" as Rel12_FromRole <<Role>>
+cloud "Employee" as Rel12_ToRole <<Role>>
+
+cloud "Employer" as Rel13_FromRole <<Role>>
+cloud "Employee" as Rel13_ToRole <<Role>>
+
+cloud "Bank" as Rel14_FromRole <<Role>>
+cloud "Tech Partner" as Rel14_ToRole <<Role>>
+
+cloud "Employer" as Rel15_FromRole <<Role>>
+cloud "Employee" as Rel15_ToRole <<Role>>
+
+cloud "External Partner" as Rel16_FromRole <<Role>>
+cloud "Internal Unit" as Rel16_ToRole <<Role>>
+
+' NovaBank -> PayNova
+NovaBank -[#red,thickness=2]-> Rel1_FromRole : as
+Rel1_FromRole -[#red]-> Rel1
+Rel1 -[#red]-> Rel1_ToRole
+Rel1_ToRole -[#red,thickness=2]-> PayNova : as
+
+' PayNova -> PayNova_Team
+PayNova -[#purple,thickness=2]-> Rel2_FromRole : as
+Rel2_FromRole -[#purple]-> Rel2
+Rel2 -[#purple]-> Rel2_ToRole
+Rel2_ToRole -[#purple,thickness=2]-> PayNova_Team : as
+
+' PayNova_Team -> Anna
+PayNova_Team -[#blue,thickness=2]-> Rel3_FromRole : as
+Rel3_FromRole -[#blue]-> Rel3
+Rel3 -[#blue]-> Rel3_ToRole
+Rel3_ToRole -[#blue,thickness=2]-> Anna : as
+
+' PayNova -> PiotrM
+PayNova -[#blue,thickness=2]-> Rel4_FromRole : as
+Rel4_FromRole -[#blue]-> Rel4
+Rel4 -[#blue]-> Rel4_ToRole
+Rel4_ToRole -[#blue,thickness=2]-> PiotrM : as
+
+' NovaBank -> SafeLedger
+NovaBank -[#red,thickness=2]-> Rel5_FromRole : as
+Rel5_FromRole -[#red]-> Rel5
+Rel5 -[#red]-> Rel5_ToRole
+Rel5_ToRole -[#red,thickness=2]-> SafeLedger : as
+
+' SafeLedger -> Tomasz
+SafeLedger -[#blue,thickness=2]-> Rel6_FromRole : as
+Rel6_FromRole -[#blue]-> Rel6
+Rel6 -[#blue]-> Rel6_ToRole
+Rel6_ToRole -[#blue,thickness=2]-> Tomasz : as
+
+' SafeLedger -> Magda
+SafeLedger -[#blue,thickness=2]-> Rel7_FromRole : as
+Rel7_FromRole -[#blue]-> Rel7
+Rel7 -[#blue]-> Rel7_ToRole
+Rel7_ToRole -[#blue,thickness=2]-> Magda : as
+
+' NovaBank -> FinAudit
+NovaBank -[#orange,thickness=2]-> Rel8_FromRole : as
+Rel8_FromRole -[#orange]-> Rel8
+Rel8 -[#orange]-> Rel8_ToRole
+Rel8_ToRole -[#orange,thickness=2]-> FinAudit : as
+
+' FinAudit -> Pawel
+FinAudit -[#blue,thickness=2]-> Rel9_FromRole : as
+Rel9_FromRole -[#blue]-> Rel9
+Rel9 -[#blue]-> Rel9_ToRole
+Rel9_ToRole -[#blue,thickness=2]-> Pawel : as
+
+' FinAudit -> Olga
+FinAudit -[#blue,thickness=2]-> Rel10_FromRole : as
+Rel10_FromRole -[#blue]-> Rel10
+Rel10 -[#blue]-> Rel10_ToRole
+Rel10_ToRole -[#blue,thickness=2]-> Olga : as
+
+' NovaBank -> HorizonTech
+NovaBank -[#darkgreen,thickness=2]-> Rel11_FromRole : as
+Rel11_FromRole -[#darkgreen]-> Rel11
+Rel11 -[#darkgreen]-> Rel11_ToRole
+Rel11_ToRole -[#darkgreen,thickness=2]-> HorizonTech : as
+
+' HorizonTech -> Maciej
+HorizonTech -[#blue,thickness=2]-> Rel12_FromRole : as
+Rel12_FromRole -[#blue]-> Rel12
+Rel12 -[#blue]-> Rel12_ToRole
+Rel12_ToRole -[#blue,thickness=2]-> Maciej : as
+
+' HorizonTech -> Agnieszka
+HorizonTech -[#blue,thickness=2]-> Rel13_FromRole : as
+Rel13_FromRole -[#blue]-> Rel13
+Rel13 -[#blue]-> Rel13_ToRole
+Rel13_ToRole -[#blue,thickness=2]-> Agnieszka : as
+
+' NovaBank -> CloudOps
+NovaBank -[#red,thickness=2]-> Rel14_FromRole : as
+Rel14_FromRole -[#red]-> Rel14
+Rel14 -[#red]-> Rel14_ToRole
+Rel14_ToRole -[#red,thickness=2]-> CloudOps : as
+
+' CloudOps -> Daniel
+CloudOps -[#blue,thickness=2]-> Rel15_FromRole : as
+Rel15_FromRole -[#blue]-> Rel15
+Rel15 -[#blue]-> Rel15_ToRole
+Rel15_ToRole -[#blue,thickness=2]-> Daniel : as
+
+' CloudOps -> NovaBank_IT
+CloudOps -[#green,thickness=2]-> Rel16_FromRole : as
+Rel16_FromRole -[#green]-> Rel16
+Rel16 -[#green]-> Rel16_ToRole
+Rel16_ToRole -[#green,thickness=2]-> NovaBank_IT : as
+
+note bottom of NovaBank
+  **Model relacji z rolami:**
+
+  Każda relacja ma:
+  - Party FROM z rolą kontekstową (np. Bank, Employer)
+  - Party TO z rolą kontekstową (np. Service Provider, Employee)
+
+  Każde Party ma też rolę niezależną
+  (np. "Central Bank", "FinTech Partner", "Data Scientist")
+
+  **Zapytania semantyczne uwzględniające role:**
+  1. "Znajdź wszystkich Employees w roli Auditor"
+     → FinAudit [Employer] → Pawel [Employee + Compliance Auditor]
+     → FinAudit [Employer] → Olga [Employee + GDPR Auditor]
+
+  2. "Kto jest Service Provider dla Banku?"
+     → NovaBank [Bank] → PayNova [Service Provider + FinTech Partner]
+     → NovaBank [Bank] → SafeLedger [Service Provider + Blockchain Provider]
+end note
+
+@enduml

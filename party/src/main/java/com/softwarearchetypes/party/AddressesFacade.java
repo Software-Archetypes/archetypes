@@ -1,9 +1,14 @@
 package com.softwarearchetypes.party;
 
 import com.softwarearchetypes.common.Result;
+import com.softwarearchetypes.party.commands.AddOrUpdateGeoAddressCommand;
+import com.softwarearchetypes.party.commands.GeoAddressDTO;
+import com.softwarearchetypes.party.commands.RemoveAddressCommand;
 import com.softwarearchetypes.party.events.AddressDefinitionFailed;
 import com.softwarearchetypes.party.events.AddressRemovalFailed;
 import com.softwarearchetypes.party.events.EventPublisher;
+
+import java.util.stream.Collectors;
 
 public class AddressesFacade {
 
@@ -16,21 +21,37 @@ public class AddressesFacade {
     }
 
     //can be enhanced with check against missing party (here we accept addresses for any partyId)
-    Result<AddressDefinitionFailed, AddressId> addOrUpdate(PartyId partyId, Address address) {
-        Addresses addresses = repository.findFor(partyId).orElse(Addresses.emptyAddressesFor(partyId));
-        return addresses.addOrUpdate(address)
+    public Result<AddressDefinitionFailed, AddressId> handle(AddOrUpdateGeoAddressCommand command) {
+        GeoAddressDTO dto = command.address();
+        GeoAddress geoAddress = new GeoAddress(
+                dto.addressId(),
+                dto.partyId(),
+                GeoAddress.GeoAddressDetails.from(
+                        dto.name(),
+                        dto.street(),
+                        dto.building(),
+                        dto.flat(),
+                        dto.city(),
+                        ZipCode.of(dto.zipCode()),
+                        dto.locale()
+                ),
+                dto.useTypes().stream().map(AddressUseType::valueOf).collect(Collectors.toSet())
+        );
+
+        Addresses addresses = repository.findFor(command.partyId()).orElse(Addresses.emptyAddressesFor(command.partyId()));
+        return addresses.addOrUpdate(geoAddress)
                         .peekSuccess(repository::save)
                         .peekSuccess(it -> publisher.publish(it.publishedEvents()))
-                        .map(ignored -> address.id());
+                        .map(ignored -> geoAddress.id());
     }
 
     //can be enhanced with check against missing party (here we accept addresses for any partyId)
-    Result<AddressRemovalFailed, AddressId> remove(PartyId partyId, AddressId addressId) {
-        Addresses addresses = repository.findFor(partyId).orElse(Addresses.emptyAddressesFor(partyId));
-        return addresses.removeAddressWith(addressId)
+    public Result<AddressRemovalFailed, AddressId> handle(RemoveAddressCommand command) {
+        Addresses addresses = repository.findFor(command.partyId()).orElse(Addresses.emptyAddressesFor(command.partyId()));
+        return addresses.removeAddressWith(command.addressId())
                         .peekSuccess(repository::save)
                         .peekSuccess(it -> publisher.publish(it.publishedEvents()))
-                        .map(ignored -> addressId);
+                        .map(ignored -> command.addressId());
     }
 
 }

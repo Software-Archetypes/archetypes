@@ -1,42 +1,57 @@
 @startuml
 skinparam MinClassWidth 150
 skinparam linetype ortho
+title Party Address Aggregate Model
 
+' ===== PARTY =====
 object Party
 object PartyIdentifier {
   value: UUID
 }
+
+Party "1" -- "1" PartyIdentifier : has
+
+' ===== ADDRESSES AGGREGATE =====
 object Addresses
+
+Party "1" -- "0..1" Addresses : owns
+
+' ===== ADDRESS =====
 object Address {
   validFrom: Date
   validTo: Date
 }
+
 object AddressId {
   value: UUID
 }
+
 object AddressUseType {
   value: String
 }
+
+Addresses "1" -- "0..*" Address : contains
+Address "1" *-- "1" AddressId
+Address "1" *-- "1..*" AddressUseType
+
+' ===== ADDRESS TYPES =====
 object EmailAddress {
   value: String
 }
+
 object GeographicAddress {
   addressLine: String[]
   city: String
   region: String
   zipCode: String
 }
+
 object WebPageAddress {
   url: String
 }
 
-Party "1" *- "1" PartyIdentifier
-Party "1" *-- "0..1" Addresses
-Addresses "1" --- "0..*" Address
-Address "1" *-- "1..*" AddressUseType
-Address "1" *-- "1*" AddressId
+EmailAddress -up-|> Address
+GeographicAddress -up-|> Address
+WebPageAddress -up-|> Address
 
-EmailAddress --up-|> Address
-GeographicAddress --up-|> Address
-WebPageAddress --up-|> Address
 @enduml

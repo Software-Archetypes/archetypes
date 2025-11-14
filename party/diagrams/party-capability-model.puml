@@ -1,0 +1,145 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 80
+skinparam ranksep 80
+title Party Capability Model with Operating Scopes
+
+' ===== PARTY =====
+package "Party Archetype" {
+  object Party {
+    partyId: PartyId
+  }
+}
+
+' ===== CAPABILITY & OPERATING SCOPES =====
+package "Capability & Operating Scopes" #EEFFEE {
+  object Capability {
+    capabilityId: CapabilityId
+    partyId: PartyId
+    capabilityType: CapabilityType
+    operatingScopes: Set<OperatingScope>
+    validity: Validity
+    --
+    + hasScope(scopeType): boolean
+    + getScope(scopeType): OperatingScope
+  }
+
+  object CapabilityType {
+    id: CapabilityTypeId
+    name: String
+    description: String
+    requiredScopeTypes: Set<Class<? extends OperatingScope>>
+    --
+    + requiresScope(scopeType): boolean
+  }
+
+  object OperatingScope {
+    {abstract} validate(): boolean
+    {abstract} scopeType(): String
+  }
+
+  object LocationScope {
+    location: String
+    radius: Distance
+    --
+    + coversLocation(loc): boolean
+  }
+
+  object ProductScope {
+    productTypes: Set<ProductTypeId>
+    productCategories: Set<String>
+    --
+    + coversProduct(productId): boolean
+  }
+
+  object SkillLevelScope {
+    skillName: String
+    level: int (1-10)
+    certifications: Set<String>
+    --
+    + meetsMinimumLevel(required): boolean
+  }
+
+  object QuantityScope {
+    quantityPerPeriod: Quantity
+    period: Period
+    --
+    + canHandle(quantity, period): boolean
+  }
+
+  object ProtocolScope {
+    protocolName: String
+    procedures: Set<String>
+    --
+    + supportsProtocol(name): boolean
+  }
+
+  object ResourceScope {
+    resourceTypes: Set<String>
+    maxCapacity: Quantity
+    --
+    + canHandleResource(type, qty): boolean
+  }
+
+  object TemporalScope {
+    availableFrom: LocalTime
+    availableTo: LocalTime
+    daysOfWeek: Set<DayOfWeek>
+    --
+    + isAvailableAt(dateTime): boolean
+  }
+
+  Party "1" -- "0..*" Capability : has capabilities
+  Capability "*" --> "1" CapabilityType : of type
+  Capability "1" *-- "0..*" OperatingScope : constrained by
+
+  LocationScope -up-|> OperatingScope
+  ProductScope -up-|> OperatingScope
+  SkillLevelScope -up-|> OperatingScope
+  QuantityScope -up-|> OperatingScope
+  ProtocolScope -up-|> OperatingScope
+  ResourceScope -up-|> OperatingScope
+  TemporalScope -up-|> OperatingScope
+}
+
+' ===== EXAMPLES =====
+note right of Capability
+  **Example 1: USG Technician (Person)**
+  Type: "Medical Imaging"
+  Scopes:
+  - ProtocolScope: "Ultrasound Imaging"
+  - QuantityScope: "15 patients/day"
+  - LocationScope: "Medicover Warszawa"
+  - TemporalScope: "Mon-Fri, 8-16"
+
+  **Example 2: Electrician (Person)**
+  Type: "Electrical Installation"
+  Scopes:
+  - SkillLevelScope: "Level 9/10, SEP G1"
+  - ProtocolScope: "Residential, Commercial, Industrial"
+  - LocationScope: "Kraków, 30 km radius"
+  - TemporalScope: "Mon-Sat, 7-19"
+
+  **Example 3: Software House (Organization)**
+  Type: "Software Development"
+  Scopes:
+  - SkillLevelScope: "Java/Spring 9/10, React 8/10"
+  - ProductScope: "Web, Mobile, API, Cloud"
+  - QuantityScope: "15 concurrent projects"
+  - ResourceScope: "75 people (25 senior, 40 mid, 10 QA)"
+end note
+
+note bottom of OperatingScope
+  Operating Scopes define the **boundaries**
+  and **constraints** of a Capability.
+
+  They answer questions like:
+  - WHERE? (LocationScope)
+  - WHAT? (ProductScope, ResourceScope)
+  - HOW MUCH? (QuantityScope)
+  - HOW WELL? (SkillLevelScope)
+  - WHEN? (TemporalScope)
+  - WHICH PROTOCOL? (ProtocolScope)
+end note
+
+@enduml

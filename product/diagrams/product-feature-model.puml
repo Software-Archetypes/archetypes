@@ -1,0 +1,31 @@
+@startuml
+title Product Type and Instance with Features
+
+object ProductType {
+  id
+  name
+  featureTypes
+}
+
+object ProductInstance {
+  id
+  productType
+  features
+}
+
+object ProductFeatureType {
+  name
+  constraint
+}
+
+object ProductFeatureInstance {
+  featureType
+  value
+}
+
+ProductType o-- ProductFeatureType : defines
+ProductInstance --> ProductType : instanceOf
+ProductInstance o-- ProductFeatureInstance : has
+ProductFeatureInstance --> ProductFeatureType : conformsTo
+
+@enduml

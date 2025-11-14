@@ -1,0 +1,144 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 100
+skinparam ranksep 100
+title Accounting Archetype - Core Concept
+
+' ===== GŁÓWNE KONCEPTY =====
+
+object Account {
+  accountId: AccountId
+  type: AccountType
+  name: AccountName
+  balance: Money
+  --
+  addEntry(entry)
+  balance(): Money
+}
+
+object "Entry\n<<sealed>>" as Entry {
+  id: EntryId
+  transactionId: TransactionId
+  accountId: AccountId
+  amount: Money
+  occurredAt: Instant
+  appliesAt: Instant
+  metadata: MetaData
+  validity: Validity
+}
+
+object AccountDebited {
+  amount negated
+}
+
+object AccountCredited {
+  amount positive
+}
+
+object Transaction {
+  id: TransactionId
+  type: TransactionType
+  entries: Map<Account, List<Entry>>
+  --
+  execute()
+}
+
+object "TransactionEntriesConstraint\n<<interface>>" as TransactionEntriesConstraint {
+  errorMessage(): String
+  test(entries): boolean
+  isApplicable(entries): boolean
+}
+
+object BALANCING_CONSTRAINT {
+  Σ amounts = 0
+}
+
+object MIN_2_ENTRIES_CONSTRAINT {
+  entries.size() >= 2
+}
+
+object MIN_2_ACCOUNTS_INVOLVED_CONSTRAINT {
+  accounts.size() >= 2
+}
+
+object "PostingRule\n<<interface>>" as PostingRule {
+  isEligible(context): boolean
+  execute(context): List<Transaction>
+}
+
+' ===== RELACJE =====
+
+Transaction "1" *--> "2..*" Entry : contains
+Transaction --> TransactionEntriesConstraint : validates
+Entry --> Account : debit OR credit
+
+AccountDebited -up-|> Entry
+AccountCredited -up-|> Entry
+
+BALANCING_CONSTRAINT -up-|> TransactionEntriesConstraint
+MIN_2_ENTRIES_CONSTRAINT -up-|> TransactionEntriesConstraint
+MIN_2_ACCOUNTS_INVOLVED_CONSTRAINT -up-|> TransactionEntriesConstraint
+
+PostingRule ..> Transaction : triggered by\ngenerates more
+
+note right of Account
+  **Account = Konto księgowe**
+
+  AccountType (enum):
+  - ASSET (majątek)
+  - LIABILITY (zobowiązania)
+  - EXPENSE (koszty)
+  - REVENUE (przychody)
+  - OFF_BALANCE (pozabilansowe)
+
+  ✓ NIE wie o właścicielach!
+  ✓ Tylko księgowanie
+  ✓ Optimistic locking (version)
+end note
+
+note left of Transaction
+  **Transaction = Transakcja**
+
+  Grupuje entries
+  (double-entry bookkeeping)
+
+  **Walidacja przez Constraints:**
+  - BALANCING_CONSTRAINT
+  - MIN_2_ENTRIES_CONSTRAINT
+  - MIN_2_ACCOUNTS_INVOLVED_CONSTRAINT
+
+  refId = referencja dla reversals
+  execute() = dodaje entries do kont
+end note
+
+note bottom of Entry
+  **Entry = Sealed interface**
+
+  **AccountDebited:**
+  amount().negate() (ujemna)
+
+  **AccountCredited:**
+  amount (dodatnia)
+
+  **appliedTo:**
+  Optional<EntryId> - alokacja
+  do innego entry
+
+  **validity:**
+  okres ważności zapisu
+end note
+
+note top of PostingRule
+  **Posting Rule = Automatyzacja**
+
+  Na podstawie Transaction
+  generuje dodatkowe Transactions
+
+  **ConfigurablePostingRule:**
+  - eligibilityCondition
+  - accountFinder
+  - calculator
+  - priority
+end note
+
+@enduml

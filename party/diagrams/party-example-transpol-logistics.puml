@@ -1,0 +1,326 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+title TransPol Logistics Network - Party Graph with Capabilities
+
+' ===== MAIN ORGANIZATION =====
+package "TransPol Logistics" #E6F3FF {
+  object "TransPol Logistics\n<<Organization>>" as TransPol {
+    partyId: TP-001
+    --
+    **Role**: Dostawca 3PL
+  }
+
+  object "Freight Management" as TP_Cap1 <<Capability>> {
+    type: Freight Management
+    regions: [PL, DE, CZ]
+    quantity: 100 shipments/day
+  }
+
+  TransPol -- TP_Cap1
+}
+
+' ===== FASTTRACK PARTNER =====
+package "FastTrack - Express Delivery" #FFF4E6 {
+  object "FastTrack\n<<Organization>>" as FastTrack {
+    partyId: FT-001
+    --
+    **Role**: Express Delivery Partner
+  }
+
+  object "Express Delivery" as FT_Cap1 <<Capability>> {
+    type: Express Delivery
+    region: Warsaw, 50km
+    quantity: 40 deliveries/day
+  }
+
+  object "Marek Kwiatkowski\n<<Person>>" as Marek {
+    partyId: MK-001
+  }
+
+  object "Goods Delivery" as MK_Cap1 <<Capability>> {
+    type: Goods Delivery
+    category: Documents
+    maxWeight: 50kg
+  }
+
+  object "Route Optimization" as MK_Cap2 <<Capability>> {
+    type: Route Optimization
+    skillLevel: 8/10
+    certified: Yes
+  }
+
+  object "Kasia Zawadzka\n<<Person>>" as Kasia {
+    partyId: KZ-001
+  }
+
+  object "Food Delivery" as KZ_Cap1 <<Capability>> {
+    type: Food Delivery
+    coldChain: Yes
+    quantity: 25 deliveries/day
+  }
+
+  FastTrack -- FT_Cap1
+  Marek -- MK_Cap1
+  Marek -- MK_Cap2
+  Kasia -- KZ_Cap1
+}
+
+' ===== ECOFLEET PARTNER =====
+package "EcoFleet - Green Delivery" #E8F5E9 {
+  object "EcoFleet\n<<Organization>>" as EcoFleet {
+    partyId: EF-001
+    --
+    **Role**: Green Delivery Partner
+  }
+
+  object "Goods Delivery (EV)" as EF_Cap1 <<Capability>> {
+    type: Goods Delivery
+    fleet: EV
+    range: 150km
+    locations: [Warsaw, Łódź]
+  }
+
+  object "Charging Management" as EF_Cap2 <<Capability>> {
+    type: Charging Management
+    stations: 12
+    locations: PL-Central
+  }
+
+  object "Krzysztof Płatek\n<<Person>>" as Krzysztof {
+    partyId: KP-001
+  }
+
+  object "Goods Delivery (EV Van)" as KP_Cap1 <<Capability>> {
+    type: Goods Delivery
+    vehicle: EV Van
+    maxLoad: 800kg
+  }
+
+  object "GreenCharge\n<<Organization>>" as GreenCharge {
+    partyId: GC-001
+  }
+
+  object "Electric Fleet Charging" as GC_Cap1 <<Capability>> {
+    type: Electric Fleet Charging
+    scope: [PL, CZ]
+  }
+
+  object "Ola Wilk\n<<Person>>" as Ola {
+    partyId: OW-001
+  }
+
+  object "Infrastructure Maintenance" as OW_Cap1 <<Capability>> {
+    type: Infrastructure Maintenance
+    skillLevel: 7/10
+    certification: Safety+
+  }
+
+  EcoFleet -- EF_Cap1
+  EcoFleet -- EF_Cap2
+  Krzysztof -- KP_Cap1
+  GreenCharge -- GC_Cap1
+  Ola -- OW_Cap1
+}
+
+' ===== CARGOMATE PARTNER =====
+package "CargoMate - Heavy Freight" #FFF0F5 {
+  object "CargoMate\n<<Organization>>" as CargoMate {
+    partyId: CM-001
+  }
+
+  object "Heavy Freight" as CM_Cap1 <<Capability>> {
+    type: Heavy Freight
+    trucks: >12t
+    scope: EU-wide
+  }
+
+  object "Adam Nowak\n<<Person>>" as Adam {
+    partyId: AN-001
+  }
+
+  object "Heavy Truck Driving" as AN_Cap1 <<Capability>> {
+    type: Heavy Truck Driving
+    license: C+E
+    range: 500km
+  }
+
+  object "Piotr Lewandowski\n<<Person>>" as Piotr {
+    partyId: PL-001
+  }
+
+  object "Furniture Transport" as PL_Cap1 <<Capability>> {
+    type: Furniture Transport
+    maxWeight: 900kg
+    radius: 70km
+  }
+
+  CargoMate -- CM_Cap1
+  Adam -- AN_Cap1
+  Piotr -- PL_Cap1
+}
+
+' ===== INSURSAFE PARTNER =====
+package "InsurSafe - Insurance" #F0F8FF {
+  object "InsurSafe\n<<Organization>>" as InsurSafe {
+    partyId: IS-001
+  }
+
+  object "Cargo Insurance" as IS_Cap1 <<Capability>> {
+    type: Cargo Insurance
+    products: [Goods in Transit, Warehousing]
+  }
+
+  object "Ewa Malec\n<<Person>>" as Ewa {
+    partyId: EM-001
+  }
+
+  object "Risk Assessment" as EM_Cap1 <<Capability>> {
+    type: Risk Assessment
+    skillLevel: 9
+    certified: Yes
+  }
+
+  object "Robert Kania\n<<Person>>" as Robert {
+    partyId: RK-001
+  }
+
+  object "Customer Claims Handling" as RK_Cap1 <<Capability>> {
+    type: Customer Claims Handling
+    languages: [EN, DE]
+    experience: 5y
+  }
+
+  InsurSafe -- IS_Cap1
+  Ewa -- EM_Cap1
+  Robert -- RK_Cap1
+}
+
+' ===== RELATIONSHIPS =====
+object "PODWYKONAWSTWO" as Rel1 <<PartyRelationship>> {
+  type: SUBCONTRACTING
+  from: TransPol
+  to: FastTrack
+}
+
+object "ZATRUDNIENIE" as Rel2 <<PartyRelationship>> {
+  type: EMPLOYMENT
+  from: FastTrack
+  to: Marek
+}
+
+object "ZATRUDNIENIE" as Rel3 <<PartyRelationship>> {
+  type: EMPLOYMENT
+  from: FastTrack
+  to: Kasia
+}
+
+object "PODWYKONAWSTWO" as Rel4 <<PartyRelationship>> {
+  type: SUBCONTRACTING
+  from: TransPol
+  to: EcoFleet
+}
+
+object "ZATRUDNIENIE" as Rel5 <<PartyRelationship>> {
+  type: EMPLOYMENT
+  from: EcoFleet
+  to: Krzysztof
+}
+
+object "PARTNERSTWO" as Rel6 <<PartyRelationship>> {
+  type: PARTNERSHIP
+  from: EcoFleet
+  to: GreenCharge
+}
+
+object "ZATRUDNIENIE" as Rel7 <<PartyRelationship>> {
+  type: EMPLOYMENT
+  from: GreenCharge
+  to: Ola
+}
+
+object "PODWYKONAWSTWO" as Rel8 <<PartyRelationship>> {
+  type: SUBCONTRACTING
+  from: TransPol
+  to: CargoMate
+}
+
+object "ZATRUDNIENIE" as Rel9 <<PartyRelationship>> {
+  type: EMPLOYMENT
+  from: CargoMate
+  to: Adam
+}
+
+object "ZATRUDNIENIE" as Rel10 <<PartyRelationship>> {
+  type: EMPLOYMENT
+  from: CargoMate
+  to: Piotr
+}
+
+object "PARTNERSTWO" as Rel11 <<PartyRelationship>> {
+  type: PARTNERSHIP
+  from: TransPol
+  to: InsurSafe
+}
+
+object "ZATRUDNIENIE" as Rel12 <<PartyRelationship>> {
+  type: EMPLOYMENT
+  from: InsurSafe
+  to: Ewa
+}
+
+object "ZATRUDNIENIE" as Rel13 <<PartyRelationship>> {
+  type: EMPLOYMENT
+  from: InsurSafe
+  to: Robert
+}
+
+TransPol ..> Rel1
+Rel1 ..> FastTrack
+FastTrack ..> Rel2
+Rel2 ..> Marek
+FastTrack ..> Rel3
+Rel3 ..> Kasia
+
+TransPol ..> Rel4
+Rel4 ..> EcoFleet
+EcoFleet ..> Rel5
+Rel5 ..> Krzysztof
+EcoFleet ..> Rel6
+Rel6 ..> GreenCharge
+GreenCharge ..> Rel7
+Rel7 ..> Ola
+
+TransPol ..> Rel8
+Rel8 ..> CargoMate
+CargoMate ..> Rel9
+Rel9 ..> Adam
+CargoMate ..> Rel10
+Rel10 ..> Piotr
+
+TransPol ..> Rel11
+Rel11 ..> InsurSafe
+InsurSafe ..> Rel12
+Rel12 ..> Ewa
+InsurSafe ..> Rel13
+Rel13 ..> Robert
+
+note bottom of TransPol
+  **Przykładowe zapytania:**
+
+  1. "Znajdź kierowcę naszego partnera, który może
+     dostarczać meble w promieniu 70 km"
+     → Piotr Lewandowski (CargoMate)
+
+  2. "Kto potrafi realizować dostawy elektrycznymi pojazdami?"
+     → EcoFleet, Krzysztof Płatek
+
+  3. "Która organizacja obsługuje ubezpieczenia ładunków?"
+     → InsurSafe
+
+  4. "Kto potrafi zoptymalizować trasy dostaw w Warszawie?"
+     → Marek Kwiatkowski (FastTrack)
+end note
+
+@enduml

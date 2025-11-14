@@ -1,0 +1,77 @@
+@startuml
+skinparam MinClassWidth 150
+skinparam linetype ortho
+title Address Model (Annotated)
+
+' ===== ADDRESS =====
+package "Address Archetype" {
+  object Address {
+    validFrom: Date
+    validTo: Date
+  }
+
+  object AddressId {
+    value: UUID
+  }
+
+  object AddressUseType {
+    value: String
+  }
+
+  Address "1" *-- "1" AddressId
+  Address "1" *-- "1..*" AddressUseType
+}
+
+' ===== ADDRESS TYPES =====
+package "Address Types" #EEFFEE {
+  object EmailAddress {
+    value: String
+  }
+
+  object GeographicAddress {
+    addressLine: String[]
+    city: String
+    region: String
+    zipCode: String
+  }
+
+  object WebPageAddress {
+    url: String
+  }
+
+  EmailAddress -up-|> Address
+  GeographicAddress -up-|> Address
+  WebPageAddress -up-|> Address
+}
+
+note right of Address
+  <b>Address Archetype</b>
+
+  Sealed abstract class with:
+  - Validity period
+  - Use types (HOME, WORK, etc.)
+  - Multiple implementations
+
+  Common behavior in base class,
+  specific details in subtypes.
+end note
+
+note bottom of EmailAddress
+  <b>Email Address</b>
+  Email with validation
+  (RFC 5322 pattern)
+end note
+
+note bottom of GeographicAddress
+  <b>Geographic Address</b>
+  Physical location with
+  address components
+end note
+
+note bottom of WebPageAddress
+  <b>Web Address</b>
+  URL/web address
+  with validation
+end note
+
+@enduml

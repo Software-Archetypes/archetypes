@@ -1,0 +1,144 @@
+@startuml
+skinparam MinClassWidth 150
+skinparam linetype ortho
+title Party with Data and Authentication (Annotated)
+
+' ===== PARTY HIERARCHY =====
+package "Core Party Archetype" {
+  object Party
+  object Person
+  object Organization
+
+  Person -up-|> Party
+  Organization -up-|> Party
+}
+
+' ===== COMPANY TYPES =====
+package "Company Types" #FFFFEE {
+  object Company
+  object JointStock
+  object LimitedLiability
+  object LimitedPartnership
+
+  Company -up-|> Organization
+  JointStock -up-|> Company
+  LimitedLiability -up-|> Company
+  LimitedPartnership -up-|> Company
+}
+
+' ===== ORGANIZATION UNIT TYPES =====
+package "Organization Unit Types" #EEEEFF {
+  object OrganizationUnit
+  object Division
+  object Department
+  object Team
+
+  OrganizationUnit -up-|> Organization
+  Division -up-|> OrganizationUnit
+  Department -up-|> OrganizationUnit
+  Team -up-|> OrganizationUnit
+}
+
+' ===== PARTY DATA =====
+package "Party Data" #EEFFEE {
+  object PartyIdentifier {
+    value: UUID
+  }
+
+  object Role {
+    name: String
+  }
+
+  object PersonName {
+    givenName: String
+    familyName: String
+  }
+
+  object OrganizationName {
+    value: String
+  }
+
+  Party "1" *-- "1" PartyIdentifier
+  Party "1" -- "0..*" Role
+  Person "1" *-- "1..*" PersonName
+  Organization "1" *-- "1..*" OrganizationName
+}
+
+' ===== AUTHENTICATION & IDENTIFIERS =====
+package "Authentication & Identifiers" #FFEEEE {
+  object RegisteredIdentifier {
+    value: String
+    type: String
+    validFrom: Date
+    validTo: Date
+  }
+
+  object PartyAuthentication
+
+  Party "1" *-- "0..*" RegisteredIdentifier
+  Party "1" *-- "0..*" PartyAuthentication
+}
+
+' ===== ADDRESS =====
+package "Address" #EEEEFF {
+  object Address {
+    validFrom: Date
+    validTo: Date
+  }
+
+  object AddressId {
+    value: UUID
+  }
+
+  object AddressUseType {
+    value: String
+  }
+
+  object EmailAddress {
+    value: String
+  }
+
+  object GeographicAddress {
+    addressLine: String[]
+    city: String
+    region: String
+    zipCode: String
+  }
+
+  Party "1" -- "0..*" Address
+  Address "1" *-- "1" AddressId
+  Address "1" *-- "1..*" AddressUseType
+  EmailAddress -up-|> Address
+  GeographicAddress -up-|> Address
+}
+
+note right of Party
+  <b>Party with Complete Data</b>
+
+  Shows full Party model with:
+  - Hierarchy
+  - Personal/Organizational data
+  - Authentication
+  - Registered identifiers
+  - Addresses
+end note
+
+note right of PersonName
+  Person can have multiple names
+  (legal, preferred, historical)
+end note
+
+note right of RegisteredIdentifier
+  Official identifiers:
+  - PESEL, Tax Number
+  - Passport, ID Card
+  With validity periods
+end note
+
+note bottom of PartyAuthentication
+  System access credentials:
+  - Username/password
+  - OAuth, API keys
+end note
+
+@enduml

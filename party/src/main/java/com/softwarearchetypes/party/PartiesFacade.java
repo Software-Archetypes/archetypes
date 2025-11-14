@@ -2,9 +2,11 @@ package com.softwarearchetypes.party;
 
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import com.softwarearchetypes.common.Result;
 import com.softwarearchetypes.common.Version;
+import com.softwarearchetypes.party.commands.*;
 import com.softwarearchetypes.party.events.EventPublisher;
 import com.softwarearchetypes.party.events.IncorrectPartyTypeIdentified;
 import com.softwarearchetypes.party.events.PartyNotFound;
@@ -76,72 +78,91 @@ public class PartiesFacade {
         this.newPartyIdSupplier = newPartyIdSupplier != null ? newPartyIdSupplier : PartyId::random;
     }
 
-    public Result<PartyRelatedFailureEvent, Person> registerPersonFor(PersonalData personalData, Set<Role> roles, Set<RegisteredIdentifier> registeredIdentifiers) {
-        return registerPartyAccordingTo(() -> new Person(newPartyIdSupplier.get(), personalData, roles, registeredIdentifiers, Version.initial())).map(Person.class::cast);
+    public Result<PartyRelatedFailureEvent, PartyView> handle(RegisterPersonCommand command) {
+        PersonalData personalData = PersonalData.from(command.firstName(), command.lastName());
+        Set<Role> roles = command.roles().stream().map(Role::of).collect(Collectors.toSet());
+        return registerPartyAccordingTo(() -> new Person(newPartyIdSupplier.get(), personalData, roles, command.registeredIdentifiers(), Version.initial()))
+                .map(PartyViewMapper::toView);
     }
 
-    public Result<PartyRelatedFailureEvent, Company> registerCompanyFor(OrganizationName organizationName, Set<Role> roles, Set<RegisteredIdentifier> registeredIdentifiers) {
-        return registerPartyAccordingTo(() -> new Company(newPartyIdSupplier.get(), organizationName, roles, registeredIdentifiers, Version.initial())).map(Company.class::cast);
+    public Result<PartyRelatedFailureEvent, PartyView> handle(RegisterCompanyCommand command) {
+        OrganizationName organizationName = OrganizationName.of(command.organizationName());
+        Set<Role> roles = command.roles().stream().map(Role::of).collect(Collectors.toSet());
+        return registerPartyAccordingTo(() -> new Company(newPartyIdSupplier.get(), organizationName, roles, command.registeredIdentifiers(), Version.initial()))
+                .map(PartyViewMapper::toView);
     }
 
-    public Result<PartyRelatedFailureEvent, OrganizationUnit> registerOrganizationUnitFor(OrganizationName organizationName, Set<Role> roles, Set<RegisteredIdentifier> registeredIdentifiers) {
-        return registerPartyAccordingTo(() -> new OrganizationUnit(newPartyIdSupplier.get(), organizationName, roles, registeredIdentifiers, Version.initial())).map(OrganizationUnit.class::cast);
+    public Result<PartyRelatedFailureEvent, PartyView> handle(RegisterOrganizationUnitCommand command) {
+        OrganizationName organizationName = OrganizationName.of(command.organizationName());
+        Set<Role> roles = command.roles().stream().map(Role::of).collect(Collectors.toSet());
+        return registerPartyAccordingTo(() -> new OrganizationUnit(newPartyIdSupplier.get(), organizationName, roles, command.registeredIdentifiers(), Version.initial()))
+                .map(PartyViewMapper::toView);
     }
 
-    public Result<PartyRelatedFailureEvent, Party> add(PartyId partyId, Role role) {
-        return partyRepository.findBy(partyId)
+    public Result<PartyRelatedFailureEvent, PartyId> handle(AddRoleCommand command) {
+        Role role = Role.of(command.role());
+        return partyRepository.findBy(command.partyId())
                               .map(party -> party.add(role))
                               .map(party -> party.mapFailure(PartyRelatedFailureEvent.class::cast))
-                              .orElse(Result.failure(new PartyNotFound(partyId.asString())))
+                              .orElse(Result.failure(new PartyNotFound(command.partyId().asString())))
                               .peekSuccess(partyRepository::save)
-                              .peekSuccess(party -> eventPublisher.publish(party.publishedEvents()));
+                              .peekSuccess(party -> eventPublisher.publish(party.publishedEvents()))
+                              .map(Party::id);
     }
 
-    public Result<PartyRelatedFailureEvent, Party> remove(PartyId partyId, Role role) {
-        return partyRepository.findBy(partyId)
+    public Result<PartyRelatedFailureEvent, PartyId> handle(RemoveRoleCommand command) {
+        Role role = Role.of(command.role());
+        return partyRepository.findBy(command.partyId())
                               .map(party -> party.remove(role))
                               .map(party -> party.mapFailure(PartyRelatedFailureEvent.class::cast))
-                              .orElse(Result.failure(new PartyNotFound(partyId.asString())))
+                              .orElse(Result.failure(new PartyNotFound(command.partyId().asString())))
                               .peekSuccess(partyRepository::save)
-                              .peekSuccess(party -> eventPublisher.publish(party.publishedEvents()));
+                              .peekSuccess(party -> eventPublisher.publish(party.publishedEvents()))
+                              .map(Party::id);
     }
 
-    public Result<PartyRelatedFailureEvent, Party> add(PartyId partyId, RegisteredIdentifier identifier) {
-        return partyRepository.findBy(partyId)
-                              .map(party -> party.add(identifier))
+    public Result<PartyRelatedFailureEvent, PartyId> handle(AddRegisteredIdentifierCommand command) {
+        return partyRepository.findBy(command.partyId())
+                              .map(party -> party.add(command.registeredIdentifier()))
                               .map(party -> party.mapFailure(PartyRelatedFailureEvent.class::cast))
-                              .orElse(Result.failure(new RegisteredIdentifierAdditionFailed(partyId.asString(), identifier.asString(), "PARTY_NOT_FOUND")))
+                              .orElse(Result.failure(new RegisteredIdentifierAdditionFailed(command.partyId().asString(), command.registeredIdentifier().asString(), "PARTY_NOT_FOUND")))
                               .peekSuccess(partyRepository::save)
-                              .peekSuccess(party -> eventPublisher.publish(party.publishedEvents()));
+                              .peekSuccess(party -> eventPublisher.publish(party.publishedEvents()))
+                              .map(Party::id);
     }
 
-    public Result<PartyRelatedFailureEvent, Party> remove(PartyId partyId, RegisteredIdentifier identifier) {
-        return partyRepository.findBy(partyId)
-                              .map(party -> party.remove(identifier))
+    public Result<PartyRelatedFailureEvent, PartyId> handle(RemoveRegisteredIdentifierCommand command) {
+        return partyRepository.findBy(command.partyId())
+                              .map(party -> party.remove(command.registeredIdentifier()))
                               .map(party -> party.mapFailure(PartyRelatedFailureEvent.class::cast))
-                              .orElse(Result.failure(new RegisteredIdentifierRemovalFailed(partyId.asString(), identifier.asString(), "PARTY_NOT_FOUND")))
+                              .orElse(Result.failure(new RegisteredIdentifierRemovalFailed(command.partyId().asString(), command.registeredIdentifier().asString(), "PARTY_NOT_FOUND")))
                               .peekSuccess(partyRepository::save)
-                              .peekSuccess(party -> eventPublisher.publish(party.publishedEvents()));
+                              .peekSuccess(party -> eventPublisher.publish(party.publishedEvents()))
+                              .map(Party::id);
     }
 
-    public Result<PartyRelatedFailureEvent, Person> update(PartyId partyId, PersonalData personalData) {
-        return partyRepository.findBy(partyId, Person.class)
+    public Result<PartyRelatedFailureEvent, PartyView> handle(UpdatePersonalDataCommand command) {
+        PersonalData personalData = PersonalData.from(command.firstName(), command.lastName());
+        return partyRepository.findBy(command.partyId(), Person.class)
                               .map(Person.class::cast)
                               .map(party -> party.update(personalData))
                               .map(party -> party.mapFailure(PartyRelatedFailureEvent.class::cast))
-                              .orElse(Result.failure(new IncorrectPartyTypeIdentified(partyId.asString(), "Person")))
+                              .orElse(Result.failure(new IncorrectPartyTypeIdentified(command.partyId().asString(), "Person")))
                               .peekSuccess(partyRepository::save)
-                              .peekSuccess(party -> eventPublisher.publish(party.publishedEvents()));
+                              .peekSuccess(party -> eventPublisher.publish(party.publishedEvents()))
+                              .map(PartyViewMapper::toView);
     }
 
-    public Result<PartyRelatedFailureEvent, Organization> update(PartyId partyId, OrganizationName organizationName) {
-        return partyRepository.findBy(partyId, Organization.class)
+    public Result<PartyRelatedFailureEvent, PartyView> handle(UpdateOrganizationNameCommand command) {
+        OrganizationName organizationName = OrganizationName.of(command.organizationName());
+        return partyRepository.findBy(command.partyId(), Organization.class)
                               .map(Organization.class::cast)
                               .map(party -> party.update(organizationName))
                               .map(party -> party.mapFailure(PartyRelatedFailureEvent.class::cast))
-                              .orElse(Result.failure(new IncorrectPartyTypeIdentified(partyId.asString(), "Organization")))
+                              .orElse(Result.failure(new IncorrectPartyTypeIdentified(command.partyId().asString(), "Organization")))
                               .peekSuccess(partyRepository::save)
-                              .peekSuccess(party -> eventPublisher.publish(party.publishedEvents()));
+                              .peekSuccess(party -> eventPublisher.publish(party.publishedEvents()))
+                              .map(PartyViewMapper::toView);
     }
 
     private Result<PartyRelatedFailureEvent, Party> registerPartyAccordingTo(Supplier<Party> partySupplier) {

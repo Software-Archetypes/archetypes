@@ -1,0 +1,125 @@
+@startuml
+skinparam linetype ortho
+title Account Ownership - Porównanie Podejść
+
+' ===== ZŁE PODEJŚCIE =====
+rectangle "❌ ZŁE: Account wie o właścicielach" #FFCCCC {
+
+  object Account_BAD {
+    accountId
+    --
+    partyOwner?
+    fleetCardOwner?
+    loanOwner?
+    creditCardOwner?
+    investmentOwner?
+    mortgageOwner?
+    ...
+  }
+
+  object Party1
+  object FleetCard1
+  object Loan1
+  object CreditCard1
+  object Investment1
+  object Mortgage1
+
+  Account_BAD -down-> Party1
+  Account_BAD -down-> FleetCard1
+  Account_BAD -down-> Loan1
+  Account_BAD -down-> CreditCard1
+  Account_BAD -down-> Investment1
+  Account_BAD -down-> Mortgage1
+
+  note bottom of Account_BAD
+    **Coupling Explosion**
+    Account zależy od WSZYSTKICH
+    możliwych właścicieli
+
+    Nowy typ = zmiana Account
+  end note
+}
+
+' ===== DOBRE PODEJŚCIE =====
+rectangle "✓ DOBRE: Właściciele wiedzą o Account" #CCFFCC {
+
+  object Account_GOOD {
+    accountId
+    accountNumber
+    balance
+    --
+    ✓ Nie wie o właścicielach!
+  }
+
+  object Party2 {
+    partyId
+    --
+    accountId ────┐
+  }
+
+  object FleetCard2 {
+    cardId
+    --
+    accountId ────┤
+  }
+
+  object Loan2 {
+    loanId
+    --
+    accountId ────┤
+  }
+
+  object CreditCard2 {
+    cardId
+    --
+    accountId ────┤
+  }
+
+  object Investment2 {
+    investmentId
+    --
+    accountId ────┤
+  }
+
+  object Mortgage2 {
+    mortgageId
+    --
+    accountId ────┘
+  }
+
+  Party2 -up-> Account_GOOD
+  FleetCard2 -up-> Account_GOOD
+  Loan2 -up-> Account_GOOD
+  CreditCard2 -up-> Account_GOOD
+  Investment2 -up-> Account_GOOD
+  Mortgage2 -up-> Account_GOOD
+
+  note bottom of Account_GOOD
+    **Low Coupling**
+    Account niezależny
+    od przypadków użycia
+
+    Nowy typ = ZERO zmian w Account
+  end note
+}
+
+' ===== PORÓWNANIE =====
+note as N1
+  **Kluczowa różnica:**
+
+  **ZŁE:**
+  Account → [zna] → Party, FleetCard, Loan, ...
+  = coupling do wszystkich modeli
+  = zmiana przy każdym nowym use case
+
+  **DOBRE:**
+  Party, FleetCard, Loan, ... → [znają] → Account
+  = Account niezależny
+  = dependency inversion
+  = archetyp reużywalny
+end note
+
+N1 -[hidden]-> Account_BAD
+N1 -[hidden]-> Account_GOOD
+
+@enduml

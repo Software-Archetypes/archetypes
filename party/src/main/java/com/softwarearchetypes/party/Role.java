@@ -13,7 +13,7 @@ public record Role(String name) {
         return new Role(value);
     }
 
-    String asString() {
+    public String asString() {
         return name;
     }
 }

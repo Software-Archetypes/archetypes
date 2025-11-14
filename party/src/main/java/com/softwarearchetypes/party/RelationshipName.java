@@ -13,7 +13,7 @@ public record RelationshipName(String value) {
         return new RelationshipName(value);
     }
 
-    String asString() {
+    public String asString() {
         return value;
     }
 

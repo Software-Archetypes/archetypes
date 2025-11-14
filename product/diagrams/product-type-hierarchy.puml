@@ -1,0 +1,31 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+title Product Type Hierarchy
+
+class ProductType {
+  id: ProductTypeId
+  name: String
+  description: String
+}
+
+class ServiceType {
+  serviceCategory: String
+  sla: SLA
+}
+
+class MeasuredProductType {
+  unitOfMeasure: UnitOfMeasure
+  precision: int
+}
+
+class MeasuredServiceType {
+  unitOfMeasure: UnitOfMeasure
+  precision: int
+}
+
+ProductType <|-- ServiceType
+ProductType <|-- MeasuredProductType
+ServiceType <|-- MeasuredServiceType
+
+@enduml

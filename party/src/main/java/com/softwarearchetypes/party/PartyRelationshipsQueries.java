@@ -3,7 +3,6 @@ package com.softwarearchetypes.party;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class PartyRelationshipsQueries {
 
@@ -13,27 +12,35 @@ public class PartyRelationshipsQueries {
         this.repository = repository;
     }
 
-    public Optional<PartyRelationship> findBy(PartyRelationshipId partyId) {
-        return repository.findBy(partyId);
+    public Optional<PartyRelationshipView> findBy(PartyRelationshipId partyId) {
+        return repository.findBy(partyId)
+                         .map(PartyRelationshipViewMapper::toView);
     }
 
-    public List<PartyRelationship> findAllRelationsFrom(PartyId partyId) {
-        return repository.findAllRelationsFrom(partyId);
+    public List<PartyRelationshipView> findAllRelationsFrom(PartyId partyId) {
+        return repository.findAllRelationsFrom(partyId).stream()
+                         .map(PartyRelationshipViewMapper::toView)
+                         .toList();
     }
 
-    public List<PartyRelationship> findAllRelationsFrom(PartyId partyId, RelationshipName name) {
-        return repository.findAllRelationsFrom(partyId, name);
+    public List<PartyRelationshipView> findAllRelationsFrom(PartyId partyId, String relationshipName) {
+        RelationshipName name = RelationshipName.of(relationshipName);
+        return repository.findAllRelationsFrom(partyId, name).stream()
+                         .map(PartyRelationshipViewMapper::toView)
+                         .toList();
     }
 
-    public List<PartyRelationship> findAllRelationsFrom(List<PartyId> partyIds, RelationshipName name) {
-        return partyIds.stream().flatMap(it -> repository.findAllRelationsFrom(it, name).stream()).collect(Collectors.toList());
+    public List<PartyRelationshipView> findAllRelationsFrom(List<PartyId> partyIds, String relationshipName) {
+        RelationshipName name = RelationshipName.of(relationshipName);
+        return partyIds.stream()
+                       .flatMap(it -> repository.findAllRelationsFrom(it, name).stream())
+                       .map(PartyRelationshipViewMapper::toView)
+                       .toList();
     }
 
-    public List<PartyRelationship> findMatching(List<PartyId> partyIds, RelationshipName name) {
-        return partyIds.stream().flatMap(it -> repository.findAllRelationsFrom(it, name).stream()).collect(Collectors.toList());
-    }
-
-    public List<PartyRelationship> findMatching(Predicate<PartyRelationship> predicate) {
-        return repository.findMatching(predicate);
+    public List<PartyRelationshipView> findMatching(Predicate<PartyRelationship> predicate) {
+        return repository.findMatching(predicate).stream()
+                         .map(PartyRelationshipViewMapper::toView)
+                         .toList();
     }
 }

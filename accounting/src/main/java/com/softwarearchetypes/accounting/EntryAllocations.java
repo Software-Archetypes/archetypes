@@ -64,7 +64,7 @@ class EntryAllocationFilterBuilder {
         return new EntryAllocationFilterBuilder(EntryAllocationStrategy.LIFO, accountId);
     }
 
-    static EntryAllocationFilterBuilder Al(EntryId entryId) {
+    static EntryAllocationFilterBuilder manual(EntryId entryId) {
         return new EntryAllocationFilterBuilder(MANUAL, entryId);
     }
 

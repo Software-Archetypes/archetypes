@@ -1,0 +1,54 @@
+@startuml
+skinparam MinClassWidth 120
+skinparam linetype ortho
+skinparam packageMargin 20
+skinparam nodesep 100
+skinparam ranksep 100
+title Party Role - Inheritance Alternative
+
+' ===== PARTY BASE =====
+package "Core Party Archetype" {
+  object Party
+  object Person
+  object Organization
+
+  Person -up-|> Party
+  Organization -up-|> Party
+}
+
+' ===== PARTY ROLE - INHERITANCE APPROACH =====
+package "PartyRole - Inheritance" #FFEEEE {
+  object PartyRole {
+    partyId: PartyId
+    --
+    + {abstract} canBeAssignedTo(Party): boolean
+  }
+
+  object Employee {
+    + canBeAssignedTo(Party): boolean
+  }
+
+  object Employer {
+    + canBeAssignedTo(Party): boolean
+  }
+
+  object Customer {
+    + canBeAssignedTo(Party): boolean
+  }
+
+  object Supplier {
+    + canBeAssignedTo(Party): boolean
+  }
+
+  Employee -up-|> PartyRole
+  Employer -up-|> PartyRole
+  Customer -up-|> PartyRole
+  Supplier -up-|> PartyRole
+}
+
+Party "1" -- "0..*" PartyRole : plays
+PartyRole ..> Party : validates
+
+Party -[hidden]down- PartyRole
+
+@enduml

@@ -1,0 +1,77 @@
+@startuml
+skinparam MinClassWidth 120
+skinparam linetype ortho
+title Party Basic Model - Core Hierarchy (Annotated)
+
+' ===== PARTY BASE =====
+package "Core Party Archetype" {
+  object Party
+  object Person
+  object Organization
+
+  Person -up-|> Party
+  Organization -up-|> Party
+}
+
+' ===== COMPANY HIERARCHY =====
+package "Company Types" #FFFFEE {
+  object Company
+  object JointStock
+  object LimitedLiability
+  object LimitedPartnership
+
+  Company -up-|> Organization
+  JointStock -up-|> Company
+  LimitedLiability -up-|> Company
+  LimitedPartnership -up-|> Company
+}
+
+' ===== ORGANIZATION UNIT HIERARCHY =====
+package "Organization Unit Types" #EEEEFF {
+  object OrganizationUnit
+  object Division
+  object Department
+  object Team
+
+  OrganizationUnit -up-|> Organization
+  Division -up-|> OrganizationUnit
+  Department -up-|> OrganizationUnit
+  Team -up-|> OrganizationUnit
+}
+
+' ===== ROLE =====
+object PartyRole
+
+Party "1" -- "0..*" PartyRole : has
+
+note right of Party
+  <b>Party Archetype</b>
+
+  Base abstraction for all
+  entities that can participate
+  in business relationships.
+
+  Sealed hierarchy:
+  - Person (individuals)
+  - Organization (entities)
+end note
+
+note right of Company
+  <b>Company</b>
+
+  Legal business entities:
+  - Joint Stock (SA)
+  - Limited Liability (Sp. z o.o.)
+  - Limited Partnership (SKA)
+end note
+
+note right of OrganizationUnit
+  <b>Organization Unit</b>
+
+  Internal structures:
+  - Division
+  - Department
+  - Team
+end note
+
+@enduml

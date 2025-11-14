@@ -1,0 +1,260 @@
+@startuml
+skinparam rectangle {
+  BackgroundColor<<Party>> #E6F3FF
+  BorderColor<<Party>> #333333
+}
+
+skinparam card {
+  BackgroundColor<<Capability>> #FFE6CC
+  BorderColor<<Capability>> #CC9966
+}
+
+skinparam cloud {
+  BackgroundColor<<Role>> #E8F5E9
+  BorderColor<<Role>> #66CC66
+}
+
+skinparam component {
+  BackgroundColor<<Relationship>> #F5E8E8
+  BorderColor<<Relationship>> #CC6666
+}
+
+title TransPol Logistics Network - Party Graph with Roles and Capabilities
+
+' ===== PARTIES =====
+rectangle "TransPol Logistics\n(Organization)" as TransPol <<Party>>
+rectangle "FastTrack\n(Organization)" as FastTrack <<Party>>
+rectangle "Marek Kwiatkowski\n(Person)" as Marek <<Party>>
+rectangle "Kasia Zawadzka\n(Person)" as Kasia <<Party>>
+rectangle "EcoFleet\n(Organization)" as EcoFleet <<Party>>
+rectangle "Krzysztof Płatek\n(Person)" as Krzysztof <<Party>>
+rectangle "GreenCharge\n(Organization)" as GreenCharge <<Party>>
+rectangle "Ola Wilk\n(Person)" as Ola <<Party>>
+rectangle "CargoMate\n(Organization)" as CargoMate <<Party>>
+rectangle "Adam Nowak\n(Person)" as Adam <<Party>>
+rectangle "Piotr Lewandowski\n(Person)" as Piotr <<Party>>
+rectangle "InsurSafe\n(Organization)" as InsurSafe <<Party>>
+rectangle "Ewa Malec\n(Person)" as Ewa <<Party>>
+rectangle "Robert Kania\n(Person)" as Robert <<Party>>
+
+' ===== ROLES (independent) =====
+cloud "3PL Provider" as Role_TransPol <<Role>>
+cloud "Express Delivery\nPartner" as Role_FastTrack <<Role>>
+cloud "Green Delivery\nPartner" as Role_EcoFleet <<Role>>
+cloud "Courier" as Role_Marek <<Role>>
+cloud "Food Courier" as Role_Kasia <<Role>>
+cloud "EV Driver" as Role_Krzysztof <<Role>>
+cloud "Charging Provider" as Role_GreenCharge <<Role>>
+cloud "Technician" as Role_Ola <<Role>>
+cloud "Freight Carrier" as Role_CargoMate <<Role>>
+cloud "Heavy Driver" as Role_Adam <<Role>>
+cloud "Furniture Driver" as Role_Piotr <<Role>>
+cloud "Insurer" as Role_InsurSafe <<Role>>
+cloud "Risk Assessor" as Role_Ewa <<Role>>
+cloud "Claims Handler" as Role_Robert <<Role>>
+
+' ===== CAPABILITIES =====
+card "Freight Management\nRegions: PL, DE, CZ\n100 shipments/day" as TransPol_Cap1 <<Capability>>
+card "Express Delivery\nWarsaw, 50km\n40 deliveries/day" as FastTrack_Cap1 <<Capability>>
+card "Goods Delivery\nDocuments, max 50kg" as Marek_Cap1 <<Capability>>
+card "Route Optimization\nSkill: 8/10, Certified" as Marek_Cap2 <<Capability>>
+card "Food Delivery\nCold Chain\n25 deliveries/day" as Kasia_Cap1 <<Capability>>
+card "Goods Delivery (EV)\nRange: 150km\nWarsaw, Łódź" as EcoFleet_Cap1 <<Capability>>
+card "Charging Management\n12 stations\nPL-Central" as EcoFleet_Cap2 <<Capability>>
+card "Goods Delivery\nEV Van, 800kg" as Krzysztof_Cap1 <<Capability>>
+card "Electric Fleet Charging\nPL, CZ" as GreenCharge_Cap1 <<Capability>>
+card "Infrastructure Maintenance\nSkill: 7/10\nCert: Safety+" as Ola_Cap1 <<Capability>>
+card "Heavy Freight\nTrucks >12t\nEU-wide" as CargoMate_Cap1 <<Capability>>
+card "Heavy Truck Driving\nLicense: C+E\nRange: 500km" as Adam_Cap1 <<Capability>>
+card "Furniture Transport\nmax 900kg\nRadius: 70km" as Piotr_Cap1 <<Capability>>
+card "Cargo Insurance\nGoods in Transit\nWarehousing" as InsurSafe_Cap1 <<Capability>>
+card "Risk Assessment\nSkill: 9, Certified" as Ewa_Cap1 <<Capability>>
+card "Customer Claims Handling\nEN/DE, 5y exp" as Robert_Cap1 <<Capability>>
+
+' ===== PARTY -> ROLE =====
+TransPol --> Role_TransPol : plays
+FastTrack --> Role_FastTrack : plays
+Marek --> Role_Marek : plays
+Kasia --> Role_Kasia : plays
+EcoFleet --> Role_EcoFleet : plays
+Krzysztof --> Role_Krzysztof : plays
+GreenCharge --> Role_GreenCharge : plays
+Ola --> Role_Ola : plays
+CargoMate --> Role_CargoMate : plays
+Adam --> Role_Adam : plays
+Piotr --> Role_Piotr : plays
+InsurSafe --> Role_InsurSafe : plays
+Ewa --> Role_Ewa : plays
+Robert --> Role_Robert : plays
+
+' ===== CAPABILITIES LINKS =====
+TransPol ..> TransPol_Cap1 : has
+FastTrack ..> FastTrack_Cap1 : has
+Marek ..> Marek_Cap1 : has
+Marek ..> Marek_Cap2 : has
+Kasia ..> Kasia_Cap1 : has
+EcoFleet ..> EcoFleet_Cap1 : has
+EcoFleet ..> EcoFleet_Cap2 : has
+Krzysztof ..> Krzysztof_Cap1 : has
+GreenCharge ..> GreenCharge_Cap1 : has
+Ola ..> Ola_Cap1 : has
+CargoMate ..> CargoMate_Cap1 : has
+Adam ..> Adam_Cap1 : has
+Piotr ..> Piotr_Cap1 : has
+InsurSafe ..> InsurSafe_Cap1 : has
+Ewa ..> Ewa_Cap1 : has
+Robert ..> Robert_Cap1 : has
+
+' ===== RELATIONSHIPS WITH ROLES =====
+component "PODWYKONAWSTWO\n(Subcontracting)" as Rel1 <<Relationship>>
+component "ZATRUDNIENIE\n(Employment)" as Rel2 <<Relationship>>
+component "ZATRUDNIENIE\n(Employment)" as Rel3 <<Relationship>>
+component "PODWYKONAWSTWO\n(Subcontracting)" as Rel4 <<Relationship>>
+component "ZATRUDNIENIE\n(Employment)" as Rel5 <<Relationship>>
+component "PARTNERSTWO\n(Partnership)" as Rel6 <<Relationship>>
+component "ZATRUDNIENIE\n(Employment)" as Rel7 <<Relationship>>
+component "PODWYKONAWSTWO\n(Subcontracting)" as Rel8 <<Relationship>>
+component "ZATRUDNIENIE\n(Employment)" as Rel9 <<Relationship>>
+component "ZATRUDNIENIE\n(Employment)" as Rel10 <<Relationship>>
+component "PARTNERSTWO\n(Partnership)" as Rel11 <<Relationship>>
+component "ZATRUDNIENIE\n(Employment)" as Rel12 <<Relationship>>
+component "ZATRUDNIENIE\n(Employment)" as Rel13 <<Relationship>>
+
+' Relationship roles
+cloud "Principal" as Rel1_FromRole <<Role>>
+cloud "Subcontractor" as Rel1_ToRole <<Role>>
+
+cloud "Employer" as Rel2_FromRole <<Role>>
+cloud "Employee" as Rel2_ToRole <<Role>>
+
+cloud "Employer" as Rel3_FromRole <<Role>>
+cloud "Employee" as Rel3_ToRole <<Role>>
+
+cloud "Principal" as Rel4_FromRole <<Role>>
+cloud "Subcontractor" as Rel4_ToRole <<Role>>
+
+cloud "Employer" as Rel5_FromRole <<Role>>
+cloud "Employee" as Rel5_ToRole <<Role>>
+
+cloud "Partner A" as Rel6_FromRole <<Role>>
+cloud "Partner B" as Rel6_ToRole <<Role>>
+
+cloud "Employer" as Rel7_FromRole <<Role>>
+cloud "Employee" as Rel7_ToRole <<Role>>
+
+cloud "Principal" as Rel8_FromRole <<Role>>
+cloud "Subcontractor" as Rel8_ToRole <<Role>>
+
+cloud "Employer" as Rel9_FromRole <<Role>>
+cloud "Employee" as Rel9_ToRole <<Role>>
+
+cloud "Employer" as Rel10_FromRole <<Role>>
+cloud "Employee" as Rel10_ToRole <<Role>>
+
+cloud "Partner A" as Rel11_FromRole <<Role>>
+cloud "Partner B" as Rel11_ToRole <<Role>>
+
+cloud "Employer" as Rel12_FromRole <<Role>>
+cloud "Employee" as Rel12_ToRole <<Role>>
+
+cloud "Employer" as Rel13_FromRole <<Role>>
+cloud "Employee" as Rel13_ToRole <<Role>>
+
+' TransPol -> FastTrack
+TransPol -[#red,thickness=2]-> Rel1_FromRole : as
+Rel1_FromRole -[#red]-> Rel1
+Rel1 -[#red]-> Rel1_ToRole
+Rel1_ToRole -[#red,thickness=2]-> FastTrack : as
+
+' FastTrack -> Marek
+FastTrack -[#blue,thickness=2]-> Rel2_FromRole : as
+Rel2_FromRole -[#blue]-> Rel2
+Rel2 -[#blue]-> Rel2_ToRole
+Rel2_ToRole -[#blue,thickness=2]-> Marek : as
+
+' FastTrack -> Kasia
+FastTrack -[#blue,thickness=2]-> Rel3_FromRole : as
+Rel3_FromRole -[#blue]-> Rel3
+Rel3 -[#blue]-> Rel3_ToRole
+Rel3_ToRole -[#blue,thickness=2]-> Kasia : as
+
+' TransPol -> EcoFleet
+TransPol -[#red,thickness=2]-> Rel4_FromRole : as
+Rel4_FromRole -[#red]-> Rel4
+Rel4 -[#red]-> Rel4_ToRole
+Rel4_ToRole -[#red,thickness=2]-> EcoFleet : as
+
+' EcoFleet -> Krzysztof
+EcoFleet -[#blue,thickness=2]-> Rel5_FromRole : as
+Rel5_FromRole -[#blue]-> Rel5
+Rel5 -[#blue]-> Rel5_ToRole
+Rel5_ToRole -[#blue,thickness=2]-> Krzysztof : as
+
+' EcoFleet -> GreenCharge
+EcoFleet -[#green,thickness=2]-> Rel6_FromRole : as
+Rel6_FromRole -[#green]-> Rel6
+Rel6 -[#green]-> Rel6_ToRole
+Rel6_ToRole -[#green,thickness=2]-> GreenCharge : as
+
+' GreenCharge -> Ola
+GreenCharge -[#blue,thickness=2]-> Rel7_FromRole : as
+Rel7_FromRole -[#blue]-> Rel7
+Rel7 -[#blue]-> Rel7_ToRole
+Rel7_ToRole -[#blue,thickness=2]-> Ola : as
+
+' TransPol -> CargoMate
+TransPol -[#red,thickness=2]-> Rel8_FromRole : as
+Rel8_FromRole -[#red]-> Rel8
+Rel8 -[#red]-> Rel8_ToRole
+Rel8_ToRole -[#red,thickness=2]-> CargoMate : as
+
+' CargoMate -> Adam
+CargoMate -[#blue,thickness=2]-> Rel9_FromRole : as
+Rel9_FromRole -[#blue]-> Rel9
+Rel9 -[#blue]-> Rel9_ToRole
+Rel9_ToRole -[#blue,thickness=2]-> Adam : as
+
+' CargoMate -> Piotr
+CargoMate -[#blue,thickness=2]-> Rel10_FromRole : as
+Rel10_FromRole -[#blue]-> Rel10
+Rel10 -[#blue]-> Rel10_ToRole
+Rel10_ToRole -[#blue,thickness=2]-> Piotr : as
+
+' TransPol -> InsurSafe
+TransPol -[#green,thickness=2]-> Rel11_FromRole : as
+Rel11_FromRole -[#green]-> Rel11
+Rel11 -[#green]-> Rel11_ToRole
+Rel11_ToRole -[#green,thickness=2]-> InsurSafe : as
+
+' InsurSafe -> Ewa
+InsurSafe -[#blue,thickness=2]-> Rel12_FromRole : as
+Rel12_FromRole -[#blue]-> Rel12
+Rel12 -[#blue]-> Rel12_ToRole
+Rel12_ToRole -[#blue,thickness=2]-> Ewa : as
+
+' InsurSafe -> Robert
+InsurSafe -[#blue,thickness=2]-> Rel13_FromRole : as
+Rel13_FromRole -[#blue]-> Rel13
+Rel13 -[#blue]-> Rel13_ToRole
+Rel13_ToRole -[#blue,thickness=2]-> Robert : as
+
+note bottom of TransPol
+  **Model relacji z rolami:**
+
+  Każda relacja ma:
+  - Party FROM z rolą (np. Employer, Principal)
+  - Party TO z rolą (np. Employee, Subcontractor)
+
+  Każde Party może mieć też role niezależne od relacji
+  (np. "3PL Provider", "Courier")
+
+  **Zapytania semantyczne:**
+  1. "Znajdź kierowcę partnera w roli Subcontractor"
+     → Path: TransPol [Principal] → CargoMate [Subcontractor]
+              → Piotr [Employee]
+
+  2. "Kto jest Employer dla Food Courier?"
+     → FastTrack [Employer] → Kasia [Employee, Food Courier]
+end note
+
+@enduml

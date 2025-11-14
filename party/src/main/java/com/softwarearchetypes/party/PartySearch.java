@@ -18,32 +18,45 @@ public class PartySearch {
         this.addressesQueries = addressesQueries;
     }
 
-    //sample query - here is the place where we could apply graph database queries
-    List<Party> findMatching(Search search) {
-        List<Party> result = new LinkedList<>();
+    /**
+     * Sample query implementation using predicates on domain objects.
+     * NOTE: This is an example implementation. In production, this should be replaced with:
+     * - Search Criteria objects instead of Predicates
+     * - Direct database queries (e.g., SQL joins, graph database queries)
+     * - Avoiding loading domain objects just for filtering
+     *
+     * This is the place where we could apply graph database queries or advanced search engines.
+     */
+    List<PartyView> findMatching(Search search) {
+        List<PartyView> result = new LinkedList<>();
         if (search.partyPredicate != null) {
             result = partiesQueries.findMatching(search.partyPredicate);
         }
         if (search.partyRelationshipPredicate != null) {
             if (!result.isEmpty()) {
-                List<PartyId> foundIds = result.stream().map(Party::id).toList();
+                List<PartyId> foundIds = result.stream().map(PartyView::partyId).toList();
                 List<PartyId> toPartyIds = partyRelationshipsQueries
                         .findMatching(it -> foundIds.contains(it.from().partyId()) && search.partyRelationshipPredicate.test(it))
                         .stream()
-                        .map(rel -> rel.to().partyId())
+                        .map(PartyRelationshipView::toPartyId)
                         .toList();
                 result = partiesQueries.findMatching(it -> toPartyIds.contains(it.id()));
             }
         }
         if (search.addressPredicate != null) {
             if (!result.isEmpty()) {
-                result = result.stream().filter(party -> !addressesQueries.findMatching(party.id(), search.addressPredicate).isEmpty()).collect(toList());
+                result = result.stream()
+                        .filter(partyView -> !addressesQueries.findMatching(partyView.partyId(), search.addressPredicate).isEmpty())
+                        .collect(toList());
             }
         }
         return result;
     }
 
-    //we could add builder and spec pattern
+    /**
+     * Search criteria using predicates on domain objects.
+     * NOTE: In production, replace with proper Criteria/Specification pattern.
+     */
     record Search(Predicate<Party> partyPredicate,
                   Predicate<PartyRelationship> partyRelationshipPredicate,
                   Predicate<Address> addressPredicate) {

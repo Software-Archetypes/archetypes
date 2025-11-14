@@ -1,0 +1,127 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+title Account Coupling Solution - ✓ DOBRE PODEJŚCIE
+
+package "Account Archetype" #CCFFCC {
+  class Account {
+    accountId: AccountId
+    accountNumber: String
+    balance: Money
+    --
+    ✓ BRAK wiedzy o właścicielach!
+    ✓ Tylko księgowanie
+  }
+
+  class Entry {
+    amount: Money
+    debitAccount: AccountId
+    creditAccount: AccountId
+  }
+}
+
+package "Domain Models Know Account" {
+  class Party {
+    partyId: PartyId
+    --
+    accountId: AccountId ─┐
+  }
+
+  class FleetCard {
+    cardId: FleetCardId
+    --
+    accountId: AccountId ─┤
+  }
+
+  class Loan {
+    loanId: LoanId
+    --
+    accountId: AccountId ─┤
+  }
+
+  class CreditCard {
+    cardId: CreditCardId
+    --
+    accountId: AccountId ─┤
+  }
+
+  class Investment {
+    investmentId: InvestmentId
+    --
+    accountId: AccountId ─┤
+  }
+
+  class Savings {
+    savingsId: SavingsId
+    --
+    accountId: AccountId ─┤
+  }
+
+  class Mortgage {
+    mortgageId: MortgageId
+    --
+    accountId: AccountId ─┤
+  }
+
+  class Subscription {
+    subscriptionId: SubscriptionId
+    --
+    accountId: AccountId ─┤
+  }
+
+  class Budget {
+    budgetId: BudgetId
+    --
+    accountId: AccountId ─┤
+  }
+
+  class Project {
+    projectId: ProjectId
+    --
+    accountId: AccountId ─┘
+  }
+}
+
+' Wszystkie strzałki ODWROTNIE - od modeli DO Account
+Party --> Account : "has account"
+FleetCard --> Account : "has account"
+Loan --> Account : "has account"
+CreditCard --> Account : "has account"
+Investment --> Account : "has account"
+Savings --> Account : "has account"
+Mortgage --> Account : "has account"
+Subscription --> Account : "has account"
+Budget --> Account : "has account"
+Project --> Account : "has account"
+
+note left of Account
+  **Zalety:**
+  ✓ Account nie wie o właścicielach
+  ✓ Account nie zmienia się z nowymi feature
+  ✓ Dependency Inversion
+  ✓ Low coupling
+  ✓ Open-Closed Principle
+
+  **Dodanie nowego typu właściciela:**
+  1. Nowy model (np. Insurance)
+  2. Insurance ma accountId
+  3. Account NIE zmienia się!
+  4. Brak zmian w core archetypu
+
+  **Account = czysty archetype**
+  - Tylko księgowanie
+  - Niezależny od przypadków użycia
+  - Reużywalny
+end note
+
+note bottom of Party
+  **Informacja o właścicielstwie**
+  jest WYŻEJ w hierarchii,
+  nie w Account archetyp.
+
+  Account nie wie "kto" go używa.
+  Modele wiedzą "które" konto używają.
+end note
+
+@enduml

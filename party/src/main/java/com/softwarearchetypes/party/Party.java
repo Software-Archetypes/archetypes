@@ -13,11 +13,11 @@ import com.softwarearchetypes.party.events.PartyRegistered;
 import com.softwarearchetypes.party.events.PartyRelatedEvent;
 import com.softwarearchetypes.party.events.PublishedEvent;
 import com.softwarearchetypes.party.events.RegisteredIdentifierAdded;
+import com.softwarearchetypes.party.events.RegisteredIdentifierAdditionFailed;
 import com.softwarearchetypes.party.events.RegisteredIdentifierAdditionSkipped;
+import com.softwarearchetypes.party.events.RegisteredIdentifierRemovalFailed;
 import com.softwarearchetypes.party.events.RegisteredIdentifierRemovalSkipped;
 import com.softwarearchetypes.party.events.RegisteredIdentifierRemoved;
-import com.softwarearchetypes.party.events.RegisteredIdentifierAdditionFailed;
-import com.softwarearchetypes.party.events.RegisteredIdentifierRemovalFailed;
 import com.softwarearchetypes.party.events.RoleAdded;
 import com.softwarearchetypes.party.events.RoleAdditionFailed;
 import com.softwarearchetypes.party.events.RoleAdditionSkipped;
@@ -35,28 +35,57 @@ public sealed abstract class Party permits Organization, Person {
     private final Set<RegisteredIdentifier> registeredIdentifiers;
     private final List<PartyRelatedEvent> events = new LinkedList<>();
     private final Version version;
+    private final RegisteredIdentifierDefiningPolicy identifierPolicy;
+    private final PartyRoleDefiningPolicy roleDefiningPolicy;
 
     Party(PartyId partyId, Set<Role> roles, Set<RegisteredIdentifier> registeredIdentifiers, Version version) {
+        this(partyId, roles, registeredIdentifiers, version, RegisteredIdentifierDefiningPolicy.all(), PartyRoleDefiningPolicy.alwaysAllow());
+    }
+
+    Party(PartyId partyId, Set<Role> roles, Set<RegisteredIdentifier> registeredIdentifiers, Version version,
+            RegisteredIdentifierDefiningPolicy identifierPolicy, PartyRoleDefiningPolicy roleDefiningPolicy) {
         checkArgument(partyId != null, "Party Id cannot be null");
         checkArgument(roles != null, "Roles cannot be null");
         checkArgument(registeredIdentifiers != null, "Registered identifiers cannot be null");
         checkArgument(version != null, "Version cannot be null");
+        checkArgument(identifierPolicy != null, "Identifier policy cannot be null");
+        checkArgument(roleDefiningPolicy != null, "Role policy cannot be null");
+
         this.partyId = partyId;
         this.roles = new HashSet<>(roles);
-        this.registeredIdentifiers = new HashSet<>(registeredIdentifiers);
         this.version = version;
+        this.identifierPolicy = identifierPolicy;
+        this.roleDefiningPolicy = roleDefiningPolicy;
+
+        // Validate all identifiers against policy
+        validateIdentifiers(registeredIdentifiers, identifierPolicy);
+        this.registeredIdentifiers = new HashSet<>(registeredIdentifiers);
+    }
+
+    private void validateIdentifiers(Set<RegisteredIdentifier> registeredIdentifiers, RegisteredIdentifierDefiningPolicy identifierPolicy) {
+        for (RegisteredIdentifier identifier : registeredIdentifiers) {
+            if (!identifierPolicy.canRegister(this, identifier)) {
+                throw new IllegalArgumentException(
+                        "Registered identifier " + identifier.type() + " is not allowed for this party type"
+                );
+            }
+        }
     }
 
     public Result<RoleAdditionFailed, Party> add(Role role) {
         checkNotNull(role, "Role cannot be null");
-        if (!roles.contains(role)) {
-            roles.add(role);
-            events.add(new RoleAdded(partyId.asString(), role.asString()));
+        if (roleDefiningPolicy.canDefineFor(this, role)) {
+            if (!roles.contains(role)) {
+                roles.add(role);
+                events.add(new RoleAdded(partyId.asString(), role.asString()));
+            } else {
+                //for idempotency
+                events.add(RoleAdditionSkipped.dueToDuplicationFor(partyId.asString(), role.asString()));
+            }
+            return Result.success(this);
         } else {
-            //for idempotency
-            events.add(RoleAdditionSkipped.dueToDuplicationFor(partyId.asString(), role.asString()));
+            return Result.failure(RoleAdditionFailed.dueTo(partyId.asString(), role.asString(), "POLICY_NOT_MET"));
         }
-        return Result.success(this);
     }
 
     Result<RoleRemovalFailed, Party> remove(Role role) {
@@ -73,6 +102,16 @@ public sealed abstract class Party permits Organization, Person {
 
     public Result<RegisteredIdentifierAdditionFailed, Party> add(RegisteredIdentifier identifier) {
         checkNotNull(identifier, "Registered identifier cannot be null");
+
+        // Check policy before adding
+        if (!canRegister(identifier)) {
+            return Result.failure(new RegisteredIdentifierAdditionFailed(
+                    partyId.asString(),
+                    identifier.asString(),
+                    "IDENTIFIER_NOT_ALLOWED_FOR_PARTY_TYPE"
+            ));
+        }
+
         if (!registeredIdentifiers.contains(identifier)) {
             registeredIdentifiers.add(identifier);
             events.add(new RegisteredIdentifierAdded(partyId.asString(), identifier.type(), identifier.asString()));
@@ -81,6 +120,13 @@ public sealed abstract class Party permits Organization, Person {
             events.add(RegisteredIdentifierAdditionSkipped.dueToDataDuplicationFor(partyId.asString(), identifier.type(), identifier.asString()));
         }
         return Result.success(this);
+    }
+
+    /**
+     * Checks if the given identifier can be registered for this party according to the policy.
+     */
+    public boolean canRegister(RegisteredIdentifier identifier) {
+        return identifierPolicy.canRegister(this, identifier);
     }
 
     public Result<RegisteredIdentifierRemovalFailed, Party> remove(RegisteredIdentifier identifier) {

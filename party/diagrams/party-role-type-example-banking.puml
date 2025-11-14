@@ -1,0 +1,226 @@
+@startuml
+skinparam MinClassWidth 120
+skinparam linetype ortho
+title Banking Industry Example - Party Role Types in Action
+
+' ===== LEGEND =====
+legend right
+  |<back:#CCCCFF>   </back>| PartyRoleType (catalog) |
+  |<back:#FFCCCC>   </back>| PartyRole (instance) |
+  |<back:#CCFFCC>   </back>| Party (actual entity) |
+  |<back:#FFFFCC>   </back>| PartyRelationship |
+endlegend
+
+' ===== PARTY ROLE TYPE CATALOG =====
+package "Catalog - PartyRoleTypes" #CCCCFF {
+  object EMPLOYEE_TYPE {
+    name: "EMPLOYEE"
+    description: "Employee of organization"
+    constraints: [OnlyPerson]
+  }
+
+  object EMPLOYER_TYPE {
+    name: "EMPLOYER"
+    description: "Employing organization"
+    constraints: [OnlyOrganization]
+  }
+
+  object CUSTOMER_TYPE {
+    name: "CUSTOMER"
+    description: "Customer of a business"
+    constraints: [AnyParty]
+  }
+
+  object BANK_TYPE {
+    name: "BANK"
+    description: "Banking institution"
+    constraints: [OnlyOrganization]
+  }
+
+  object RELATIONSHIP_MANAGER_TYPE {
+    name: "RELATIONSHIP_MANAGER"
+    description: "Client advisor/manager"
+    constraints: [OnlyPerson]
+  }
+
+  object CLIENT_TYPE {
+    name: "CLIENT"
+    description: "Managed client"
+    constraints: [AnyParty]
+  }
+}
+
+package "Catalog - PartyRelationshipTypes" #CCCCFF {
+  object EMPLOYMENT_TYPE {
+    name: "EMPLOYMENT"
+    constraints: [
+      client: "EMPLOYEE"
+      supplier: "EMPLOYER"
+    ]
+  }
+
+  object ACCOUNT_HOLDER_TYPE {
+    name: "ACCOUNT_HOLDER"
+    constraints: [
+      client: "CUSTOMER"
+      supplier: "BANK"
+    ]
+  }
+
+  object MANAGES_TYPE {
+    name: "MANAGES"
+    constraints: [
+      client: "RELATIONSHIP_MANAGER"
+      supplier: "CLIENT"
+    ]
+  }
+}
+
+' ===== ACTUAL PARTIES =====
+package "Parties (Actual Entities)" #CCFFCC {
+  object john {
+    <<Person>>
+    id: party-001
+    name: "John Smith"
+    pesel: "44051401359"
+  }
+
+  object jane {
+    <<Person>>
+    id: party-002
+    name: "Jane Doe"
+    pesel: "92022912345"
+  }
+
+  object cityBank {
+    <<Organization>>
+    id: party-003
+    name: "City Bank Corp"
+    taxNumber: "1234567890"
+  }
+}
+
+' ===== PARTY ROLES (INSTANCES) =====
+package "PartyRoles (Instances)" #FFCCCC {
+  object johnAsCustomer {
+    <<PartyRole>>
+    partyId: party-001
+  }
+
+  object janeAsEmployee {
+    <<PartyRole>>
+    partyId: party-002
+  }
+
+  object janeAsManager {
+    <<PartyRole>>
+    partyId: party-002
+  }
+
+  object cityBankAsBank {
+    <<PartyRole>>
+    partyId: party-003
+  }
+
+  object cityBankAsEmployer {
+    <<PartyRole>>
+    partyId: party-003
+  }
+
+  object johnAsClient {
+    <<PartyRole>>
+    partyId: party-001
+  }
+}
+
+' ===== RELATIONSHIPS (INSTANCES) =====
+package "PartyRelationships (Instances)" #FFFFCC {
+  object johnBankAccount {
+    <<PartyRelationship>>
+    id: rel-001
+    validity: from 2024-01-15
+  }
+
+  object janeEmployment {
+    <<PartyRelationship>>
+    id: rel-002
+    validity: from 2023-01-01
+  }
+
+  object janeManagesJohn {
+    <<PartyRelationship>>
+    id: rel-003
+    validity: ALWAYS
+  }
+}
+
+' ===== CONNECTIONS =====
+
+' Party to PartyRole
+john -- johnAsCustomer : plays
+john -- johnAsClient : plays
+jane -- janeAsEmployee : plays
+jane -- janeAsManager : plays
+cityBank -- cityBankAsBank : plays
+cityBank -- cityBankAsEmployer : plays
+
+' PartyRole to PartyRoleType
+johnAsCustomer -- CUSTOMER_TYPE : instance of
+johnAsClient -- CLIENT_TYPE : instance of
+janeAsEmployee -- EMPLOYEE_TYPE : instance of
+janeAsManager -- RELATIONSHIP_MANAGER_TYPE : instance of
+cityBankAsBank -- BANK_TYPE : instance of
+cityBankAsEmployer -- EMPLOYER_TYPE : instance of
+
+' PartyRelationship to PartyRelationshipType
+johnBankAccount -- ACCOUNT_HOLDER_TYPE : instance of
+janeEmployment -- EMPLOYMENT_TYPE : instance of
+janeManagesJohn -- MANAGES_TYPE : instance of
+
+' PartyRelationship to PartyRole
+johnBankAccount -up-> johnAsCustomer : from
+johnBankAccount -up-> cityBankAsBank : to
+
+janeEmployment -up-> janeAsEmployee : from
+janeEmployment -up-> cityBankAsEmployer : to
+
+janeManagesJohn -up-> janeAsManager : from
+janeManagesJohn -up-> johnAsClient : to
+
+note bottom of john
+  <b>John Smith</b> (Person)
+  Plays 2 roles:
+  - CUSTOMER of City Bank
+  - CLIENT managed by Jane
+end note
+
+note bottom of jane
+  <b>Jane Doe</b> (Person)
+  Plays 2 roles:
+  - EMPLOYEE of City Bank
+  - RELATIONSHIP_MANAGER for John
+end note
+
+note bottom of cityBank
+  <b>City Bank</b> (Organization)
+  Plays 2 roles:
+  - BANK for customers
+  - EMPLOYER for employees
+end note
+
+note right of EMPLOYEE_TYPE
+  <b>Type Catalog</b>
+  Defined once, reused many times.
+  Contains constraints:
+  - EMPLOYEE: only Person
+  - EMPLOYER: only Organization
+end note
+
+note right of EMPLOYMENT_TYPE
+  <b>Relationship Type Catalog</b>
+  Defines valid role combinations:
+  - EMPLOYMENT requires
+    EMPLOYEE <-> EMPLOYER
+end note
+
+@enduml

@@ -1,0 +1,104 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 80
+skinparam ranksep 100
+title Party Role with Capabilities and Requirements
+
+' ===== PARTY & CAPABILITIES =====
+package "Party with Capabilities" #E6F3FF {
+  object Party {
+    partyId: PartyId
+    roles: Set<Role>
+  }
+
+  object Capability {
+    capabilityId: CapabilityId
+    partyId: PartyId
+    capabilityType: CapabilityType
+    operatingScopes: Set<OperatingScope>
+    validity: Validity
+  }
+
+  object CapabilityType {
+    id: CapabilityTypeId
+    name: String
+    description: String
+  }
+
+  object OperatingScope <<interface>> {
+    validate(): boolean
+    scopeType(): String
+  }
+
+  Party "1" -- "0..*" Capability : has
+  Capability "*" --> "1" CapabilityType : of type
+  Capability "1" *-- "0..*" OperatingScope : constrained by
+}
+
+' ===== PARTY ROLE TYPE & REQUIREMENTS =====
+package "Party Role Type with Requirements" #FFF4E6 {
+  object PartyRoleType {
+    id: PartyRoleTypeId
+    name: String
+    description: String
+    constraints: Set<PartyRoleConstraint>
+  }
+
+  object RoleRequirements {
+    requirements: Set<CapabilityRequirement>
+    --
+    + isSatisfiedBy(Party): boolean
+    + match(capabilities): MatchResult
+  }
+
+  object CapabilityRequirement {
+    capabilityTypeId: CapabilityTypeId
+    scopeRequirements: Set<ScopeRequirement>
+    --
+    + isSatisfiedBy(Capability): boolean
+  }
+
+  object ScopeRequirement <<interface>> {
+    isSatisfiedBy(OperatingScope): boolean
+  }
+
+  object MinimumSkillLevelRequirement {
+    minimumLevel: int
+  }
+
+  object RequiredCertificationRequirement {
+    certification: String
+  }
+
+  object LocationRequirement {
+    requiredLocation: String
+    maxDistance: Distance
+  }
+
+  PartyRoleType "1" *-- "0..1" RoleRequirements : requires
+  RoleRequirements "1" *-- "1..*" CapabilityRequirement : composed of
+  CapabilityRequirement "1" *-- "0..*" ScopeRequirement : validates scopes
+
+  ScopeRequirement <|-- MinimumSkillLevelRequirement
+  ScopeRequirement <|-- RequiredCertificationRequirement
+  ScopeRequirement <|-- LocationRequirement
+
+  ScopeRequirement -[hidden]down- MinimumSkillLevelRequirement
+  ScopeRequirement -[hidden]down- RequiredCertificationRequirement
+  ScopeRequirement -[hidden]down- LocationRequirement
+}
+
+' ===== PARTY ROLE INSTANCE =====
+package "Party Role Instance" #E8F5E9 {
+  object PartyRole {
+    partyRoleId: PartyRoleId
+    partyId: PartyId
+    partyRoleTypeId: PartyRoleTypeId
+    validity: Validity
+  }
+
+  PartyRole "*" --> "1" Party : played by
+  PartyRole "*" --> "1" PartyRoleType : instance of
+}
+
+@enduml

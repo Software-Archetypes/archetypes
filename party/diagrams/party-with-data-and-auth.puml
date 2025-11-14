@@ -1,84 +1,115 @@
 @startuml
 skinparam MinClassWidth 150
 skinparam linetype ortho
+title Party with Data and Authentication
 
-object Party
-object Person
-object PartyRole {
-  name: String
-}
-object PartyIdentifier {
-  value: UUID
-}
-object RegisteredIdentifier {
-  value: String
-  type: String
-  validFrom: Date
-  validTo: Date
-}
-object PartyAuthentication
+' ===== PARTY HIERARCHY =====
+package "Core Party Archetype" {
+  object Party
+  object Person
+  object Organization
 
-object Address {
-  validFrom: Date
-  validTo: Date
-}
-object AddressId {
-  value: UUID
-}
-object AddressUseType {
-  value: String
-}
-object EmailAddress {
-  value: String
-}
-object GeographicAddress {
-  addressLine: String[]
-  city: String
-  region: String
-  zipCode: String
+  Person -up-|> Party
+  Organization -up-|> Party
 }
 
-object PersonName {
-  givenName: String
-  familyName: String
+' ===== COMPANY TYPES =====
+package "Company Types" #FFFFEE {
+  object Company
+  object JointStock
+  object LimitedLiability
+  object LimitedPartnership
+
+  Company -up-|> Organization
+  JointStock -up-|> Company
+  LimitedLiability -up-|> Company
+  LimitedPartnership -up-|> Company
 }
 
-object Organization
-object OrganizationName {
-  value: String
+' ===== ORGANIZATION UNIT TYPES =====
+package "Organization Unit Types" #EEEEFF {
+  object OrganizationUnit
+  object Division
+  object Department
+  object Team
+
+  OrganizationUnit -up-|> Organization
+  Division -up-|> OrganizationUnit
+  Department -up-|> OrganizationUnit
+  Team -up-|> OrganizationUnit
 }
-object Company
-object JointStock
-object LimitedLiability
-object LimitedPartnership
 
-object OrganizationUnit
-object Division
-object Department
-object Team
+' ===== PARTY DATA =====
+package "Party Data" #EEFFEE {
+  object PartyIdentifier {
+    value: UUID
+  }
 
-Party "1" *-- "1" PartyIdentifier
-Party "1" -- "0..*" PartyRole
-Party "1" -- "0..*" Address
-Address "1" *-- "1..*" AddressUseType
-Address "1" *-- "1*" AddressId
-Party "1..*" *-- "0..*" RegisteredIdentifier
-Party "1..*" *-- "0..*" PartyAuthentication
+  object Role {
+    name: String
+  }
 
-Person "1" *-- "1..*" PersonName
-Organization "1" *-- "1..*" OrganizationName
+  object PersonName {
+    givenName: String
+    familyName: String
+  }
 
-Person -up-|> Party
-Organization -up-|> Party
-Company --up-|> Organization
-JointStock ---up-|> Company
-LimitedLiability ---up-|> Company
-LimitedPartnership ---up-|> Company
-OrganizationUnit --up-|> Organization
-Division ---up-|> OrganizationUnit
-Department ---up-|> OrganizationUnit
-Team ---up-|> OrganizationUnit
+  object OrganizationName {
+    value: String
+  }
 
-EmailAddress --up-|> Address
-GeographicAddress --up-|> Address
+  Party "1" *-- "1" PartyIdentifier
+  Party "1" -- "0..*" Role
+  Person "1" *-- "1..*" PersonName
+  Organization "1" *-- "1..*" OrganizationName
+}
+
+' ===== AUTHENTICATION & IDENTIFIERS =====
+package "Authentication & Identifiers" #FFEEEE {
+  object RegisteredIdentifier {
+    value: String
+    type: String
+    validFrom: Date
+    validTo: Date
+  }
+
+  object PartyAuthentication
+
+  Party "1" *-- "0..*" RegisteredIdentifier
+  Party "1" *-- "0..*" PartyAuthentication
+}
+
+' ===== ADDRESS =====
+package "Address" #EEEEFF {
+  object Address {
+    validFrom: Date
+    validTo: Date
+  }
+
+  object AddressId {
+    value: UUID
+  }
+
+  object AddressUseType {
+    value: String
+  }
+
+  object EmailAddress {
+    value: String
+  }
+
+  object GeographicAddress {
+    addressLine: String[]
+    city: String
+    region: String
+    zipCode: String
+  }
+
+  Party "1" -- "0..*" Address
+  Address "1" *-- "1" AddressId
+  Address "1" *-- "1..*" AddressUseType
+  EmailAddress -up-|> Address
+  GeographicAddress -up-|> Address
+}
+
 @enduml

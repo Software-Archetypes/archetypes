@@ -1,0 +1,112 @@
+@startuml
+skinparam linetype ortho
+title Accounting Archetype - Model
+
+' ===== CORE ACCOUNTING =====
+package "Core Accounting" #E6F3FF {
+
+  object Transaction
+  object "Entry\n<<sealed>>" as Entry
+
+  object AccountDebited
+  object AccountCredited
+
+  object Account
+  object "AccountType\n<<enum>>" as AccountType
+  object EntryAllocations
+  object "TransactionEntriesConstraint\n<<interface>>" as TransactionEntriesConstraint
+
+  object BALANCING_CONSTRAINT
+  object MIN_2_ENTRIES_CONSTRAINT
+  object MIN_2_ACCOUNTS_INVOLVED_CONSTRAINT
+
+  Transaction "1" *--> "2..*" Entry
+  Transaction --> TransactionEntriesConstraint
+
+  BALANCING_CONSTRAINT --|> TransactionEntriesConstraint
+  MIN_2_ENTRIES_CONSTRAINT --|> TransactionEntriesConstraint
+  MIN_2_ACCOUNTS_INVOLVED_CONSTRAINT --|> TransactionEntriesConstraint
+
+  AccountDebited --|> Entry
+  AccountCredited --|> Entry
+
+  Entry --> Account
+  Account --> AccountType
+
+  Entry ..> EntryAllocations : tracked by
+}
+
+' ===== TRANSACTION BUILDING =====
+package "Transaction Building" #FFF4E6 {
+
+  object TransactionBuilderFactory
+  object TransactionBuilder
+
+  TransactionBuilderFactory .down.> TransactionBuilder : creates
+}
+
+' ===== POSTING RULES =====
+package "Posting Rules" #E8F5E9 {
+
+  object "PostingRule\n<<interface>>" as PostingRule
+  object ConfigurablePostingRule
+  object PostingRuleExecutor
+
+  ConfigurablePostingRule -up-|> PostingRule
+  PostingRuleExecutor o-right-> PostingRule
+
+  ' Hidden dla układu
+  PostingRule -[hidden]down- ConfigurablePostingRule
+}
+
+' Relacje między pakietami
+TransactionBuilder .down.> Transaction : builds
+PostingRuleExecutor .up.> Transaction : generates
+
+note right of Account
+  **Account = konto księgowe**
+
+  - NIE wie o właścicielach!
+  - Tylko księgowanie (debit/credit)
+  - Optimistic locking (version)
+  - Events (DebitEntryRegistered, CreditEntryRegistered)
+
+  Właściciele (Party, FleetCard, etc.)
+  mają accountId - nie na odwrót!
+end note
+
+note right of Transaction
+  **Transaction grupuje entries**
+
+  - refId dla reversals/compensations
+  - execute() dodaje entries do kont
+
+  **TransactionEntriesConstraint:**
+  - BALANCING_CONSTRAINT (Σ Debits = Σ Credits = 0)
+  - MIN_2_ENTRIES_CONSTRAINT (minimum 2 entries)
+  - MIN_2_ACCOUNTS_INVOLVED_CONSTRAINT (minimum 2 konta)
+end note
+
+note right of Entry
+  **Entry = sealed interface**
+
+  Dwie implementacje:
+  - AccountDebited (amount negated)
+  - AccountCredited (amount positive)
+
+  appliedTo = alokacja do innego Entry
+  validity = ważność zapisu
+  metadata = dodatkowe dane
+end note
+
+note right of PostingRule
+  **Posting Rule = automatyzacja**
+
+  Na podstawie Transaction generuje
+  dodatkowe Transactions
+
+  eligibility → warunek kiedy reguła działa
+  priority → kolejność wykonywania
+end note
+
+@enduml

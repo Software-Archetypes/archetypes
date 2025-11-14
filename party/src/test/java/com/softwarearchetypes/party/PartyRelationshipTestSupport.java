@@ -1,5 +1,7 @@
 package com.softwarearchetypes.party;
 
+import com.softwarearchetypes.party.commands.AssignPartyRelationshipCommand;
+
 class PartyRelationshipTestSupport {
 
     private final PartyRelationshipsFacade facade;
@@ -9,6 +11,6 @@ class PartyRelationshipTestSupport {
     }
 
     void thereIsARelationBetween(Party from, Role fromRole, Party to, Role toRole, RelationshipName name) {
-        facade.assign(from.id(), fromRole, to.id(), toRole, name);
+        facade.handle(new AssignPartyRelationshipCommand(from.id(), fromRole.asString(), to.id(), toRole.asString(), name.asString()));
     }
 }

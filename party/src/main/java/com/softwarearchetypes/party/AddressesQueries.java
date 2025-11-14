@@ -1,7 +1,6 @@
 package com.softwarearchetypes.party;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 public class AddressesQueries {
@@ -12,12 +11,30 @@ public class AddressesQueries {
         this.repository = repository;
     }
 
-    public Optional<Addresses> findFor(PartyId partyId) {
-        return repository.findFor(partyId);
+    public List<AddressView> findAllFor(PartyId partyId) {
+        return repository.findFor(partyId)
+                         .map(Addresses::asSet)
+                         .orElse(java.util.Set.of())
+                         .stream()
+                         .map(AddressViewMapper::toView)
+                         .toList();
     }
 
-    public List<Address> findMatching(PartyId partyId, Predicate<Address> predicate) {
-        return repository.findMatching(partyId, predicate);
+    /**
+     * Sample query using predicate on domain objects.
+     * NOTE: In production, replace with proper Criteria pattern.
+     */
+    List<AddressView> findMatching(PartyId partyId, Predicate<Address> predicate) {
+        return repository.findFor(partyId)
+                         .map(Addresses::asSet)
+                         .orElse(java.util.Set.of())
+                         .stream()
+                         .filter(predicate)
+                         .map(AddressViewMapper::toView)
+                         .toList();
     }
+
+    // In the future, we can add criteria-based queries like:
+    // public List<AddressView> findMatching(PartyId partyId, AddressCriteria criteria)
 
 }

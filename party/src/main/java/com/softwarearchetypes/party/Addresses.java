@@ -23,7 +23,7 @@ import static java.util.stream.Collectors.toMap;
 
 public class Addresses {
 
-    private static final AddressDefiningPolicy DEFAULT_ADDRESS_DEFINING_POLICY = new AlwaysAllowAddressDefiningPolicy();
+    private static final AddressDefiningPolicy DEFAULT_ADDRESS_DEFINING_POLICY = AddressDefiningPolicy.DEFAULT;
     private final PartyId partyId;
     private final Map<AddressId, Address> addresses;
     private final List<AddressRelatedEvent> events = new LinkedList<>();

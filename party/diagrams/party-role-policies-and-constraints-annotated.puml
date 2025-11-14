@@ -1,0 +1,88 @@
+@startuml
+skinparam MinClassWidth 120
+skinparam linetype ortho
+skinparam packageMargin 20
+skinparam nodesep 80
+skinparam ranksep 80
+title Party Role - Defining Policy (Annotated)
+
+' ===== PARTY BASE =====
+package "Core Party Archetype" {
+  object Party
+  object Person
+  object Organization
+
+  Person -up-|> Party
+  Organization -up-|> Party
+}
+
+' ===== PARTY ROLE =====
+package "PartyRole" #FFCCCC {
+  object PartyRole {
+    partyId: PartyId
+    role: Role
+  }
+
+  object Role {
+    name: String
+  }
+
+  object PartyRoleDefiningPolicy {
+    canDefineFor(Party, Role): boolean
+  }
+
+  PartyRole "1" *-- "1" Role
+  Party "1" -- "0..*" PartyRole : plays
+  PartyRoleDefiningPolicy ..> Party : validates
+  PartyRoleDefiningPolicy ..> Role : checks
+}
+
+note right of Role
+  <b>Role = String name</b>
+
+  Simple approach:
+  - "EMPLOYEE"
+  - "EMPLOYER"
+  - "CUSTOMER"
+  - "MANAGER"
+
+  Flexible but needs validation
+  to prevent chaos.
+end note
+
+note right of PartyRoleDefiningPolicy
+  <b>Policy = Validation Logic</b>
+
+  Validates: "Can this Party play this Role?"
+
+  Implementations:
+  - alwaysAllow()
+  - requiresPersonOnly()
+  - requiresOrganizationOnly()
+  - composite(policy1, policy2, ...)
+
+  Example:
+  Role("EMPLOYEE") with requiresPersonOnly()
+  Organization cannot play EMPLOYEE role
+
+  Same pattern as AddressDefiningPolicy.
+end note
+
+note bottom of PartyRole
+  <b>String-based approach with Policy</b>
+
+  PartyRole with Role name (String):
+  - Simple and flexible
+  - No compile-time safety
+  - Runtime validation via Policy
+
+  DefiningPolicy pattern used across:
+  - AddressDefiningPolicy
+  - PartyRoleDefiningPolicy
+  - PartyRelationshipDefiningPolicy
+
+  Policy = behavior, multiple implementations
+  No Constraint needed (that's for catalog)
+end note
+
+@enduml

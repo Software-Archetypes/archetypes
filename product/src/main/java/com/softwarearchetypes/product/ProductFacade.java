@@ -60,6 +60,11 @@ public class ProductFacade {
                 }
             }
 
+            // Add metadata
+            if (command.metadata() != null) {
+                builder.withMetadata(ProductMetadata.of(command.metadata()));
+            }
+
             var productType = builder.build();
             repository.save(productType);
 

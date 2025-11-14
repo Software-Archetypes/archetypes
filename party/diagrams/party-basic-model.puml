@@ -1,34 +1,47 @@
 @startuml
-skinparam MinClassWidth 100
+skinparam MinClassWidth 120
 skinparam linetype ortho
+title Party Basic Model - Core Hierarchy
 
-object Party
-object Person
-object Organization
+' ===== PARTY BASE =====
+package "Core Party Archetype" {
+  object Party
+  object Person
+  object Organization
 
-object Company
-object JointStock
-object LimitedLiability
-object LimitedPartnership
+  Person -up-|> Party
+  Organization -up-|> Party
+}
 
-object OrganizationUnit
-object Division
-object Department
-object Team
+' ===== COMPANY HIERARCHY =====
+package "Company Types" #FFFFEE {
+  object Company
+  object JointStock
+  object LimitedLiability
+  object LimitedPartnership
 
+  Company -up-|> Organization
+  JointStock -up-|> Company
+  LimitedLiability -up-|> Company
+  LimitedPartnership -up-|> Company
+}
+
+' ===== ORGANIZATION UNIT HIERARCHY =====
+package "Organization Unit Types" #EEEEFF {
+  object OrganizationUnit
+  object Division
+  object Department
+  object Team
+
+  OrganizationUnit -up-|> Organization
+  Division -up-|> OrganizationUnit
+  Department -up-|> OrganizationUnit
+  Team -up-|> OrganizationUnit
+}
+
+' ===== ROLE =====
 object PartyRole
 
-Person -up-|> Party
-Organization -up-|> Party
-Company -up-|> Organization
-JointStock --up-|> Company
-LimitedLiability --up-|> Company
-LimitedPartnership --up-|> Company
-OrganizationUnit -up-|> Organization
-Division --up-|> OrganizationUnit
-Department --up-|> OrganizationUnit
-Team --up-|> OrganizationUnit
-
-Party "1" -- "0..*" PartyRole
+Party "1" -- "0..*" PartyRole : has
 
 @enduml

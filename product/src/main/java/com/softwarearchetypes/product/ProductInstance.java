@@ -26,22 +26,22 @@ import static com.softwarearchetypes.common.Preconditions.checkArgument;
  * ProductInstance can have features that specify the actual values for features
  * defined in the ProductType (e.g., color=red, size=L, yearOfProduction=2023).
  */
-class ProductInstance {
+class ProductInstance implements Instance {
 
-    private final ProductInstanceId id;
+    private final InstanceId id;
     private final ProductType productType;
     private final SerialNumber serialNumber;
     private final BatchId batchId;
     private final Quantity quantity;
     private final ProductFeatureInstances features;
 
-    private ProductInstance(ProductInstanceId id,
-                           ProductType productType,
-                           SerialNumber serialNumber,
-                           BatchId batchId,
-                           Quantity quantity,
-                           ProductFeatureInstances features) {
-        checkArgument(id != null, "ProductInstanceId must be defined");
+    ProductInstance(InstanceId id,
+                   ProductType productType,
+                   SerialNumber serialNumber,
+                   BatchId batchId,
+                   Quantity quantity,
+                   ProductFeatureInstances features) {
+        checkArgument(id != null, "InstanceId must be defined");
         checkArgument(productType != null, "ProductType must be defined");
         checkArgument(features != null, "ProductFeatureInstances must be defined");
 
@@ -91,23 +91,27 @@ class ProductInstance {
         }
     }
 
-    static Builder builder() {
-        return new Builder();
+    @Override
+    public InstanceId id() {
+        return id;
     }
 
-    ProductInstanceId id() {
-        return id;
+    @Override
+    public Product product() {
+        return productType;
     }
 
     ProductType productType() {
         return productType;
     }
 
-    Optional<SerialNumber> serialNumber() {
+    @Override
+    public Optional<SerialNumber> serialNumber() {
         return Optional.ofNullable(serialNumber);
     }
 
-    Optional<BatchId> batchId() {
+    @Override
+    public Optional<BatchId> batchId() {
         return Optional.ofNullable(batchId);
     }
 
@@ -140,54 +144,5 @@ class ProductInstance {
             quantity != null ? quantity : "implicit 1 " + productType.preferredUnit(),
             features
         );
-    }
-
-    static class Builder {
-        private ProductInstanceId id;
-        private ProductType productType;
-        private SerialNumber serialNumber;
-        private BatchId batchId;
-        private Quantity quantity;
-        private final java.util.List<ProductFeatureInstance> features = new java.util.ArrayList<>();
-
-        Builder id(ProductInstanceId id) {
-            this.id = id;
-            return this;
-        }
-
-        Builder type(ProductType type) {
-            this.productType = type;
-            return this;
-        }
-
-        Builder serial(SerialNumber serial) {
-            this.serialNumber = serial;
-            return this;
-        }
-
-        Builder batch(BatchId batch) {
-            this.batchId = batch;
-            return this;
-        }
-
-        Builder quantity(Quantity quantity) {
-            this.quantity = quantity;
-            return this;
-        }
-
-        Builder withFeature(ProductFeatureInstance feature) {
-            this.features.add(feature);
-            return this;
-        }
-
-        Builder withFeature(ProductFeatureType featureType, Object value) {
-            this.features.add(new ProductFeatureInstance(featureType, value));
-            return this;
-        }
-
-        ProductInstance build() {
-            ProductFeatureInstances featureInstances = new ProductFeatureInstances(features);
-            return new ProductInstance(id, productType, serialNumber, batchId, quantity, featureInstances);
-        }
     }
 }

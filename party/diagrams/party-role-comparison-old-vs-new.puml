@@ -1,0 +1,149 @@
+@startuml
+skinparam MinClassWidth 140
+skinparam linetype ortho
+title Comparison: Simple Role (String) vs PartyRoleType Pattern
+
+' ===== OLD APPROACH =====
+package "OLD APPROACH - Role as String" #FFE5E5 {
+  object Party_Old {
+    id: PartyId
+  }
+
+  object PartyRole_Old {
+    partyId: PartyId
+    role: String
+  }
+
+  object PartyRelationship_Old {
+    id: PartyRelationshipId
+    name: String
+    validity: Validity
+  }
+
+  Party_Old -- PartyRole_Old
+  PartyRelationship_Old -up-> PartyRole_Old : from
+  PartyRelationship_Old -up-> PartyRole_Old : to
+
+  note right of PartyRole_Old
+    <b>SIMPLE but LIMITED</b>
+
+    Pros:
+    ✓ Simple to implement
+    ✓ Minimal code
+    ✓ Easy to understand
+
+    Cons:
+    ✗ No metadata (description)
+    ✗ No constraints (anyone can play any role)
+    ✗ No responsibilities
+    ✗ String magic - typos possible
+    ✗ Hard to list all role types
+    ✗ Validation logic in policies
+  end note
+
+  note bottom of PartyRelationship_Old
+    Example problems:
+    - Can Person be EMPLOYER? (requires policy)
+    - Can Organization be EMPLOYEE? (requires policy)
+    - What does "CUSTOMER" mean? (no description)
+    - What roles exist? (grep code)
+  end note
+}
+
+' ===== NEW APPROACH =====
+package "NEW APPROACH - PartyRoleType Pattern" #E5FFE5 {
+  object Party_New {
+    id: PartyId
+  }
+
+  object PartyRoleType {
+    id: PartyRoleTypeId
+    name: String
+    description: String
+  }
+
+  object PartyRoleConstraint {
+    isSatisfiedBy(Party): boolean
+  }
+
+  object PartyRole_New {
+    partyId: PartyId
+  }
+
+  object PartyRelationshipType {
+    id: PartyRelationshipTypeId
+    name: String
+    description: String
+  }
+
+  object PartyRelationshipConstraint {
+    clientRoleName: String
+    supplierRoleName: String
+  }
+
+  object PartyRelationship_New {
+    id: PartyRelationshipId
+    validity: Validity
+  }
+
+  Party_New -- PartyRole_New
+  PartyRole_New -- PartyRoleType : instance of
+  PartyRoleType *-- PartyRoleConstraint
+
+  PartyRelationship_New -- PartyRelationshipType : instance of
+  PartyRelationshipType *-- PartyRelationshipConstraint
+
+  PartyRelationship_New -up-> PartyRole_New : from
+  PartyRelationship_New -up-> PartyRole_New : to
+
+  note right of PartyRoleType
+    <b>RICH but MORE COMPLEX</b>
+
+    Pros:
+    ✓ Rich metadata
+    ✓ Declarative constraints
+    ✓ Type catalog (list all types)
+    ✓ Extensible (Responsibilities, Capabilities)
+    ✓ API manageable
+    ✓ Self-documenting
+    ✓ Type safety
+
+    Cons:
+    ✗ More code
+    ✗ More entities
+    ✗ Steeper learning curve
+  end note
+
+  note bottom of PartyRelationshipType
+    Example benefits:
+    - EMPLOYEE type: "only Person" constraint
+    - EMPLOYER type: "only Organization" constraint
+    - CUSTOMER type: full description
+    - List all types via API
+    - Validation in type, not policy
+  end note
+}
+
+note bottom
+  <b>MIGRATION STRATEGY</b>
+
+  1. Start with simple String-based roles
+     Good for MVP, simple domains
+
+  2. Migrate to PartyRoleType when:
+     - Need to manage role catalog
+     - Need complex constraints
+     - Need responsibilities/capabilities
+     - Multiple teams/modules use roles
+
+  3. Both can coexist:
+     - Core uses PartyRoleType
+     - Simple modules use String
+     - Facade translates between
+
+  Similar to Product pattern:
+  ProductType (catalog) + ProductInstance
+  PartyRoleType (catalog) + PartyRole
+end note
+
+@enduml

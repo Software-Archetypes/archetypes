@@ -1,0 +1,139 @@
+@startuml
+skinparam MinClassWidth 150
+skinparam linetype ortho
+
+' ===== CORE PARTY MODEL =====
+package "Core Party Model" {
+  object Party {
+    id: PartyId
+  }
+
+  object Person {
+    personalData: PersonalData
+  }
+
+  object Organization {
+    organizationalData: OrganizationalData
+  }
+
+  Person -up-|> Party
+  Organization -up-|> Party
+}
+
+' ===== PARTY ROLE TYPE (CATALOG) =====
+package "Party Role Type - Catalog" {
+  object PartyRoleType {
+    id: PartyRoleTypeId
+    name: String
+    description: String
+  }
+
+  object PartyRoleConstraint <<interface>> {
+    isSatisfiedBy(Party): boolean
+  }
+
+  object OnlyPersonConstraint {
+  }
+
+  object OnlyOrganizationConstraint {
+  }
+
+  object AnyPartyConstraint {
+  }
+
+  PartyRoleType "1" *-- "1..*" PartyRoleConstraint
+
+  OnlyPersonConstraint -up-|> PartyRoleConstraint
+  OnlyOrganizationConstraint -up-|> PartyRoleConstraint
+  AnyPartyConstraint -up-|> PartyRoleConstraint
+}
+
+' ===== PARTY ROLE (INSTANCE) =====
+package "Party Role - Instance" {
+  object PartyRole {
+    partyId: PartyId
+  }
+
+  PartyRole "0..*" -- "1" PartyRoleType : << instance of >>
+  PartyRole "0..*" -- "1" Party : << played by >>
+}
+
+' ===== PARTY RELATIONSHIP TYPE (CATALOG) =====
+package "Party Relationship Type - Catalog" {
+  object PartyRelationshipType {
+    id: PartyRelationshipTypeId
+    name: String
+    description: String
+  }
+
+  object PartyRelationshipConstraint {
+    clientRoleName: String
+    supplierRoleName: String
+    isSatisfiedBy(from, to): boolean
+  }
+
+  PartyRelationshipType "1" *-- "1..*" PartyRelationshipConstraint
+}
+
+' ===== PARTY RELATIONSHIP (INSTANCE) =====
+package "Party Relationship - Instance" {
+  object PartyRelationship {
+    id: PartyRelationshipId
+    validity: Validity
+  }
+
+  PartyRelationship "0..*" -- "1" PartyRelationshipType : << instance of >>
+  PartyRelationship "0..*" -up- "from 1" PartyRole
+  PartyRelationship "0..*" -up- "to 1" PartyRole
+}
+
+' ===== VALIDITY =====
+object Validity {
+  validFrom: Instant
+  validTo: Instant
+}
+
+PartyRelationship "1" *-- "1" Validity
+
+note right of PartyRoleType
+  <b>PartyRoleType</b> is the catalog/definition
+  of role types (like ProductType).
+
+  Examples:
+  - EMPLOYEE (only Person)
+  - EMPLOYER (only Organization)
+  - CUSTOMER (any Party)
+  - SUBSCRIBER (only Person)
+end note
+
+note right of PartyRole
+  <b>PartyRole</b> is the instance
+  of a specific Party playing
+  a specific role type.
+
+  Example:
+  - John plays EMPLOYEE role
+  - Acme Corp plays EMPLOYER role
+end note
+
+note bottom of PartyRelationshipType
+  <b>PartyRelationshipType</b> defines
+  allowed relationships between role types.
+
+  Examples:
+  - EMPLOYMENT: EMPLOYEE <-> EMPLOYER
+  - SUBSCRIPTION: SUBSCRIBER <-> SERVICE_PROVIDER
+  - MANAGES: MANAGER <-> MANAGED_ACCOUNT
+end note
+
+note bottom of PartyRelationship
+  <b>PartyRelationship</b> is the actual
+  relationship between two PartyRoles.
+
+  Example:
+  - John(EMPLOYEE) -> Acme(EMPLOYER)
+    type: EMPLOYMENT
+    validity: from 2023-01-01
+end note
+
+@enduml

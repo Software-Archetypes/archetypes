@@ -1,8 +1,13 @@
 package com.softwarearchetypes.product;
 
+import com.softwarearchetypes.common.Preconditions;
+
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Set;
+
+import static com.softwarearchetypes.common.Preconditions.checkArgument;
+import static com.softwarearchetypes.common.Preconditions.checkNotNull;
 
 /**
  * Public API - queries for reading from ProductFacade and ProductCatalog.

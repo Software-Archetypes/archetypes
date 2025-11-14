@@ -17,9 +17,9 @@ import com.softwarearchetypes.quantity.money.Money;
 import static com.softwarearchetypes.accounting.TransactionEntriesConstraint.BALANCING_CONSTRAINT;
 import static com.softwarearchetypes.accounting.TransactionType.EXPIRATION_COMPENSATION;
 import static com.softwarearchetypes.accounting.TransactionType.REVERSAL;
+import static com.softwarearchetypes.common.CollectionTransformations.keyValueMapFrom;
+import static com.softwarearchetypes.common.CollectionTransformations.subtract;
 import static com.softwarearchetypes.common.Preconditions.checkArgument;
-import static io.pillopl.common.CollectionTransformations.keyValueMapFrom;
-import static io.pillopl.common.CollectionTransformations.subtract;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 

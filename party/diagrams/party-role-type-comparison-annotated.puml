@@ -1,0 +1,114 @@
+@startuml
+skinparam MinClassWidth 120
+skinparam linetype ortho
+skinparam packageMargin 20
+skinparam nodesep 80
+skinparam ranksep 80
+title PartyRole - Type-Instance Pattern (Recommended, Annotated)
+
+' ===== PARTY BASE =====
+package "Core Party Archetype" {
+  object Party
+  object Person
+  object Organization
+
+  Person -up-|> Party
+  Organization -up-|> Party
+}
+
+' ===== PARTY ROLE TYPE - CATALOG =====
+package "PartyRoleType - Catalog" #CCCCFF {
+  object PartyRoleType {
+    id: PartyRoleTypeId
+    name: String
+    description: String
+  }
+
+  object PartyRoleConstraint {
+    isSatisfiedBy(Party): boolean
+  }
+
+  PartyRoleType "1" *-- "1..*" PartyRoleConstraint
+}
+
+' ===== PARTY ROLE - INSTANCE =====
+package "PartyRole - Instance" #FFCCCC {
+  object PartyRole {
+    partyId: PartyId
+  }
+
+  PartyRole "0..*" -- "1" PartyRoleType : instance of
+  Party "1" -- "0..*" PartyRole : plays
+}
+
+note right of PartyRoleType
+  <b>PartyRoleType = Catalog</b>
+  (like ProductType)
+
+  Defined once, used many times:
+  - EMPLOYEE (only Person)
+  - EMPLOYER (only Organization)
+  - CUSTOMER (any Party)
+  - MANAGER (only Person)
+
+  Managed via API:
+  - Add new types at runtime
+  - Update descriptions
+  - Modify constraints
+  - No code changes needed
+
+  Benefits:
+  ✓ No String chaos
+  ✓ Rich metadata
+  ✓ Validation via constraints
+  ✓ Runtime flexibility
+  ✓ Reporting (list all types)
+  ✓ Multi-tenant support
+end note
+
+note right of PartyRole
+  <b>PartyRole = Instance</b>
+  (like ProductInstance)
+
+  Concrete role of specific Party:
+  - John plays EMPLOYEE
+  - Acme plays EMPLOYER
+  - Jane plays MANAGER
+
+  Many instances share same type:
+  - 1000 employees → 1 EMPLOYEE type
+  - Metadata stored once in type
+  - No duplication
+
+  Type-Instance pattern:
+  PartyRoleType (1) → PartyRole (*)
+end note
+
+note bottom of PartyRoleConstraint
+  <b>Constraints in Catalog</b>
+
+  Define who can play role:
+  - onlyPerson()
+  - onlyOrganization()
+  - anyParty()
+  - minimumAge(18)
+  - requiresCertification(...)
+
+  Validated automatically:
+  Organization cannot be EMPLOYEE
+  Person cannot be EMPLOYER
+end note
+
+note bottom of Party
+  <b>Type-Instance Pattern</b>
+
+  Same as Product archetype:
+
+  ProductType → ProductInstance
+  PartyRoleType → PartyRole
+
+  One type definition,
+  many instances.
+end note
+
+@enduml

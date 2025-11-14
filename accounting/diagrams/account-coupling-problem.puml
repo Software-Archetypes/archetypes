@@ -1,0 +1,80 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+title Account Coupling Problem - ❌ ZŁE PODEJŚCIE
+
+package "Account Aggregate" #FFCCCC {
+  class Account {
+    accountId: AccountId
+    --
+    ownerId: ???
+    ownerType: ???
+    --
+    partyOwner: PartyId?
+    fleetCardOwner: FleetCardId?
+    loanOwner: LoanId?
+    creditCardOwner: CreditCardId?
+    investmentOwner: InvestmentId?
+    savingsOwner: SavingsId?
+    mortgageOwner: MortgageId?
+    ...
+    --
+    ❌ COUPLING EXPLOSION!
+  }
+}
+
+package "Domain Models" {
+  class Party
+  class FleetCard
+  class Loan
+  class CreditCard
+  class Investment
+  class Savings
+  class Mortgage
+  class Subscription
+  class Budget
+  class Project
+}
+
+' Wszystkie strzałki z Account DO różnych modeli
+Account --> Party : "knows about"
+Account --> FleetCard : "knows about"
+Account --> Loan : "knows about"
+Account --> CreditCard : "knows about"
+Account --> Investment : "knows about"
+Account --> Savings : "knows about"
+Account --> Mortgage : "knows about"
+Account --> Subscription : "knows about"
+Account --> Budget : "knows about"
+Account --> Project : "knows about"
+
+note right of Account
+  **Problem:**
+  - Account zna WSZYSTKIE możliwe typy właścicieli
+  - Dodanie nowego typu = zmiana Account
+  - Eksplozja zależności (coupling explosion)
+  - Account nie może być niezależny
+  - Naruszenie Open-Closed Principle
+
+  **Każdy nowy przypadek użycia:**
+  1. Nowy typ właściciela
+  2. Zmiana w Account (nowe pole)
+  3. Zmiana logiki (if/switch na typ)
+  4. Testy Account się psują
+  5. Deploy całego modułu Account
+
+  **Account staje się "God Object"**
+  - Wie o wszystkim
+  - Robi wszystko
+  - Zmienia się z każdym nowym feature
+end note
+
+note bottom of Account
+  ❌ HIGH COUPLING
+  ❌ LOW COHESION
+  ❌ HARD TO EXTEND
+  ❌ VIOLATES SRP
+end note
+
+@enduml

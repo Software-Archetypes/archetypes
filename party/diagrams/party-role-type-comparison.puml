@@ -1,0 +1,44 @@
+@startuml
+skinparam MinClassWidth 120
+skinparam linetype ortho
+skinparam packageMargin 20
+skinparam nodesep 80
+skinparam ranksep 100
+title PartyRole - Type-Instance Pattern
+
+' ===== PARTY BASE =====
+package "Core Party Archetype" {
+  object Party
+  object Person
+  object Organization
+
+  Person -up-|> Party
+  Organization -up-|> Party
+}
+
+' ===== PARTY ROLE TYPE - CATALOG =====
+package "PartyRoleType - Catalog" #CCCCFF {
+  object PartyRoleType {
+    id: PartyRoleTypeId
+    name: String
+    description: String
+  }
+
+  object PartyRoleConstraint {
+    isSatisfiedBy(Party): boolean
+  }
+
+  PartyRoleType "1" *-- "1..*" PartyRoleConstraint
+}
+
+' ===== PARTY ROLE - INSTANCE =====
+package "PartyRole - Instance" #FFCCCC {
+  object PartyRole {
+    partyId: PartyId
+  }
+
+  PartyRole "0..*" -- "1" PartyRoleType : instance of
+  Party "1" -- "0..*" PartyRole : plays
+}
+
+@enduml

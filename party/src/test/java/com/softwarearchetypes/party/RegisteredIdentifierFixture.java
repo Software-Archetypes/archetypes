@@ -31,6 +31,11 @@ final class RegisteredIdentifierFixture {
             public String asString() {
                 return VALUE;
             }
+
+            @Override
+            public Validity validity() {
+                return Validity.ALWAYS;
+            }
         };
     }
 

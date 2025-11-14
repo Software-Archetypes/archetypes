@@ -15,8 +15,10 @@ import static com.softwarearchetypes.common.Preconditions.checkArgument;
  * and defines how instances should be tracked and measured.
  *
  * ProductType can define mandatory and optional feature types that instances must or may have.
+ *
+ * This is a leaf in the composite pattern - a regular product (not a package).
  */
-class ProductType {
+class ProductType implements Product {
 
     private final ProductIdentifier id;
     private final ProductName name;
@@ -24,25 +26,42 @@ class ProductType {
     private final Unit preferredUnit;
     private final ProductTrackingStrategy trackingStrategy;
     private final ProductFeatureTypes featureTypes;
+    private final ProductMetadata metadata;
+    private final ApplicabilityConstraint applicabilityConstraint;
 
     ProductType(ProductIdentifier id,
                 ProductName name,
                 ProductDescription description,
                 Unit preferredUnit,
                 ProductTrackingStrategy trackingStrategy,
-                ProductFeatureTypes featureTypes) {
+                ProductFeatureTypes featureTypes,
+                ProductMetadata metadata,
+                ApplicabilityConstraint applicabilityConstraint) {
         checkArgument(id != null, "ProductIdentifier must be defined");
         checkArgument(name != null, "ProductName must be defined");
         checkArgument(description != null, "ProductDescription must be defined");
         checkArgument(preferredUnit != null, "Unit must be defined");
         checkArgument(trackingStrategy != null, "ProductTrackingStrategy must be defined");
         checkArgument(featureTypes != null, "ProductFeatureTypes must be defined");
+        checkArgument(metadata != null, "ProductMetadata must be defined");
+        checkArgument(applicabilityConstraint != null, "ApplicabilityConstraint must be defined");
         this.id = id;
         this.name = name;
         this.description = description;
         this.preferredUnit = preferredUnit;
         this.trackingStrategy = trackingStrategy;
         this.featureTypes = featureTypes;
+        this.metadata = metadata;
+        this.applicabilityConstraint = applicabilityConstraint;
+    }
+
+    /**
+     * Creates a simple product type for testing purposes.
+     */
+    static ProductType define(ProductIdentifier id,
+                             ProductName name,
+                             ProductDescription description) {
+        return new ProductType(id, name, description, Unit.pieces(), ProductTrackingStrategy.IDENTICAL, ProductFeatureTypes.empty(), ProductMetadata.empty(), ApplicabilityConstraint.alwaysTrue());
     }
 
     /**
@@ -52,7 +71,7 @@ class ProductType {
     static ProductType unique(ProductIdentifier id,
                               ProductName name,
                               ProductDescription description) {
-        return new ProductType(id, name, description, Unit.pieces(), ProductTrackingStrategy.UNIQUE, ProductFeatureTypes.empty());
+        return new ProductType(id, name, description, Unit.pieces(), ProductTrackingStrategy.UNIQUE, ProductFeatureTypes.empty(), ProductMetadata.empty(), ApplicabilityConstraint.alwaysTrue());
     }
 
     /**
@@ -62,7 +81,7 @@ class ProductType {
                                           ProductName name,
                                           ProductDescription description,
                                           Unit preferredUnit) {
-        return new ProductType(id, name, description, preferredUnit, ProductTrackingStrategy.INDIVIDUALLY_TRACKED, ProductFeatureTypes.empty());
+        return new ProductType(id, name, description, preferredUnit, ProductTrackingStrategy.INDIVIDUALLY_TRACKED, ProductFeatureTypes.empty(), ProductMetadata.empty(), ApplicabilityConstraint.alwaysTrue());
     }
 
     /**
@@ -72,7 +91,7 @@ class ProductType {
                                    ProductName name,
                                    ProductDescription description,
                                    Unit preferredUnit) {
-        return new ProductType(id, name, description, preferredUnit, ProductTrackingStrategy.BATCH_TRACKED, ProductFeatureTypes.empty());
+        return new ProductType(id, name, description, preferredUnit, ProductTrackingStrategy.BATCH_TRACKED, ProductFeatureTypes.empty(), ProductMetadata.empty(), ApplicabilityConstraint.alwaysTrue());
     }
 
     /**
@@ -82,7 +101,7 @@ class ProductType {
                                                   ProductName name,
                                                   ProductDescription description,
                                                   Unit preferredUnit) {
-        return new ProductType(id, name, description, preferredUnit, ProductTrackingStrategy.INDIVIDUALLY_AND_BATCH_TRACKED, ProductFeatureTypes.empty());
+        return new ProductType(id, name, description, preferredUnit, ProductTrackingStrategy.INDIVIDUALLY_AND_BATCH_TRACKED, ProductFeatureTypes.empty(), ProductMetadata.empty(), ApplicabilityConstraint.alwaysTrue());
     }
 
     /**
@@ -92,18 +111,21 @@ class ProductType {
                                 ProductName name,
                                 ProductDescription description,
                                 Unit preferredUnit) {
-        return new ProductType(id, name, description, preferredUnit, ProductTrackingStrategy.IDENTICAL, ProductFeatureTypes.empty());
+        return new ProductType(id, name, description, preferredUnit, ProductTrackingStrategy.IDENTICAL, ProductFeatureTypes.empty(), ProductMetadata.empty(), ApplicabilityConstraint.alwaysTrue());
     }
 
-    ProductIdentifier id() {
+    @Override
+    public ProductIdentifier id() {
         return id;
     }
 
-    ProductName name() {
+    @Override
+    public ProductName name() {
         return name;
     }
 
-    ProductDescription description() {
+    @Override
+    public ProductDescription description() {
         return description;
     }
 
@@ -119,16 +141,22 @@ class ProductType {
         return featureTypes;
     }
 
-    /**
-     * Creates a builder for constructing ProductTypes with feature types.
-     * All basic product attributes are required upfront.
-     */
-    static Builder builder(ProductIdentifier id,
-                          ProductName name,
-                          ProductDescription description,
-                          Unit preferredUnit,
-                          ProductTrackingStrategy trackingStrategy) {
-        return new Builder(id, name, description, preferredUnit, trackingStrategy);
+    @Override
+    public ProductMetadata metadata() {
+        return metadata;
+    }
+
+    @Override
+    public ApplicabilityConstraint applicabilityConstraint() {
+        return applicabilityConstraint;
+    }
+
+    ProductIdentifier identifier() {
+        return id;
+    }
+
+    public boolean isApplicableFor(ApplicabilityContext context) {
+        return applicabilityConstraint.isSatisfiedBy(context);
     }
 
     @Override
@@ -136,46 +164,5 @@ class ProductType {
         return "ProductType{id=%s, name=%s, unit=%s, tracking=%s, features=%s}".formatted(
             id, name, preferredUnit, trackingStrategy, featureTypes
         );
-    }
-
-    static class Builder {
-        private final ProductIdentifier id;
-        private final ProductName name;
-        private final ProductDescription description;
-        private final Unit preferredUnit;
-        private final ProductTrackingStrategy trackingStrategy;
-        private final List<ProductFeatureTypeDefinition> featureDefinitions = new ArrayList<>();
-
-        private Builder(ProductIdentifier id,
-                       ProductName name,
-                       ProductDescription description,
-                       Unit preferredUnit,
-                       ProductTrackingStrategy trackingStrategy) {
-            this.id = id;
-            this.name = name;
-            this.description = description;
-            this.preferredUnit = preferredUnit;
-            this.trackingStrategy = trackingStrategy;
-        }
-
-        Builder withMandatoryFeature(ProductFeatureType featureType) {
-            this.featureDefinitions.add(ProductFeatureTypeDefinition.mandatory(featureType));
-            return this;
-        }
-
-        Builder withOptionalFeature(ProductFeatureType featureType) {
-            this.featureDefinitions.add(ProductFeatureTypeDefinition.optional(featureType));
-            return this;
-        }
-
-        Builder withFeature(ProductFeatureTypeDefinition definition) {
-            this.featureDefinitions.add(definition);
-            return this;
-        }
-
-        ProductType build() {
-            ProductFeatureTypes features = new ProductFeatureTypes(featureDefinitions);
-            return new ProductType(id, name, description, preferredUnit, trackingStrategy, features);
-        }
     }
 }

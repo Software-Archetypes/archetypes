@@ -8,7 +8,7 @@ import java.util.UUID;
  */
 record UuidProductIdentifier(UUID value) implements ProductIdentifier {
 
-    static UuidProductIdentifier newOne() {
+    static UuidProductIdentifier random() {
         return new UuidProductIdentifier(UUID.randomUUID());
     }
 
