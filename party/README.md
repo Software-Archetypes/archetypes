@@ -675,7 +675,7 @@ class PartyFacade {
     
     void addRelationship(PartyId fromId, Role fromPartyRole, PartyId toId, Role toPartyRole, RelationshipName name) {
         Party fromParty = partyRepository.findBy(fromId); //with all relationships
-        Party toParty = partyRepository.findBy(fromId); //with all relationships
+        Party toParty = partyRepository.findBy(toId); //with all relationships
 
         if (canCreateRelationshipFor(fromParty, fromPartyRole, toParty, toPartyRole, relationshipName)) {
             fromParty.addRelationship(new PartyRelationship(fromId, fromPartyRole, toId, toPartyRole, relationshipName));
