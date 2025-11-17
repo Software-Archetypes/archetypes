@@ -1,0 +1,38 @@
+@startuml
+skinparam MinClassWidth 100
+skinparam linetype ortho
+ 
+object Car {
+  - id: CarId
+  - reserved: boolean
+  - inMaintenance: boolean
+  - inRelocation: boolean
+  - licensePlate: LicensePlate
+  - mileage: Mileage
+  __
+  + isReserved(): boolean
+  + isInMaintenance(): boolean
+  + isInRelocation(): boolean
+  + reserve(): boolean
+  + enterMaintenance(): boolean
+  + registerRelocation(): boolean
+  + cancelReservation(): void
+}
+
+object CarService {
+  - carRepository: CarRepository
+  __
+  + reserve(carId: CarId): boolean
+  + enterMaintenance(carId: CarId): boolean
+  + registerRelocation(carId: CarId): boolean
+}
+
+object CarRepository {
+  + findById(carId: CarId): Car
+  + save(car: Car): void
+}
+
+CarService --> Car
+CarService --> CarRepository
+
+@enduml

@@ -1,0 +1,48 @@
+@startuml
+skinparam MinClassWidth 100
+skinparam linetype ortho
+
+object AvailabilityFacade {
+  + block(resourceId: ResourceId, timeSlot: TimeSlot, owner: Owner): boolean
+  + release(resourceId: ResourceId, timeSlot: TimeSlot, owner: Owner): boolean
+}
+
+object ResourceAvailability {
+  - resourceId: ResourceId
+  - blockades: List<Blockade>
+  - period: TimeSlot
+  __
+  + block(timeSlot: TimeSlot, owner: Owner): void
+  + release(timeSlot: TimeSlot, owner: Owner): void
+}
+
+object Blockade {
+  + timeSlot: TimeSlot
+  + owner: Owner
+}
+
+object Owner {
+  + value: UUID
+  __
+  + of(value: UUID): Owner
+}
+
+object ResourceId {
+  + value: UUID
+  __
+  + of(value: UUID): ResourceId
+}
+
+object TimeSlot {
+  + from: Instant
+  + to: Instant
+}
+
+AvailabilityFacade ..> ResourceAvailability : «loads»
+ResourceAvailability "1" *-- "0..*" Blockade
+ResourceAvailability --> ResourceId
+ResourceAvailability --> TimeSlot
+Blockade --> TimeSlot
+Blockade --> Owner
+
+@enduml

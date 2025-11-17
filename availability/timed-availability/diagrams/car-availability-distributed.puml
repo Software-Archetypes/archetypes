@@ -1,0 +1,103 @@
+@startuml
+skinparam MinClassWidth 100
+skinparam linetype ortho
+
+object Car {
+  - id: CarId
+  - licensePlate: LicensePlate
+  - mileage: Mileage
+}
+
+object Reservation {
+  - id: ReservationId
+  - carId: CarId
+  - riderId: RiderId
+  - timeSlot: TimeSlot
+  __
+  + isActive(): boolean
+  + ownedBy(riderId: RiderId): boolean
+}
+
+object Maintenance {
+  - carId: CarId
+  - slot: TimeSlot
+  __
+  + active(slot: TimeSlot): boolean
+}
+
+object Relocation {
+  - id: CarId
+  - slot: TimeSlot
+  __
+  + active(slot: TimeSlot): boolean
+}
+
+object CarService {
+  - reservationRepository: ReservationRepository
+  - carRepository: CarRepository
+  - maintenanceService: MaintenanceService
+  - relocationService: RelocationService
+  __
+  + reserve(carId: CarId, riderId: RiderId, slot: TimeSlot): boolean
+  + putIntoMaintenanceMode(carId: CarId): boolean
+  + registerRelocation(carId: CarId, slot: TimeSlot): boolean
+}
+
+object MaintenanceService {
+  - maintenanceRepository: MaintenanceRepository
+  __
+  + registerMaintenance(carId: CarId, slot: TimeSlot): void
+  + isInMaintenance(carId: CarId, slot: TimeSlot): boolean
+}
+
+object RelocationService {
+  - relocationRepository: RelocationRepository
+  __
+  + registerRelocation(carId: CarId, slot: TimeSlot): void
+  + isBeingRelocated(carId: CarId, slot: TimeSlot): boolean
+}
+
+object ReservationRepository {
+  + save(reservation: Reservation): void
+  + findByCarId(carId: CarId): List<Reservation>
+}
+
+object MaintenanceRepository {
+  + save(maintenance: Maintenance): void
+  + findByCarId(carId: CarId): Optional<Maintenance>
+}
+
+object RelocationRepository {
+  + save(relocation: Relocation): void
+  + findByCarId(carId: CarId): Optional<Relocation>
+}
+
+object CarRepository {
+  + findById(carId: CarId): Car
+  + save(car: Car): void
+}
+
+object TimeSlot {
+  + from: Instant
+  + to: Instant
+}
+
+CarService --> ReservationRepository
+CarService --> CarRepository
+CarService --> MaintenanceService
+CarService --> RelocationService
+
+MaintenanceService --> MaintenanceRepository
+
+RelocationService --> RelocationRepository
+
+ReservationRepository ..> Reservation : «loads»
+MaintenanceRepository ..> Maintenance : «loads»
+RelocationRepository ..> Relocation : «loads»
+CarRepository ..> Car : «loads»
+
+Maintenance --> TimeSlot
+Relocation --> TimeSlot
+Reservation --> TimeSlot
+
+@enduml 
